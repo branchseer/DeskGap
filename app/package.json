@@ -1,0 +1,5 @@
+{
+	"name": "deskgap-default-app",
+	"productName": "DeskGap API Demo",
+	"main": "main.js"
+}

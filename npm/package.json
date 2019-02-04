@@ -1,0 +1,18 @@
+{
+  "name": "deskgap",
+  "version": "0.0.5",
+  "types": "deskgap.d.ts",
+  "author": "patr0nus",
+  "license": "MIT",
+  "description": "Build desktop apps using Node.js and the system's WebView",
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "bin": {
+    "deskgap": "cli.js"
+  },
+  "dependencies": {
+    "nugget": "^2.0.1",
+    "decompress": "^4.2.0"
+  }
+}

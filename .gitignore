@@ -1,0 +1,7 @@
+/cmake-build-*
+/build
+/.vs
+/.idea
+/deps
+/node_modules
+/CMakeSettings.json

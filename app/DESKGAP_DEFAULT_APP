@@ -1,0 +1,2 @@
+The existence of this file makes src/main.cc check the environment variable "DESKGAP_ENTRY" and, if set, load $DESKGAP_ENTRY instead of the default app for the convenience of development.
+App developers should not put a file of such name in their own apps.

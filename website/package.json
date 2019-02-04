@@ -1,0 +1,13 @@
+{
+  "name": "deskgap",
+  "version": "1.0.0",
+  "scripts": {
+    "build-docs": "typedoc --name 'DeskGap API Reference' --readme ./README.md --mode modules --excludeNotExported --excludePrivate --excludeProtected --excludeExternals --includeDeclarations --target ES6 --out ./docs ../npm/types"
+  },
+  "author": "patr0nus",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "typedoc": "^0.14.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "module": "commonjs",
+        "lib": ["es2017"],
+        "outDir": "../dist/",
+        "removeComments": true
+    }
+}

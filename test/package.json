@@ -1,0 +1,15 @@
+{
+    "name": "deskgap-test",
+    "productName": "DeskGap Test",
+    "private": true,
+    "main": "index.js",
+    "dependencies": {
+        "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
+        "koa": "^2.6.2",
+        "mocha": "^5.2.0"
+    },
+    "scripts": {
+        "start": "node start.js"
+    }
+}

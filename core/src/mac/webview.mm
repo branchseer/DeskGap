@@ -1,0 +1,356 @@
+#import <Cocoa/Cocoa.h>
+#include <functional>
+#include <memory>
+#include <string>
+
+#import "./cocoa/DeskGapWindow.h"
+#import "./cocoa/DeskGapLocalURLSchemeHandler.h"
+#include "../webview/webview.h"
+#include "webview_impl.h"
+#include "../lib_path.h"
+#include "./util/string_convert.h"
+
+namespace {
+    NSString* const DevToolsAlertSuppressionKey = @"DeskGap.Suppressions.DevToolsAlert";
+    NSArray<NSString*>* const ObservedWKWebViewKeyPaths = @[ @"title" ];
+    NSString* const StringMessageHandlerName = @"stringMessage";
+    NSString* const WindowDragHandlerName = @"windowDrag";
+    NSString* const localURLScheme = @"deskgap-local";
+}
+
+@interface DeskGapWebView: WKWebView @end
+@implementation DeskGapWebView
+
+- (void)deskgap_toggleDevTools: (id)sender {
+    BOOL isDevToolsEnabled = ![[self.configuration.preferences valueForKey: @"developerExtrasEnabled"] boolValue];
+    [self.configuration.preferences setValue: [NSNumber numberWithBool: isDevToolsEnabled] forKey: @"developerExtrasEnabled"];
+
+    if (isDevToolsEnabled) {
+        if (!self.window) return;
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        if ([defaults boolForKey: DevToolsAlertSuppressionKey]) {
+            return;
+        }
+
+        NSAlert* alert = [[NSAlert alloc] init];
+        [alert setMessageText: @"Developer Tools Enabled"];
+        [alert setInformativeText: @"Right click the page and select “Inspect Element” To show the tools."];
+        [alert setShowsSuppressionButton: YES];
+        
+        [alert beginSheetModalForWindow: self.window completionHandler: ^(NSModalResponse) {
+            if (alert.suppressionButton.state == NSControlStateValueOn) {
+                [defaults setBool: YES forKey: DevToolsAlertSuppressionKey];
+            }
+        }];
+    }
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)item {
+    if (item.action == @selector(deskgap_toggleDevTools:)) {
+        BOOL isDevToolsEnabled = [[self.configuration.preferences valueForKey: @"developerExtrasEnabled"] boolValue];
+        [item setTitle: isDevToolsEnabled? @"Disable Developer Tools": @"Enable Developer Tools"];
+    }
+    return YES;
+}
+
+//This only works in 10.11+. Haven't figured a way to hide the Reload item in 10.10
+- (void)willOpenMenu:(NSMenu *)menu withEvent:(NSEvent *)event {
+    static NSArray<NSString*>* identifiersToBeDeleted = @[
+        @"WKMenuItemIdentifierGoBack",
+        @"WKMenuItemIdentifierGoForward",
+        @"WKMenuItemIdentifierReload"
+    ];
+    for (NSInteger i = 0; i < menu.numberOfItems; ++i) {
+        NSMenuItem* item = [menu itemAtIndex: i];
+        if ([identifiersToBeDeleted containsObject: item.identifier]) {
+            [item setHidden: YES];
+        }
+        
+    }
+    [super willOpenMenu: menu withEvent: event];
+}
+
+@end
+
+
+@interface DeskGapWebViewDelegate: NSObject <WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
+-(instancetype)initWithCallbacks: (const DeskGap::WebView::EventCallbacks&) callbacks;
+@end
+
+@implementation DeskGapWebViewDelegate {
+    DeskGap::WebView::EventCallbacks callbacks_;
+}
+-(instancetype)initWithCallbacks: (const DeskGap::WebView::EventCallbacks&) callbacks {
+    self = [super init];
+    if (self) {
+        callbacks_ = callbacks;
+    }
+    return self;
+}
+
+- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation {
+    callbacks_.didStartLoading();
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    callbacks_.didStopLoading(DeskGap::WebView::LoadingError { [error code], [[error description] UTF8String] });
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    callbacks_.didStopLoading(std::nullopt);
+}
+
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    callbacks_.didStartLoading(); // didFailProvisionalNavigation is called without calling didCommitNavigation first
+    callbacks_.didStopLoading(DeskGap::WebView::LoadingError { [error code], [[error description] UTF8String] });
+}
+
+- (void)userContentController:(WKUserContentController *) userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
+    if ([message.name isEqualToString: StringMessageHandlerName]) {
+        callbacks_.onStringMessage([[message body] UTF8String]);
+    }
+    else if ([message.name isEqualToString: WindowDragHandlerName]) {
+        NSWindow* window = message.webView.window;
+        if (window) {
+            [(DeskGapWindow*)window deskgap_startDragging];
+        }
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey, id> *)change context:(void *)context {
+    if ([keyPath isEqualToString: @"title"]) {
+        callbacks_.onPageTitleUpdated([(NSString*)(change[NSKeyValueChangeNewKey]) UTF8String]);
+    }
+}
+
+- (void)webView:(WKWebView *)webView
+    runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters
+    initiatedByFrame:(WKFrameInfo *)frame
+    completionHandler:(void (^)(NSArray<NSURL *> *URLs))completionHandler
+    API_AVAILABLE(macosx(10.12))
+{
+    NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+    [openPanel setAllowsMultipleSelection: parameters.allowsMultipleSelection];
+    if (@available(macOS 10.13.4, *)) {
+        [openPanel setCanChooseDirectories: parameters.allowsDirectories];
+    }
+
+    [openPanel beginSheetModalForWindow: [webView window] completionHandler: ^(NSModalResponse result) {
+        if (result == NSModalResponseOK) {
+            completionHandler([openPanel URLs]);
+        }
+        else {
+            completionHandler(nil);
+        }
+    }];
+}
+
+@end
+
+
+namespace DeskGap {
+    void WebView::Impl::Destroy() {
+        [wkWebView setNavigationDelegate: nil];
+        [wkWebView setUIDelegate: nil];
+        [[wkWebView configuration] setUserContentController: [WKUserContentController new]];
+        [wkWebView loadHTMLString: @"" baseURL: nil];
+    }
+    void WebView::Impl::ServePath(NSString* path) {
+        if (@available(macOS 10.13, *)) {
+            [(DeskGapLocalURLSchemeHandler*)localURLSchemeHandler servePath: path];
+        }
+    }
+
+    WebView::WebView(const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+        static NSString* preloadScript = nil;
+        if (preloadScript == nil) {
+            NSMutableArray<NSString*>* scripts = [NSMutableArray new];
+            NSString* scriptDir = [NSString pathWithComponents: @[
+                NSStr(LibPath()),
+                @"dist", @"ui"
+            ]];
+
+            for (NSString* scriptFilename in @[ @"preload_mac.js", @"preload.js" ]) {
+                [scripts addObject: [NSString
+                    stringWithContentsOfURL: [NSURL fileURLWithPathComponents: @[
+                        scriptDir, scriptFilename
+                    ]]
+                    encoding: NSUTF8StringEncoding
+                    error: nil
+                ]];
+            }
+            preloadScript = [scripts componentsJoinedByString: @"\n"];
+        }
+
+        DeskGapWebViewDelegate* webviewDelegate = [[DeskGapWebViewDelegate alloc] initWithCallbacks: callbacks];
+
+        WKWebViewConfiguration* configuration = [[WKWebViewConfiguration alloc] init];
+
+
+        if (@available(macOS 10.13, *)) {
+            DeskGapLocalURLSchemeHandler* handler = [DeskGapLocalURLSchemeHandler new];
+            impl_->localURLSchemeHandler = handler;
+            [configuration setURLSchemeHandler: handler forURLScheme: localURLScheme];
+        }
+
+        if (@available(macOS 10.11, *)) {
+            [configuration.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"allowFileAccessFromFileURLs"];
+        }
+
+        for (NSString* handlerName in @[StringMessageHandlerName, WindowDragHandlerName]) {
+            [configuration.userContentController
+                addScriptMessageHandler: webviewDelegate
+                name: handlerName
+            ];
+        }
+        
+        [configuration.userContentController
+            addUserScript: [[WKUserScript alloc]
+                initWithSource: preloadScript
+                injectionTime: WKUserScriptInjectionTimeAtDocumentStart
+                forMainFrameOnly: YES
+            ]
+        ];
+
+        WKWebView* wkWebView = [[DeskGapWebView alloc] initWithFrame: CGRectZero configuration: configuration];
+
+        if (@available(macOS 10.12, *)) {
+            [wkWebView setValue: @NO forKey:@"drawsBackground"];
+        }
+        else {
+            [wkWebView setValue: @YES forKey:@"drawsTransparentBackground"];
+        }
+
+        [wkWebView setNavigationDelegate: webviewDelegate];
+        [wkWebView setUIDelegate: webviewDelegate];
+
+        for (NSString* keyPath in ObservedWKWebViewKeyPaths) {
+            [wkWebView addObserver: webviewDelegate forKeyPath: keyPath options: NSKeyValueObservingOptionNew context: nil];
+        }
+
+        impl_->wkWebView = wkWebView;
+        impl_->webViewDelegate = webviewDelegate;
+    }
+
+    void WebView::LoadHTMLString(const std::string& html) {
+        impl_->ServePath(nil);
+        [impl_->wkWebView loadHTMLString: NSStr(html) baseURL: nil];
+    }
+
+    void WebView::LoadLocalFile(const std::string& path) {
+        impl_->ServePath(nil);
+        if (@available(macOS 10.13, *)) {
+            NSString* cocoaPath = NSStr(path);
+            NSString* folder = [cocoaPath stringByDeletingLastPathComponent];
+            impl_->ServePath(folder);
+
+            NSString* filename = [cocoaPath lastPathComponent];
+            NSString* encodedFilename = [filename stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLPathAllowedCharacterSet]];
+
+            NSURL* localFileRequestURL = [NSURL URLWithString: [NSString stringWithFormat: @"%@://host/%@", localURLScheme, encodedFilename]];
+            [impl_->wkWebView loadRequest:[NSURLRequest requestWithURL: localFileRequestURL]];
+        } else
+        if (@available(macOS 10.11, *)) {
+            static NSURL* rootURL = [NSURL fileURLWithPath: @"/"];
+            NSURL* fileURL = [NSURL fileURLWithPath: NSStr(path)];
+            [impl_->wkWebView
+                loadFileURL: fileURL
+                allowingReadAccessToURL: rootURL
+            ];
+        }
+        else {
+            NSURL* fileURL = [NSURL fileURLWithPath: NSStr(path)];
+            [impl_->wkWebView loadRequest: [NSURLRequest requestWithURL: fileURL]];
+        }
+    }
+
+    void WebView::LoadRequest(
+        const std::string& method,
+        const std::string& urlString,
+        const std::vector<HTTPHeader>& headers,
+        const std::optional<std::string>& body
+    ) {
+        impl_->ServePath(nil);
+        NSString* urlNSString = NSStr(urlString);
+        NSURL* url = [NSURL URLWithString: urlNSString];
+        if (!url) {
+            @throw [NSException
+                exceptionWithName: NSInvalidArgumentException
+                reason: [NSString stringWithFormat: @"The URL string was malformed: %@", urlNSString]
+                userInfo: nil
+            ];
+        }
+        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL: url];
+        [request setHTTPMethod: NSStr(method)];
+        if (body.has_value()) {
+            [request setHTTPBody: [NSData dataWithBytes: body->data() length: body->size()]];
+        }
+        for (const HTTPHeader& header: headers) {
+            [request
+                addValue: NSStr(header.value)
+                forHTTPHeaderField: NSStr(header.field)
+            ];
+        }
+        [impl_->wkWebView loadRequest: request];
+    }
+
+    void WebView::Reload() {
+        [impl_->wkWebView reloadFromOrigin];
+    }
+
+    void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
+        void (^scriptCompletionHandler)(id, NSError *error) = nil;
+        if (optionalCallback.has_value()) {
+            JavaScriptEvaluationCallback callback = std::move(*optionalCallback);
+            scriptCompletionHandler = ^(id result, NSError *error) {
+                if (error) {
+                    NSString* errorString = nil;
+                    NSMutableDictionary* errorUserInfo = [[error userInfo] mutableCopy];
+                    if (errorUserInfo) {
+                        NSURL* sourceURL = [errorUserInfo valueForKey: @"WKJavaScriptExceptionSourceURL"];
+                        if (sourceURL) {
+                            [errorUserInfo setObject: [sourceURL absoluteString] forKey: @"WKJavaScriptExceptionSourceURL"];
+                        }
+                        NSData* errorInfoJSONData = nil;
+                        @try {
+                            errorInfoJSONData = [NSJSONSerialization dataWithJSONObject: errorUserInfo options: kNilOptions error: nil];
+                        }
+                        @catch (NSException *exception) { }
+                        errorString = [[NSString alloc] initWithData: errorInfoJSONData encoding: NSUTF8StringEncoding];
+                    }
+                    
+                    if (!errorString) {
+                        errorString = [error localizedDescription];
+                    }
+                    
+                    callback(true, [errorString UTF8String]);
+                }
+                else {
+                    std::string stringResult;
+                    if ([result isKindOfClass:[NSString class]]) {
+                        stringResult = [(NSString*)result UTF8String];
+                    }
+                    callback(false, std::move(stringResult));
+                }
+            };
+        }
+
+
+        [impl_->wkWebView 
+            evaluateJavaScript: NSStr(scriptString)
+            completionHandler: scriptCompletionHandler
+        ];
+    }
+
+
+    void WebView::SetDevToolsEnabled(bool enabled) {
+        [impl_->wkWebView.configuration.preferences setValue: [NSNumber numberWithBool: enabled] forKey: @"developerExtrasEnabled"];
+    }
+
+
+    WebView::~WebView() {
+        for (NSString* keyPath in ObservedWKWebViewKeyPaths) {
+            [impl_->wkWebView removeObserver: impl_->webViewDelegate forKeyPath: keyPath];
+        }
+    }
+}

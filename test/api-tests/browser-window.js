@@ -47,4 +47,17 @@ describe('BrowserWindow module', () => {
             expect(win.isDestroyed()).to.equal(true);
         })
     });
+    if (process.platform === 'darwin') describe('win.setTitleBarStyle(style)', () => {
+        it('should not change the frame of the window', () => {
+            const win = new BrowserWindow({ show: false });
+            const size = win.getSize();
+            const position = win.getPosition();
+
+            for (const style of ['hidden', 'hiddenInset', 'default']) {
+                win.setTitleBarStyle(style);
+                expect(win.getSize()).to.deep.equal(size);
+                expect(win.getPosition()).to.deep.equal(position);
+            }
+        });
+    });
 });

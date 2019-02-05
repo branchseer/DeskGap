@@ -410,9 +410,10 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetTitleBarStyle(TitleBarStyle titleBarStyle) {
-        impl_->SetTrafficLightsVisible(true);
-
         NSWindow* window = impl_->nsWindow;
+        NSRect windowFrame = [window frame];
+
+        impl_->SetTrafficLightsVisible(true);
         switch (titleBarStyle) {
         case TitleBarStyle::DEFAULT: {
             [window setTitleVisibility: NSWindowTitleVisible];
@@ -441,6 +442,8 @@ namespace DeskGap {
         default:
             break;
         }
+
+        [window setFrame: windowFrame display: YES];
     }
 
     BrowserWindow::~BrowserWindow() = default;

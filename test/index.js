@@ -4,8 +4,6 @@ const path = require('path');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 
-const { spawnDeskGapAsync } = require('./utils');
-
 const mocha = new Mocha({
     
 });

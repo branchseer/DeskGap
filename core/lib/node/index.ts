@@ -4,6 +4,7 @@ import { BrowserWindow } from './browser-window';
 import { Menu, MenuItem } from './menu';
 import { WebViews, messageNode } from './webview';
 import Dialog from './dialog';
+import shell from './shell';
 import './async-node';
 
 import systemPreferences from './system-preferences';
@@ -32,7 +33,8 @@ export = {
     ipcMain: messageNode,
     systemPreferences,
     dialog: Dialog,
-    NativeException
+    NativeException,
+    shell,
 };
 
 

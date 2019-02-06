@@ -212,6 +212,7 @@ namespace DeskGap {
 
         NSView* contentView = [impl_->nsWindow contentView];
         
+        //NSVisualEffectViews are cached in impl_->effectViews
         NSInteger effectViewsToAdd = vibrancies.size() - [impl_->effectViews count];
         for (NSInteger i = 0; i < effectViewsToAdd; ++i) {
             NSVisualEffectView* effectView = [[NSVisualEffectView alloc] init];
@@ -220,6 +221,7 @@ namespace DeskGap {
             [impl_->effectViews addObject: effectView];
         }
 
+        // Deactivating previous constraints
         [NSLayoutConstraint deactivateConstraints: impl_->effectViewLayoutConstraints];
         [impl_->effectViewLayoutConstraints removeAllObjects];
 

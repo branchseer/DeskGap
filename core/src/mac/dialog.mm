@@ -112,6 +112,7 @@ namespace DeskGap {
 
     namespace {
         void PrepareDialog(NSSavePanel* panel, const CommonFileDialogOptions& options) {
+            [panel setExtensionHidden: NO]; // If extensionHidden is YES, the extension of nameFieldStringValue maybe pruned.
             if (options.title.has_value()) {
                 [panel setTitle: NSStr(options.title.value())];
             }

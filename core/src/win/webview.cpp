@@ -33,13 +33,7 @@ namespace DeskGap {
                 this->folderPath = folderPath;
             }
             virtual Stream^ UriToStream(Uri^ uri) sealed {
-                try {
-                    return gcnew FileStream(Path::Combine(this->folderPath, uri->AbsolutePath->TrimStart('/')), FileMode::Open);
-                }
-                catch (Exception^ exception) {
-                    String^ errorMessage =  String::Format("Failed to load file from {0}: {1}", uri, exception);
-                    return gcnew MemoryStream(Encoding::UTF8->GetBytes(errorMessage));
-                }
+                return gcnew FileStream(Path::Combine(this->folderPath, uri->AbsolutePath->TrimStart('/')), FileMode::Open);
             }
         };
 

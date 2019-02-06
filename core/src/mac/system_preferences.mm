@@ -64,22 +64,27 @@ namespace DeskGap {
     }
 
     bool SystemPreferences::GetAndWatchDarkMode(std::function<void()>&& onDarkModeToggled) {
-        NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-        auto isDarkMode = std::make_shared<bool>([[defaults stringForKey:@"AppleInterfaceStyle"] isEqualToString:@"Dark"]);
+        if (@available(macOS 10.14, *)) {
+            NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+            auto isDarkMode = std::make_shared<bool>([[defaults stringForKey:@"AppleInterfaceStyle"] isEqualToString:@"Dark"]);
 
-        auto sharedCallback = std::make_shared<std::function<void()>>(std::move(onDarkModeToggled));
+            auto sharedCallback = std::make_shared<std::function<void()>>(std::move(onDarkModeToggled));
 
-        [[NSDistributedNotificationCenter defaultCenter]
-            addObserverForName: @"AppleInterfaceThemeChangedNotification"
-            object: nil queue: nil
-            usingBlock: ^(NSNotification*) {
-                bool nowIsDarkNode = [[defaults stringForKey:@"AppleInterfaceStyle"] isEqualToString:@"Dark"];
-                if (nowIsDarkNode != *isDarkMode) {
-                    *isDarkMode = nowIsDarkNode;
-                    (*sharedCallback)();
+            [[NSDistributedNotificationCenter defaultCenter]
+                addObserverForName: @"AppleInterfaceThemeChangedNotification"
+                object: nil queue: nil
+                usingBlock: ^(NSNotification*) {
+                    bool nowIsDarkNode = [[defaults stringForKey:@"AppleInterfaceStyle"] isEqualToString:@"Dark"];
+                    if (nowIsDarkNode != *isDarkMode) {
+                        *isDarkMode = nowIsDarkNode;
+                        (*sharedCallback)();
+                    }
                 }
-            }
-        ];
-        return *isDarkMode;
+            ];
+            return *isDarkMode;
+        }
+        else {
+            return false;
+        }
     }
 }

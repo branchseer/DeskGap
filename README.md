@@ -29,7 +29,7 @@ To test DeskGap on field, a simple app ”Pym“ was built based on it and submi
 
 |macOS|Windows|Source Code|
 |-|-|-|
-|[Mac App Store](https://deskgap.com/dl/macos) | [Microsoft Store](https://deskgap.com/dl/win32) | [GitHub](https://github.com/patr0nus/Pym) |
+|In Review | In Review | [GitHub](https://github.com/patr0nus/Pym) |
 
 ## Getting Started
 

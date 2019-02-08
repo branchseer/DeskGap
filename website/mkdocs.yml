@@ -2,6 +2,7 @@ site_name: DeskGap
 
 strict: true
 repo_url: https://github.com/patr0nus/DeskGap
+edit_uri: edit/master/website/docs
 
 theme:
   name: 'material'
@@ -13,8 +14,13 @@ extra_css:
   - 'assets/styles.css'
 
 markdown_extensions:
+  - admonition
   - pymdownx.tasklist:
       custom_checkbox: true
   - codehilite
   - toc:
       permalink: True
+
+google_analytics:
+  - 'UA-123589308-2'
+  - 'auto'

@@ -1,0 +1,14 @@
+[build]
+  base = "website/"
+  command = "bash build.sh"
+  publish = "site"
+
+[[redirects]]
+  from = "/dl/macos"
+  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.0.5-darwin-x64.zip"
+  status = 302
+
+[[redirects]]
+  from = "/dl/win32"
+  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.0.5-win32-ia32.zip"
+  status = 302

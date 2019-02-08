@@ -1,4 +1,4 @@
-# DeskGap Architecture
+# Multi-Threading Architecture
 
 DeskGap starts Node.js in a new thread to keep Node.js from blocking the UI. __The node thread__ runs the entry script and has access to all the Node.js API, but there is no DOM access. A DeskGap app starts one node thread.
 

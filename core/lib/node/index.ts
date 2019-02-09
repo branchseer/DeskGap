@@ -6,8 +6,38 @@ import { WebViews, messageNode } from './webview';
 import Dialog from './dialog';
 import shell from './shell';
 import './async-node';
-
 import systemPreferences from './system-preferences';
+import os = require('os');
+
+if (process.platform === 'win32') {
+    const gte = (release1: number[], release2: number[]): boolean => {
+        for (let i = 0; i < release2.length; ++i) {
+            const r1 = release1[i];
+            const r2 = release2[i];
+            if (r1 == null || isNaN(r1) || r1 < r2) {
+                return false;
+            }
+            if (r1 > r2) {
+                return true;
+            }
+        }
+        return true;
+    }
+
+    const minSupportedRelease = [10, 0, 17763];
+    const releaseString = os.release();
+    const release = releaseString.split('.').map(n => parseInt(n, 10));
+    
+
+    if (!gte(release, minSupportedRelease)) {
+        Dialog.showErrorBox(
+            'Unsupported OS Version: ' + releaseString,
+            "The minimum supported OS version is " + minSupportedRelease.join('.')
+        );
+        process.exit();
+    }
+}
+
 
 //The native land doesn't have a mechanism to get __dirname, so we need to tell it from the js land.
 const { setLibPath, setNativeExceptionConstructor } = require('./bindings');

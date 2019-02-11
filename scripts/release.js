@@ -75,16 +75,11 @@ function archive() {
         });
     }
     else if (process.platform === 'win32') {
-        archive.glob('*.dll', { cwd: buildReleaseFolder }, { prefix: "DeskGap" });
-        archive.glob('*.exe', { cwd: buildReleaseFolder }, { prefix: "DeskGap" });
-
-        archive.glob('resources/**', {
+        archive.glob('DeskGap/**', {
             cwd: buildReleaseFolder,
             ignore: ['.DS_Store']
-        }, {
-            prefix: "DeskGap"
         });
-    
+        
         const vcRedisDllFolder = 'SysWOW64';
     
         for (const vcRedisDll of ['vcruntime140.dll', 'msvcp140.dll']) {

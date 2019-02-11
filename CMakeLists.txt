@@ -7,11 +7,15 @@ add_executable(DeskGap src/main.cc)
 
 if(APPLE)
     add_library(DeskGapPlatform STATIC src/platform_mac.mm)
-
     file(GLOB nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/*.a)
 endif()
 
 if(WIN32)
+    set_target_properties(DeskGap
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY $<CONFIG>/DeskGap
+    )
+
     add_library(DeskGapPlatform SHARED src/platform_win.cpp)
     target_link_libraries(DeskGapPlatform shcore)
     set_property(TARGET DeskGapPlatform PROPERTY VS_DOTNET_REFERENCES

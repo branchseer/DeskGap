@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <thread>
 #include <memory>
+#include <cassert>
 #include "platform.h"
 
 namespace node {
@@ -38,11 +39,44 @@ namespace {
     }
 }
 
-// #ifdef _WIN32
-// #include <Windows.h>
- 
+//Reference: https://github.com/nodejs/node/blob/v10.15.0/src/node_main.cc
+#ifdef WIN32
+#include <Windows.h>
+int wmain(int argc, wchar_t* wargv[]) {
+
+    char** argv = new char*[argc + 1];
+    for (int i = 0; i < argc; ++i) {
+        DWORD utf8ByteCount = WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            wargv[i],
+            -1,
+            nullptr,
+            0,
+            nullptr,
+            nullptr
+        );
+        assert(utf8ByteCount != 0);
+
+        argv[i] = new char[utf8ByteCount];
+        DWORD result = WideCharToMultiByte(CP_UTF8,
+            0,
+            wargv[i],
+            -1,
+            argv[i],
+            utf8ByteCount,
+            nullptr,
+            nullptr
+        );
+        assert(result != 0);
+    }
+    argv[argc] = nullptr;
+
+#else
 int main(int argc, char* argv[])
 {
+#endif
+
     DeskGapPlatform::InitUIThread();
 
     auto nodeArgs = std::vector<std::string>(argv, argv + argc);
@@ -67,7 +101,6 @@ int main(int argc, char* argv[])
         DeskGapPlatform::InitNodeThread();
         exit(nodeStart(nodeArgs));
     });
-
     DeskGapPlatform::Run();
 	return 0;
 }

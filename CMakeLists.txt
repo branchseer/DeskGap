@@ -70,7 +70,7 @@ if (WIN32)
     set_target_properties(
         DeskGap PROPERTIES
         WIN32_EXECUTABLE TRUE
-        LINK_FLAGS "/ENTRY:\"mainCRTStartup\""
+        LINK_FLAGS "/ENTRY:\"wmainCRTStartup\""
         COMPILE_OPTIONS "/MT"
     )
 

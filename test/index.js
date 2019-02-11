@@ -11,7 +11,7 @@ const mocha = new Mocha({
 const testDir = path.join(__dirname, 'api-tests');
 
 const testFiles = fs.readdirSync(testDir)
-    .filter(filename => filename.endsWith('.js') && filename.includes('app'))
+    .filter(filename => filename.endsWith('.js'))
     .map(filename => path.join(testDir, filename));
 
 for (const file of testFiles) {

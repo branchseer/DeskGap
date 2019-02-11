@@ -33,7 +33,7 @@ To test DeskGap on field, a simple app ”Pym“ was built based on it and submi
 
 ## Getting Started
 
-### Creating the Node.js Package
+### Creating a Node.js Package for your app
 ```
 hello-deskgap/
 ├── package.json
@@ -41,7 +41,7 @@ hello-deskgap/
 └── index.html
 ```
 
-`package.json` points to the app's entry file and provides the script the start your app:
+`package.json` points to the app's entry file and provides the script that starts your app:
 ```js
 {
   "name": "hello-deskgap",
@@ -83,21 +83,27 @@ npm install --save-dev deskgap
 npm start
 ```
 
+## Documentation
+
+[Work in Progress](https://deskgap.com/api/#webview-alias-webcontents)
+
 ## FAQ
 
 ### What’s the difference between DeskGap and [Electron](https://electronjs.org)? 
 
 DeskGap is designed to be a lightweight alternative to Electron. It does not bundle [Chromium](https://www.chromium.org/) or any other web engines. Instead, the ability of rendering HTML pages comes from the webview provided by the operating system, specifically, [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview) on macOS and [Microsoft.Toolkit.Forms.UI.Controls.WebView](https://docs.microsoft.com/en-us/windows/communitytoolkit/controls/wpf-winforms/webview) on Windows.
 
-DeskGap is at its early stage. The API is still quite limited compared to Electron. Many functionalities are under development and some of them will probably never be possible. See [this](https://deskgap.com/api/) for more information.
+DeskGap is at its early stage. The API is still quite limited compared to Electron. Many functionalities are under development and some of them will probably never be possible. See [this](https://deskgap.com/api/) and [this](https://deskgap.com/architecture/#synchronous-and-asynchronous-dispatching) for more information.
 
 ### There are already similar attempts ([electrino](https://github.com/pojala/electrino) and [Quark](https://github.com/jscherer92/Quark) for instance) out there. What makes DeskGap different?
 
-Bundling a Node.js runtime, DeskGap is not that lightweight compared to them. I think this is the sweet spot: most criticism around Electron is about Chromium, which is the cause of size bloating and memory hunger. The Node.js part is actually fine: Node.js enables the cross-platform native capabilities like filesystem access, and the price is a few dozens of megabytes in file size and a reasonable resource consumption.
+With a Node.js runtime bundled, DeskGap is not that lightweight compared to them. 
 
 ### Why is the supported version of Windows so high? Any plan of supporting Windows 7 and Linux?
 
-Older Windows’ do not have a modern browser engine, only the one that powers Internet Explorer. Windows 10 1809 is the first version that provides a modern webview with [enough functionalities](https://docs.microsoft.com/en-us/microsoft-edge/dev-guide#win32-webview-updates) for DeskGap. To support Windows 7, app developers would have to face compatibility issues coming from as low as IE 8. I personally don’t have enough motivation and interest to do this, but pull requests are always welcome.
+Older Windows’ do not have a modern browser engine, only the one that powers Internet Explorer. Windows 10 1809 is the first version that provides a modern webview with [enough functionalities](https://docs.microsoft.com/en-us/microsoft-edge/dev-guide#win32-webview-updates) for DeskGap to be possible.
+
+To support Windows 7, app developers would have to face compatibility issues coming from as low as IE 8. I personally don’t have enough motivation and interest to do this, but pull requests are always welcome.
 
 Linux support would be great but I have little knowledge of Linux app development. For now I am looking at [Qt WebEngine](https://doc.qt.io/qt-5/qtwebengine-index.html). Any advice & help is appreciated.
 
@@ -116,5 +122,5 @@ const { app, BrowserWindow } = appEngine;
 
 ### So I can port my Electron app to DeskGap?
 
-Probably no. The DeskGap API is still quite limited. If you start building an app with DeskGap, getting it running on Electron could be easy, but not the other way around.
+Probably no. The DeskGap API is still quite limited. If you start building an app with DeskGap, getting it running on Electron may be easy, but not the other way around.
 

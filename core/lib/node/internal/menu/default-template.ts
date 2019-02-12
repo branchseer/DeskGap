@@ -1,6 +1,7 @@
 import { MenuItemConstructorOptions } from '../../menu'
 import shell from '../../shell';
 
+/** @internal */
 const template: Array<Partial<MenuItemConstructorOptions> | null> = [
     process.platform === 'darwin' ? {
       role: 'editMenu'
@@ -88,4 +89,5 @@ const template: Array<Partial<MenuItemConstructorOptions> | null> = [
     })
   }
 
+/** @internal */
 export default template;

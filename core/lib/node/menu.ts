@@ -7,11 +7,15 @@ import roleDefaults, { Role } from './internal/menu/roles';
 const { MenuItemNative, MenuNative } = require('./bindings');
 
 export type MenuItemType = 'normal' | 'separator' | 'submenu' | 'checkbox';
+
+/** @internal */ 
 const MenuItemTypeCode = {
     normal: 0, separator: 1, submenu: 2, checkbox: 3
 };
 
+/** @internal */ 
 type MenuType = 'main' | 'context' | 'submenu';
+
 export const MenuTypeCode = {
     main: 0, context: 1, submenu: 2
 };
@@ -31,10 +35,10 @@ export interface IMenuPopupOptions {
     window?: BrowserWindow; x?: number; y?: number; positioningItem?: number;
 }
 export class Menu {
-    private native_: any = null;
+    /** @internal */ private native_: any = null;
     public items: MenuItem[] = [];
-    private createdNativeTypeCode_: number | null = null;
-    private nativeCallbacks_ = {};
+    /** @internal */ private createdNativeTypeCode_: number | null = null;
+    /** @internal */ private nativeCallbacks_ = {};
     
     append(menuItem: MenuItem) {
         this.items.push(menuItem);
@@ -80,6 +84,8 @@ export class Menu {
         }
         return newMenu;
     }
+
+    /** @internal */ 
     private createNative_(type: number) {
         if (type === this.createdNativeTypeCode_) {
             return;
@@ -97,15 +103,15 @@ export class Menu {
 };
 
 export class MenuItem {
-    private label_: string;
-    private enabled_: boolean;
-    private type_: number;
+    /** @internal */ private label_: string;
+    /** @internal */ private enabled_: boolean;
+    /** @internal */ private type_: number;
     public click: (item: MenuItem, window: BrowserWindow | null) => void;
-    private submenu_: Menu | null;
-    private native_: any;
-    private checked_: boolean;
-    private accelerator_: string;
-    private role_: string; 
+    /** @internal */ private submenu_: Menu | null;
+    /** @internal */ private native_: any;
+    /** @internal */ private checked_: boolean;
+    /** @internal */ private accelerator_: string;
+    /** @internal */ private role_: string; 
 
     constructor(options: Partial<MenuItemConstructorOptions> = {}) {
         if (options.role != null) {
@@ -171,6 +177,8 @@ export class MenuItem {
     get accelerator(): string {
         return this.accelerator_;
     }
+    
+    /** @internal */ 
     private createNative_() {
         let nativeSubmenu = null;
         if (this.submenu_ != null) {

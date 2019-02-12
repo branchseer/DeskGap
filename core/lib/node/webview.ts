@@ -20,12 +20,12 @@ export interface WebViewEvents extends IEventMap {
 }
 
 export class WebView extends EventEmitter<WebViewEvents> {
-    private isDestroyed_ = false;
-    private id_: number;
-    private native_: any;
+    /** @internal */ private isDestroyed_ = false;
+    /** @internal */ private id_: number;
+    /** @internal */ private native_: any;
 
-    private asyncNodeObjectsById_ = new Map<number, any>();
-    private asyncNodeValuesByName_ = new Map<string, any>();
+    /** @internal */ private asyncNodeObjectsById_ = new Map<number, any>();
+    /** @internal */ private asyncNodeValuesByName_ = new Map<string, any>();
 
     constructor(callbacks: { onPageTitleUpdated: (title: string) => void, onReadyToShow: () => void }) {
         super();

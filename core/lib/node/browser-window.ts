@@ -69,16 +69,16 @@ export interface BrowserWindowEvents extends IEventMap {
 }
 
 export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
-    private id_: number;
-    private hasBeenShown_ = false;
-    private isDestroyed_ = false;
-    private webview_: WebView;
-    private native_: any;
-    private title_: string;
-    private titleBarStyle_: TitleBarStyle;
-    private minimumSize_: [number, number];
-    private maximumSize_: [number, number];
-    private menu_: Menu | null = null;
+    /** @internal */ private id_: number;
+    /** @internal */ private hasBeenShown_ = false;
+    /** @internal */ private isDestroyed_ = false;
+    /** @internal */ private webview_: WebView;
+    /** @internal */ private native_: any;
+    /** @internal */ private title_: string;
+    /** @internal */ private titleBarStyle_: TitleBarStyle;
+    /** @internal */ private minimumSize_: [number, number];
+    /** @internal */ private maximumSize_: [number, number];
+    /** @internal */ private menu_: Menu | null = null;
 
     constructor(options: Partial<IBrowserWindowConstructorOptions> = {}) {
         super();
@@ -280,6 +280,8 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
             this.actuallySetTheMenu_();
         }
     }
+
+    /** @internal */ 
     private actuallySetTheMenu_() {
         bulkUISync(() => {
             if (this.menu_ == null) {

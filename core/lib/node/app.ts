@@ -60,22 +60,11 @@ export interface AppEvents extends IEventMap {
 
 export class App extends EventEmitter<AppEvents> {
 
-    /**
-     * @event begin  Triggered once before the dispatcher invokes the compiler.
-     * @param e {Event}  The first event parameter.
-     */
-
-    /**
-     * @event end Triggered once after the dispatcher invokes the compiler.
-     * @param e {boolean} The first event parameter.
-     */
-
-    private isReady_ = false;
-    
-    private triggersWindowAllClosed_ = true;
-    private whenReady_: Promise<void>;
-    private native_: any;
-    private menu_: Menu | null = Menu.buildFromTemplate(defaultMenuTemplate);
+    /** @internal */ private isReady_ = false;
+    /** @internal */ private triggersWindowAllClosed_ = true;
+    /** @internal */ private whenReady_: Promise<void>;
+    /** @internal */ private native_: any;
+    /** @internal */ private menu_: Menu | null = Menu.buildFromTemplate(defaultMenuTemplate);
 
     constructor() {
         super();
@@ -106,10 +95,12 @@ export class App extends EventEmitter<AppEvents> {
         });
     }
 
+    /** @internal */ 
     private run_() {
         this.native_.run();
     }
 
+    /** @internal */ 
     private notifyWindowAllClosed_() {
         if (this.triggersWindowAllClosed_) {
             if (!this.trigger_('window-all-closed')) {
@@ -170,7 +161,7 @@ export class App extends EventEmitter<AppEvents> {
         appInfo.version = version;
     }
 
-    private pathCache_ = new Map<PathName, string>();
+    /** @internal */ private pathCache_ = new Map<PathName, string>();
     setPath(name: PathName, value: string): void {
         this.pathCache_.set(name, value);
     }
@@ -199,6 +190,7 @@ export class App extends EventEmitter<AppEvents> {
         }
     }
 
+    /** @internal */
     private actuallySetTheMenu_() {
         bulkUISync(() => {
             if (this.menu_ == null) {

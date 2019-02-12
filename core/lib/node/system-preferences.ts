@@ -31,7 +31,7 @@ export interface SystemPreferenceEvents extends IEventMap {
 let isDarkMode: boolean;
 
 export class SystemPreference extends EventEmitter<SystemPreferenceEvents> {
-    private isDarkMode_: boolean;
+    /** @internal */ private isDarkMode_: boolean;
     constructor() {
         super();
         this.isDarkMode_ = <boolean>spNative.getAndWatchDarkMode(() => {
@@ -56,24 +56,3 @@ export class SystemPreference extends EventEmitter<SystemPreferenceEvents> {
 const systemPreference = new SystemPreference();
 
 export default systemPreference;
-
-
-
-// export default {
-//     getUserDefault: <K extends keyof UserDefaultTypes>(key: string, type: K): UserDefaultTypes[K] => {
-//         const result = userDefaultGetters[type](key);
-//         if (type === 'array' || type === 'dictionary') {
-//             return JSON.parse(result);
-//         }
-//         return result;
-//     },
-
-//     isDarkMode: (): boolean => {
-//         if (lastIsDarkMode == null) {
-//             lastIsDarkMode = <boolean>spNative.getAndWatchDarkMode(() => {
-
-//             });
-//         }
-//         return lastIsDarkMode;
-//     }
-// };

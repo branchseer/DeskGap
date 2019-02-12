@@ -38,6 +38,7 @@ export interface TriggerOptions<Sender> {
 }
 
 export class EventEmitter<EventMap extends IEventMap, Sender = null> extends VanillaEventEmitter {
+    /** @internal */ 
     protected trigger_<K extends keyof EventMap>(eventName: K, options?: TriggerOptions<Sender extends null ? this: Sender> | null, ...args: EventMap[K]): boolean {
         const theOptions = options || { };
         const sender = theOptions.sender || this;

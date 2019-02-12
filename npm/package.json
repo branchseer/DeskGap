@@ -5,6 +5,8 @@
   "author": "patr0nus",
   "license": "MIT",
   "description": "Build desktop apps using Node.js and the system's WebView",
+  "homepage": "https://deskgap.com/",
+  "repository": "github:patr0nus/DeskGap",
   "scripts": {
     "postinstall": "node install.js"
   },

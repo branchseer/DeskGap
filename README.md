@@ -42,7 +42,7 @@ hello-deskgap/
 ```
 
 `package.json` points to the app's entry file and provides the script that starts your app:
-```js
+```json
 {
   "name": "hello-deskgap",
   "main": "index.js",
@@ -73,7 +73,7 @@ app.once('ready', () => {
 
 ### Installing DeskGap
 
-```
+```sh
 npm install --save-dev deskgap
 ```
 

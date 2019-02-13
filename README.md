@@ -22,14 +22,14 @@ The DeskGap API Demos app shows some of the DeskGap features and APIs with inter
 
 |macOS|Windows|Source Code|
 |-|-|-|
-|[Download](https://deskgap.com/dl/macos) | [Microsoft Store](https://deskgap.com/dl/win32) | [Link](https://github.com/patr0nus/DeskGap/tree/master/app) |
+|[![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-darwin-x64/images/download.svg)](https://deskgap.com/dl/macos) | [![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-win32-ia32/images/download.svg)](https://deskgap.com/dl/win32) | [GitHub](https://github.com/patr0nus/DeskGap/tree/master/app) |
 
 ### Pym: A Real-Life App Built With DeskGap
 To test DeskGap on field, a simple app ”Pym“ was built based on it and submitted to the app stores.
 
 |macOS|Windows|Source Code|
 |-|-|-|
-|In Review | In Review | [GitHub](https://github.com/patr0nus/Pym) |
+| [<img alt="Download on Mac App Store" src="https://linkmaker.itunes.apple.com/en-us/badge-lrg.svg?releaseDate=2019-02-12T00:00:00Z&kind=desktopapp&bubble=macos_apps" height="32" />](https://geo.itunes.apple.com/us/app/pym/id1451733095?mt=12&app=apps) | [<img alt="Download on Microsoft Store" src="https://storebadge.azureedge.net/assets/en.png" height="32">](https://www.microsoft.com/store/productId/9PMTMRNBXMPB) | [GitHub](https://github.com/patr0nus/Pym) |
 
 ## Getting Started
 

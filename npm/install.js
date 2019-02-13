@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { downloadFile, sha256OfPath } = require('./util');
 const decompress = require('decompress');
+const fse = require('fs-extra');
 
 process.on('unhandledRejection', (error) => {
     throw error;
@@ -27,12 +28,22 @@ const distZipFilePath = path.join(__dirname, distZipFile.filename);
 const downloadURL = "https://dl.bintray.com/patr0nus/DeskGap/" + distZipFile.filename;
 
 (async () => {
+    try {
+        fs.unlinkSync(distZipFilePath);
+    } catch (e) { }
+
     await downloadFile(downloadURL, distZipFilePath);
     const sha256 = await sha256OfPath(distZipFilePath);
     if (sha256 !== distZipFile.sha256) {
         console.error(`SHA256 mismatch (${sha256} !== ${distZipFile.sha256})`);
         process.exit(1);
     }
+
+    try {
+        await fse.remove('dist');
+    }
+    catch (e) { }
+
     await decompress(distZipFilePath, 'dist');
     fs.unlinkSync(distZipFilePath);
 })();

@@ -25,7 +25,7 @@ The DeskGap API Demos app shows some of the DeskGap features and APIs with inter
 |[![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-darwin-x64/images/download.svg)](https://deskgap.com/dl/macos) | [![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-win32-ia32/images/download.svg)](https://deskgap.com/dl/win32) | [GitHub](https://github.com/patr0nus/DeskGap/tree/master/app) |
 
 ### Pym: A Real-Life App Built With DeskGap
-To test DeskGap on field, a simple app ”Pym“ was built based on it and submitted to the app stores.
+To test DeskGap on field, [squoosh](https://squoosh.app) is wrapped into a desktop app "Pym" with DeskGap and submitted to the app stores.
 
 |macOS|Windows|Source Code|
 |-|-|-|

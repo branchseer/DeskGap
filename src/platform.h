@@ -1,13 +1,13 @@
-#ifndef HOST_H
-#define HOST_H
+#ifndef PLATFORM_H
+#define PLATFORM_H
 
 #include <string>
 #include <vector>
 
 #if _WIN32
-    #define HOST_EXPORT __declspec(dllexport)
+    #define PLATFORM_EXPORT __declspec(dllexport)
 #else
-    #define HOST_EXPORT
+    #define PLATFORM_EXPORT
 #endif
 
 namespace DeskGapPlatform {

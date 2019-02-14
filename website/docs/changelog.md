@@ -13,4 +13,4 @@
 
 ## Fixed
 - Better support for unicode argv in Windows.
-- Loading Local files no longer requires write access.
+- Loading local files no longer requires write access.

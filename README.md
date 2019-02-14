@@ -52,7 +52,7 @@ hello-deskgap/
 }
 ```
 
-`index.js` is the entry file that creates a window which will render a HTML page:
+`index.js` is the entry file that creates a window which will render an HTML page:
 ```js
 const { app, BrowserWindow } = require('deskgap');
 

@@ -18,6 +18,10 @@
           'CLANG_CXX_LIBRARY': 'libc++',
           'GCC_C_LANGUAGE_STANDARD': 'c11'
         }
+      }],
+      ['OS == "linux"', {
+        'cflags': [ '-fexceptions' ],
+        'cflags_cc': [ '-fexceptions', '-std=c++17' ]
       }]
     ],
   },

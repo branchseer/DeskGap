@@ -9,6 +9,8 @@ To enable native capabilities while keeping the size down, DeskGap bundles a [No
 - Mac OS X Yosemite (version 10.10) or later
 - Windows 10 October 2018 Update (version 1809) or later
 
+Linux support is [work in progress](https://github.com/patr0nus/DeskGap/tree/gtkwebkit).
+
 ## Downloads
 
 ### Prebuilt Binaries
@@ -99,15 +101,13 @@ DeskGap is at its early stage. __The API is still quite limited__ compared to El
 
 With a Node.js runtime bundled, DeskGap comes with support for npm packages and all the battle-tested __native capabilities__ in Node.js such as [`fs`](https://nodejs.org/api/fs.html), [`net`](https://nodejs.org/api/net.html), [`http`](https://nodejs.org/api/http.html). The price is a __larger executable size__ (about 8 MB zipped and 20 MB unzipped).
 
-### Why is the supported version of Windows so high? Any plan of supporting Windows 7 and Linux?
+### Why is the supported version of Windows so high? Any plan of supporting Windows 7?
 
 Older Windows’ __do not have a modern browser engine__, only the one that powers Internet Explorer. Windows 10 1809 is the first version that provides a modern webview with [enough functionalities](https://docs.microsoft.com/en-us/microsoft-edge/dev-guide#win32-webview-updates) for DeskGap to be possible.
 
 To support Windows 7, app developers would have to face compatibility issues coming from as low as IE 8. I personally don’t have enough motivation and interest to do this, but pull requests are always welcome.
 
-Linux support would be great but I have little knowledge of Linux app development. For now __I am looking at [Qt WebEngine](https://doc.qt.io/qt-5/qtwebengine-index.html)__. Any advice & help is appreciated.
-
-If you want to try DeskGap but dropping Windows 7 (or Linux) support is a no-go for your app, consider packaging the app with Electron for the unsupported platform. The DeskGap API is intentionally designed to be like Electron’s. The following code is a good start:
+If you want to try DeskGap but dropping Windows 7 support is a no-go for your app, consider packaging the app with Electron for the unsupported platform. The DeskGap API is intentionally designed to be like Electron’s. The following code is a good start:
 
 ```js
 let appEngine;

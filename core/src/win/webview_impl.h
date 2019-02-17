@@ -1,5 +1,5 @@
-#ifndef mac_webview_impl_h
-#define mac_webview_impl_h
+#ifndef win_webview_impl_h
+#define win_webview_impl_h
 
 #include "../webview/webview.h"
 #include <vcclr.h> 

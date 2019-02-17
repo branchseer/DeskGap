@@ -1,3 +1,6 @@
+#ifndef win_browserwindow_impl_h
+#define win_browserwindow_impl_h
+
 #include <vcclr.h>
 #include "../window/browser_window.h"
 
@@ -14,3 +17,5 @@ namespace DeskGap {
         void updateFrame();
     };
 }
+
+#endif

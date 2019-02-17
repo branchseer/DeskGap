@@ -20,5 +20,5 @@
 5. Compile the TypeScript library: run `npm run build-lib-node && npm run build-lib-ui` in `core`
 6. Configure the CMake for building the executable
     1. `mkdir build && cd build`
-    2. `cmake -G Xcode ..` on macOS, `cmake -G "Visual Studio 15 2017" ..` on Windows.
+    2. `cmake -G Xcode ..` on macOS, `cmake -G "Visual Studio 15 2017" ..` on Windows, `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..` on Linux.
 7. Build the executable and copy the resources: `cmake --build . --target ALL_BUILD --config Release`

@@ -131,7 +131,12 @@
           'sources': [
             'src/gtk/app.cpp',
             'src/gtk/ui_dispatch_platform.cpp',
-            'src/gtk/system_preferences.cpp'
+            'src/gtk/system_preferences.cpp',
+            "src/gtk/menu.cpp",
+            "src/gtk/BrowserWindow.cpp",
+            "src/gtk/webview.cpp",
+            "src/gtk/shell.cpp",
+            "src/gtk/dialog.cpp",
           ],
           'cflags': [
             '<!@(pkg-config --cflags gtk+-3.0)',

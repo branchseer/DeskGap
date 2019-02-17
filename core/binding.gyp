@@ -21,7 +21,8 @@
       }],
       ['OS == "linux"', {
         'cflags': [ '-fexceptions' ],
-        'cflags_cc': [ '-fexceptions', '-std=c++17' ]
+        'cflags_cc': [ '-fexceptions', '-std=c++17' ],
+        'cflags_cc!': [ '-fno-rtti' ]
       }]
     ],
   },
@@ -139,12 +140,12 @@
             "src/gtk/dialog.cpp",
           ],
           'cflags': [
-            '<!@(pkg-config --cflags gtk+-3.0)',
+            '<!@(pkg-config --cflags gtkmm-3.0)',
             '<!@(pkg-config --cflags webkit2gtk-4.0)'
           ],
           'link_settings': {
             'libraries': [
-              '<!@(pkg-config --libs gtk+-3.0)',
+              '<!@(pkg-config --libs gtkmm-3.0)',
               '<!@(pkg-config --libs webkit2gtk-4.0)'
             ]
           }

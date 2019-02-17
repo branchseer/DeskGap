@@ -6,11 +6,11 @@
 namespace DeskGap {
     
     BrowserWindow::BrowserWindow(const WebView& webView, const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
-        
+        impl_->gtkWindow = std::make_unique<Gtk::Window>();
     }
 
     void BrowserWindow::Show() {
-
+        impl_->gtkWindow->show();
     }
 
     void BrowserWindow::SetMaximizable(bool maximizable) {
@@ -35,7 +35,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
-
+        impl_->gtkWindow->resize(width, height);
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
@@ -46,7 +46,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-
+        impl_->gtkWindow->move(x, y);
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {
@@ -62,7 +62,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Center() {
-
+        impl_->gtkWindow->set_position(Gtk::WIN_POS_CENTER);
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {

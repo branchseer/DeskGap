@@ -111,7 +111,7 @@ namespace DeskGap {
             form->FormBorderStyle = FormBorderStyle::None;
         }
     };
-    BrowserWindow::BrowserWindow(const WebView& webView, const EventCallbacks& callbacks): impl_(new Impl) {
+    BrowserWindow::BrowserWindow(const WebView& webView, const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
         DeskGapForm^ form = gcnew DeskGapForm();
 
         form->AutoScaleMode = AutoScaleMode::Font;

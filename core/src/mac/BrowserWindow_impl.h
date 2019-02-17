@@ -1,7 +1,9 @@
+#ifndef mac_browserwindow_impl_h
+#define mac_browserwindow_impl_h
+
 #import <Cocoa/Cocoa.h>
 
 #include "../window/browser_window.h"
-
 
 struct DeskGap::BrowserWindow::Impl {
     NSWindow* nsWindow;
@@ -14,3 +16,5 @@ struct DeskGap::BrowserWindow::Impl {
     void SetStyleMask(bool on, NSWindowStyleMask flag);
     void SetTrafficLightsVisible(bool visible);
 };
+
+#endif

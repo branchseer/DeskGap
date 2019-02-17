@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
 project(DeskGap)
 add_executable(DeskGap src/main.cc)
 
@@ -30,10 +34,18 @@ if(WIN32)
     file(GLOB nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/Release/lib/*.lib)
 endif()
 
+if (LINUX)
+    add_library(DeskGapPlatform STATIC src/platform_gtk.cpp)
+    file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/*/*.a)
+    list(INSERT nodeStaticLibFiles 0 ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/libnode.a)
+    list(APPEND nodeStaticLibFiles "-pthread" "-ldl" "-lrt" "-lm")
+endif()
+
 target_link_libraries(DeskGap DeskGapPlatform)
 
 list(FILTER nodeStaticLibFiles EXCLUDE REGEX "gtest")
 list(FILTER nodeStaticLibFiles EXCLUDE REGEX "v8_nosnapshot")
+
 target_link_libraries(DeskGap ${nodeStaticLibFiles})
 
 if(APPLE)
@@ -89,6 +101,8 @@ if (WIN32)
     SET(DESKGAP_PRELOAD_SCRIPT preload_win.js)
 elseif(APPLE)
     SET(DESKGAP_PRELOAD_SCRIPT preload_mac.js)
+elseif (LINUX)
+    SET(DESKGAP_PRELOAD_SCRIPT preload_gtk.js)
 endif()
 
 add_custom_target(

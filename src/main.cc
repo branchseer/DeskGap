@@ -22,7 +22,8 @@ namespace {
 
         char* argv_cur = argv_mem.data();
         for (std::size_t i = 0; i < args.size(); i++) {
-            std::copy_n(args[i].c_str(), args[i].size() + 1, argv_cur);
+            const char* c_arg = args[i].c_str();
+            std::copy(c_arg, c_arg + args[i].size() + 1, argv_cur);
             argv[i] = argv_cur;
             argv_cur += args[i].size() + 1;
         }

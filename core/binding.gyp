@@ -125,8 +125,26 @@
               '-framework WebKit'
             ]
           }
+        }],
+
+        ['OS == "linux"', {
+          'sources': [
+            'src/gtk/app.cpp',
+            'src/gtk/ui_dispatch_platform.cpp',
+            'src/gtk/system_preferences.cpp'
+          ],
+          'cflags': [
+            '<!@(pkg-config --cflags gtk+-3.0)',
+            '<!@(pkg-config --cflags webkit2gtk-4.0)'
+          ],
+          'link_settings': {
+            'libraries': [
+              '<!@(pkg-config --libs gtk+-3.0)',
+              '<!@(pkg-config --libs webkit2gtk-4.0)'
+            ]
+          }
         }]
-      ]   
+      ] # conditions
     },
     {
       'target_name': 'deskgap_native_unmanaged_win',

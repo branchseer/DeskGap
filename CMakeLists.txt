@@ -38,8 +38,12 @@ if(WIN32)
 endif()
 
 if (LINUX)
+    FIND_PACKAGE(PkgConfig REQUIRED)
+    PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)
+
     add_library(DeskGapPlatform STATIC src/platform_gtk.cpp)
-    target_link_libraries(DeskGapPlatform stdc++fs)
+    target_include_directories(DeskGapPlatform PRIVATE ${GTK3_INCLUDE_DIRS})
+    target_link_libraries(DeskGapPlatform stdc++fs ${GTK3_LIBRARIES} ${GTK3_CFLAGS_OTHER})
 
     # Find All Node.js static dependencies
     file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/*/*.a)
@@ -55,7 +59,6 @@ target_link_libraries(DeskGap DeskGapPlatform)
 list(FILTER nodeStaticLibFiles EXCLUDE REGEX "gtest")
 list(FILTER nodeStaticLibFiles EXCLUDE REGEX "v8_nosnapshot")
 
-message(${nodeStaticLibFiles})
 
 target_link_libraries(DeskGap ${nodeStaticLibFiles})
 

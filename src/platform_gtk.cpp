@@ -7,29 +7,23 @@
 namespace fs = std::filesystem;
 
 namespace {
-    void deleteGObject(gpointer object) {
-        if (object != nullptr) {
-            g_object_unref(object);
-        }
-    }
-
-    std::unique_ptr<GtkApplication, decltype(&deleteGObject)> gtkApp(nullptr, deleteGObject);
+    GtkApplication* gtkApp;
 }
 
 void DeskGapPlatform::InitUIThread() {
-    gtkApp.reset(gtk_application_new(nullptr, G_APPLICATION_FLAGS_NONE));
-    g_application_hold(G_APPLICATION(gtkApp.get()));
+    gtkApp = gtk_application_new(nullptr, G_APPLICATION_FLAGS_NONE);
+    g_application_hold(G_APPLICATION(gtkApp));
     
     // Suppress no activate handler warning:
-    g_signal_connect(gtkApp.get(), "activate", G_CALLBACK([](){ }), NULL);
+    g_signal_connect(gtkApp, "activate", G_CALLBACK([](){ }), NULL);
 
 }
 
 void DeskGapPlatform::InitNodeThread() { }
 
 void DeskGapPlatform::Run() {
-    g_application_run(G_APPLICATION(gtkApp.get()), 0, NULL);
-    gtkApp.reset(nullptr);
+    g_application_run(G_APPLICATION(gtkApp), 0, NULL);
+    g_object_unref(gtkApp);
 }
 
 std::string DeskGapPlatform::PathOfResource(const std::vector<const char*>& paths) {

@@ -39,15 +39,23 @@ endif()
 
 if (LINUX)
     add_library(DeskGapPlatform STATIC src/platform_gtk.cpp)
+    target_link_libraries(DeskGapPlatform stdc++fs)
+
+    # Find All Node.js static dependencies
     file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/*/*.a)
+
+    # Node.js itself libnode.a must appear first
     list(INSERT nodeStaticLibFiles 0 ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/libnode.a)
-    list(APPEND nodeStaticLibFiles "-pthread" "-ldl" "-lrt" "-lm")
+
+    list(APPEND nodeStaticLibFiles "-pthread" "-ldl" "-lrt" "-lm" "-rdynamic")
 endif()
 
 target_link_libraries(DeskGap DeskGapPlatform)
 
 list(FILTER nodeStaticLibFiles EXCLUDE REGEX "gtest")
 list(FILTER nodeStaticLibFiles EXCLUDE REGEX "v8_nosnapshot")
+
+message(${nodeStaticLibFiles})
 
 target_link_libraries(DeskGap ${nodeStaticLibFiles})
 
@@ -59,15 +67,20 @@ if(APPLE)
     )
 
     target_link_libraries(DeskGap "-framework Cocoa")
+endif()
 
+if (APPLE OR LINUX)
+    set(DeskGapExecutable $<TARGET_FILE:DeskGap>)
+    if (APPLE)
+        set(DeskGapExecutable $<TARGET_BUNDLE_CONTENT_DIR:DeskGap>/MacOS/DeskGap)
+    endif()
     add_custom_command(
         TARGET DeskGap POST_BUILD
         COMMAND
             $<$<CONFIG:Release>:strip>
             $<$<CONFIG:Release>:-x>
-            $<$<CONFIG:Release>:$<TARGET_BUNDLE_CONTENT_DIR:DeskGap>/MacOS/DeskGap>
+            $<$<CONFIG:Release>:${DeskGapExecutable}>
     )
-
 endif()
 
 set(DESKGAP_RESOURCE_FOLDER $<TARGET_FILE_DIR:DeskGap>/resources)

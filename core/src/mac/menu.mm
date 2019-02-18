@@ -9,7 +9,7 @@
 
 
 @interface DeskGapMenuItemTarget: NSObject
--(instancetype)initWithOnClickFunction: (const std::function<void()>&) onClick;
+-(instancetype)initWithOnClickFunction: (std::function<void()>&) onClick;
 - (void)handleAction;
 @end
 
@@ -17,10 +17,10 @@
     std::function<void()> _onClickFunction;
 }
 
--(instancetype)initWithOnClickFunction: (const std::function<void()>&) onClick {
+-(instancetype)initWithOnClickFunction: (std::function<void()>&) onClick {
     self = [super init];
     if (self) {
-        _onClickFunction = onClick;
+        _onClickFunction = std::move(onClick);
     }
     return self;
 }
@@ -32,7 +32,7 @@
 @end
 
 namespace DeskGap {
-    MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, const EventCallbacks& eventCallbacks): impl_(std::make_unique<Impl>()) {
+    MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, EventCallbacks&& eventCallbacks): impl_(std::make_unique<Impl>()) {
         impl_->role = role;
         static const std::unordered_map<std::string, SEL> kActionsByRole {
             { "about", @selector(orderFrontStandardAboutPanel:) },

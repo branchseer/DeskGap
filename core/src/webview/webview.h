@@ -26,7 +26,7 @@ namespace DeskGap {
             std::function<void(std::string&&)> onStringMessage;
             std::function<void(const std::string&)> onPageTitleUpdated;
         };
-        WebView(const EventCallbacks&);
+        WebView(EventCallbacks&&);
 
         struct HTTPHeader {
             std::string field;

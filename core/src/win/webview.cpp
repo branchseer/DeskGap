@@ -49,8 +49,8 @@ namespace DeskGap {
             ~UWPWebViewCallbackHandler() {
                 delete callbacks_;
             }
-            UWPWebViewCallbackHandler(const WebView::EventCallbacks* callbacks):
-                callbacks_(new WebView::EventCallbacks(*callbacks)) {
+            UWPWebViewCallbackHandler(WebView::EventCallbacks* callbacks):
+                callbacks_(new WebView::EventCallbacks(std::move(*callbacks))) {
 
             }
             void OnNavigationStarting(Object^, WebViewControlNavigationStartingEventArgs^ e) {
@@ -110,7 +110,7 @@ namespace DeskGap {
     }
 
 
-    WebView::WebView(const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         UWPWebView^ uwpWebView = gcnew UWPWebView();
         impl_->uwpWebView = uwpWebView;
 

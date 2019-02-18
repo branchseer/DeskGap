@@ -11,17 +11,17 @@
 
 
 @interface DeskGapBrowserWindowDelegate: NSObject <NSWindowDelegate>
--(instancetype)initWithCallbacks: (const DeskGap::BrowserWindow::EventCallbacks&) callbacks;
+-(instancetype)initWithCallbacks: (DeskGap::BrowserWindow::EventCallbacks&) callbacks;
 @end
 
 @implementation DeskGapBrowserWindowDelegate {
     DeskGap::BrowserWindow::EventCallbacks _callbacks;
 }
 
--(instancetype)initWithCallbacks: (const DeskGap::BrowserWindow::EventCallbacks&) callbacks {
+-(instancetype)initWithCallbacks: (DeskGap::BrowserWindow::EventCallbacks&) callbacks {
     self = [super init];
     if (self) {
-        _callbacks = callbacks;
+        _callbacks = std::move(callbacks);
     }
     return self;
 }
@@ -71,7 +71,7 @@ namespace DeskGap {
         }
     }
     
-    BrowserWindow::BrowserWindow(const WebView& webview, const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    BrowserWindow::BrowserWindow(const WebView& webview, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         NSWindow *window = [[DeskGapWindow alloc]
             initWithContentRect: NSZeroRect
             styleMask: NSWindowStyleMaskTitled

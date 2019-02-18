@@ -4,7 +4,7 @@
 
 namespace DeskGap {
 
-    WebView::WebView(const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
        
     }
 

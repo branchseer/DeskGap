@@ -15,8 +15,8 @@ namespace DeskGap {
     	App::EventCallbacks callbacks;
     };
 
-    App::App(const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
-    	impl_->callbacks = callbacks;
+    App::App(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
+    	impl_->callbacks = std::move(callbacks);
     }
     
     void App::Run() {

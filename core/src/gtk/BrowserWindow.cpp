@@ -5,8 +5,12 @@
 
 namespace DeskGap {
     
-    BrowserWindow::BrowserWindow(const WebView& webView, const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         impl_->gtkWindow = std::make_unique<Gtk::Window>();
+        impl_->deleteConnection = impl_->gtkWindow->signal_delete_event().connect([onClose = std::move(callbacks.onClose)](GdkEventAny*) {
+            onClose();
+            return true;
+        });
     }
 
     void BrowserWindow::Show() {
@@ -20,18 +24,18 @@ namespace DeskGap {
 
     }
     void BrowserWindow::SetResizable(bool resizable) {
-
+        impl_->gtkWindow->set_resizable(resizable);
     }
     void BrowserWindow::SetHasFrame(bool hasFrame) {
-
+        impl_->gtkWindow->set_decorated(hasFrame);
     }
 
     void BrowserWindow::SetTitle(const std::string& utf8title) {
-
+        impl_->gtkWindow->set_title(utf8title);
     }
 
     void BrowserWindow::SetClosable(bool closable) {
-
+        impl_->gtkWindow->set_deletable(closable);
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
@@ -39,10 +43,16 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
-
+        Gdk::Geometry geometry; 
+        geometry.max_height = (height == 0 ? INT_MAX: height);
+        geometry.max_width = (width == 0 ? INT_MAX: width);
+        impl_->gtkWindow->set_geometry_hints(*(impl_->gtkWindow), geometry, Gdk::HINT_MAX_SIZE); 
     }
     void BrowserWindow::SetMinimumSize(int width, int height) {
-
+        Gdk::Geometry geometry; 
+        geometry.min_height = height;
+        geometry.min_width = width;
+        impl_->gtkWindow->set_geometry_hints(*(impl_->gtkWindow), geometry, Gdk::HINT_MIN_SIZE); 
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
@@ -50,15 +60,19 @@ namespace DeskGap {
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {
-        return {0,0};
+        int width, height;
+        impl_->gtkWindow->get_size(width, height);
+        return { width, height };
     }
 
     std::array<int, 2> BrowserWindow::GetPosition() {
-        return {0,0};
+        int x, y;
+        impl_->gtkWindow->get_position(x, y);
+        return { x, y };
     }
 
     void BrowserWindow::Minimize() {
-
+        impl_->gtkWindow->iconify();
     }
 
     void BrowserWindow::Center() {
@@ -70,15 +84,21 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {
-
+        if (iconPath.has_value()) {
+            impl_->gtkWindow->set_icon_from_file(*iconPath);
+        }
+        else {
+            impl_->gtkWindow->set_icon({ });
+        }
     }
 
 
     void BrowserWindow::Destroy() {
-
+        impl_->deleteConnection.disconnect();
+        impl_->gtkWindow->close();
     }
     void BrowserWindow::Close() {
-
+        impl_->gtkWindow->close();
     }
 
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {

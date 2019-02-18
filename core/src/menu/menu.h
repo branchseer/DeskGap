@@ -25,7 +25,7 @@ namespace DeskGap {
         struct EventCallbacks {
             std::function<void()> onClick;
         };
-        MenuItem(const std::string& role, const Type&, const Menu* submenu, const EventCallbacks&);
+        MenuItem(const std::string& role, const Type&, const Menu* submenu, EventCallbacks&&);
         std::string GetLabel();
         void SetLabel(const std::string& utf8label);
         void SetEnabled(bool enabled);

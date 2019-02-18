@@ -13,17 +13,17 @@ using std::function;
 using std::make_shared;
 
 @interface DeskGapAppDelegate: NSObject <NSApplicationDelegate>
--(instancetype)initWithCallbacks: (const DeskGap::App::EventCallbacks&) callbacks;
+-(instancetype)initWithCallbacks: (DeskGap::App::EventCallbacks&) callbacks;
 @end
 
 @implementation DeskGapAppDelegate {
     DeskGap::App::EventCallbacks callbacks_;
 }
 
--(instancetype)initWithCallbacks: (const DeskGap::App::EventCallbacks&) callbacks {
+-(instancetype)initWithCallbacks: (DeskGap::App::EventCallbacks&) callbacks {
     self = [super init];
     if (self) {
-        callbacks_ = callbacks;
+        callbacks_ = std::move(callbacks);
     }
     return self;
 }
@@ -49,7 +49,7 @@ namespace DeskGap {
         NSApplication* app;
     };
 
-    App::App(const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    App::App(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         impl_->appDelegate = [[DeskGapAppDelegate alloc] initWithCallbacks: callbacks];
         impl_->app = [NSApplication sharedApplication];
         [impl_->app setDelegate: impl_->appDelegate];   

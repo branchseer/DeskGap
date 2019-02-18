@@ -56,7 +56,7 @@ namespace DeskGap {
             };
 
             UISync(info.Env(), [&]() {
-                app_ = std::make_unique<App>(callbacks);
+                app_ = std::make_unique<App>(std::move(callbacks));
             });
         }
         Napi::Function AppWrap::Constructor(Napi::Env env) {

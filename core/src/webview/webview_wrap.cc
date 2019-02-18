@@ -52,8 +52,8 @@ namespace DeskGap {
                 });
             },
         };
-        UISyncDelayable(info.Env(), [this, eventCallbacks]() {
-            this->webview_ = std::make_unique<WebView>(eventCallbacks);
+        UISyncDelayable(info.Env(), [this, eventCallbacks = std::move(eventCallbacks)]() mutable {
+            this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks));
         });
     }
 

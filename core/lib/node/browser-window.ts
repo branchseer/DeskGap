@@ -170,7 +170,7 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
 
             this.setTitle(fullOptions.title);
             this.setMaximumSize(fullOptions.maxWidth, fullOptions.maxHeight);
-            this.setMaximumSize(fullOptions.maxWidth, fullOptions.maxHeight);
+            this.setMinimumSize(fullOptions.minWidth, fullOptions.minHeight);
             this.setSize(fullOptions.width, fullOptions.height, false);
             if (fullOptions.center) {
                 this.native_.center();

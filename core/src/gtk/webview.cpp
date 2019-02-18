@@ -4,8 +4,16 @@
 
 namespace DeskGap {
 
-    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
-       
+    WebView::Impl::Impl(EventCallbacks& callbacks) {
+        gtkWebView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+    }
+
+    WebView::Impl::~Impl() {
+        gtk_widget_destroy((GtkWidget*)gtkWebView);
+    }
+
+    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>(callbacks)) {
+       webkit_web_view_load_html(impl_->gtkWebView, "<h1>Hello WebKitGTK</h1>", nullptr);
     }
 
     void WebView::LoadHTMLString(const std::string& html) {

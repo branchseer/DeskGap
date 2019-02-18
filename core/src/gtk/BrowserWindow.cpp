@@ -6,11 +6,14 @@
 namespace DeskGap {
     
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
-        impl_->gtkWindow = std::make_unique<Gtk::Window>();
-        impl_->deleteConnection = impl_->gtkWindow->signal_delete_event().connect([onClose = std::move(callbacks.onClose)](GdkEventAny*) {
+        auto gtkWindow = std::make_unique<Gtk::Window>();
+        Gtk::Widget* gtkWebView = Glib::wrap(GTK_WIDGET(webView.impl_->gtkWebView));
+        gtkWindow->add(*gtkWebView);
+        impl_->deleteConnection = gtkWindow->signal_delete_event().connect([onClose = std::move(callbacks.onClose)](GdkEventAny*) {
             onClose();
             return true;
         });
+        impl_->gtkWindow = std::move(gtkWindow);
     }
 
     void BrowserWindow::Show() {
@@ -80,7 +83,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
-
+        
     }
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {

@@ -9,7 +9,7 @@ let mainWindow;
 app.once('ready', () => {
 
     mainWindow = new BrowserWindow({
-        show: false,
+        show: true,
         width: 1200, height: 840
     }).once('ready-to-show', () => {
         mainWindow.show();

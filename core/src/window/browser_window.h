@@ -24,7 +24,7 @@ namespace DeskGap {
             std::function<void()> onMove;
             std::function<void()> onClose;
         };
-        explicit BrowserWindow(const WebView&, const EventCallbacks&);
+        explicit BrowserWindow(const WebView&, EventCallbacks&&);
         BrowserWindow(const BrowserWindow&) = delete;
 
         void SetMaximizable(bool);

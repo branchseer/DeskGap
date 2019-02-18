@@ -68,8 +68,8 @@ namespace DeskGap {
             ~WindowCallbackHandler() {
                 delete callbacks_;
             }
-            WindowCallbackHandler(const BrowserWindow::EventCallbacks* callbacks):
-                callbacks_(new BrowserWindow::EventCallbacks(*callbacks)), ignoresOnClose_(false) {
+            WindowCallbackHandler(BrowserWindow::EventCallbacks* callbacks):
+                callbacks_(new BrowserWindow::EventCallbacks(std::move(*callbacks))), ignoresOnClose_(false) {
                 
             }
 
@@ -111,7 +111,7 @@ namespace DeskGap {
             form->FormBorderStyle = FormBorderStyle::None;
         }
     };
-    BrowserWindow::BrowserWindow(const WebView& webView, const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         DeskGapForm^ form = gcnew DeskGapForm();
 
         form->AutoScaleMode = AutoScaleMode::Font;

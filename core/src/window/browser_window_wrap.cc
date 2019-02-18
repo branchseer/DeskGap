@@ -240,8 +240,8 @@ namespace DeskGap {
                 jsOnClose->Call();
             },
         };
-        UISyncDelayable(info.Env(), [this, webViewWrap, callbacks]() {
-            this->browser_window_ = std::make_shared<BrowserWindow>(*(webViewWrap->webview_), callbacks);
+        UISyncDelayable(info.Env(), [this, webViewWrap, callbacks = std::move(callbacks)]() mutable {
+            this->browser_window_ = std::make_shared<BrowserWindow>(*(webViewWrap->webview_), std::move(callbacks));
         });
     }
     Napi::Function BrowserWindowWrap::Constructor(Napi::Env env) {

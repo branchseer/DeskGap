@@ -35,12 +35,12 @@ namespace DeskGap {
                 jsOnClick->Call();
             }
         };
-        UISyncDelayable(info.Env(), [this, role, type, wrappedSubmenu, eventCallbacks]() {
+        UISyncDelayable(info.Env(), [this, role, type, wrappedSubmenu, eventCallbacks = std::move(eventCallbacks)]() mutable {
             Menu* submenu = nullptr;
             if (wrappedSubmenu != nullptr) {
                 submenu = wrappedSubmenu->menu_.get();
             }
-            this->menu_item_ = std::make_unique<MenuItem>(role, type, submenu, eventCallbacks);
+            this->menu_item_ = std::make_unique<MenuItem>(role, type, submenu, std::move(eventCallbacks));
         });
     }
 

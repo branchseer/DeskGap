@@ -74,16 +74,16 @@ namespace {
 
 
 @interface DeskGapWebViewDelegate: NSObject <WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
--(instancetype)initWithCallbacks: (const DeskGap::WebView::EventCallbacks&) callbacks;
+-(instancetype)initWithCallbacks: (DeskGap::WebView::EventCallbacks&) callbacks;
 @end
 
 @implementation DeskGapWebViewDelegate {
     DeskGap::WebView::EventCallbacks callbacks_;
 }
--(instancetype)initWithCallbacks: (const DeskGap::WebView::EventCallbacks&) callbacks {
+-(instancetype)initWithCallbacks: (DeskGap::WebView::EventCallbacks&) callbacks {
     self = [super init];
     if (self) {
-        callbacks_ = callbacks;
+        callbacks_ = std::move(callbacks);
     }
     return self;
 }
@@ -161,7 +161,7 @@ namespace DeskGap {
         }
     }
 
-    WebView::WebView(const EventCallbacks& callbacks): impl_(std::make_unique<Impl>()) {
+    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         static NSString* preloadScript = nil;
         if (preloadScript == nil) {
             NSMutableArray<NSString*>* scripts = [NSMutableArray new];

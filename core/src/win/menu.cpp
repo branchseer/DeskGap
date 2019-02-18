@@ -22,7 +22,7 @@ namespace DeskGap {
             MenuItem::EventCallbacks* const callbacks_;
         public:
             ~MenuItemCallbackHandler() { delete callbacks_; }
-            MenuItemCallbackHandler(const MenuItem::EventCallbacks* callbacks): callbacks_(new MenuItem::EventCallbacks(*callbacks)) { }
+            MenuItemCallbackHandler(MenuItem::EventCallbacks* callbacks): callbacks_(new MenuItem::EventCallbacks(std::move(*callbacks))) { }
 
             void OnClick(Object^, EventArgs^) {
                 callbacks_->onClick();
@@ -32,13 +32,9 @@ namespace DeskGap {
                 callbacks_->onClick = newOnClick;
             }
         };
-
-        // [Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
-        // [ComImport()]
-        // public interface class ApplicationActivationManager { };
     }
 
-    MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, const EventCallbacks& eventCallbacks): impl_(std::make_unique<Impl>()) {
+    MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, EventCallbacks&& eventCallbacks): impl_(std::make_unique<Impl>()) {
         impl_->role = role;
         struct RoleInfo {
             std::string keys; Shortcut shortcut;

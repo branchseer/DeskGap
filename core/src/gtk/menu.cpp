@@ -3,7 +3,7 @@
 
 namespace DeskGap {
 
-    MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, const EventCallbacks& eventCallbacks): impl_(std::make_unique<Impl>()) {
+    MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, EventCallbacks&& eventCallbacks): impl_(std::make_unique<Impl>()) {
         
     }
 

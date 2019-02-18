@@ -3,7 +3,7 @@
 #include <condition_variable>
 #include <functional>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "../dispatch/ui_dispatch_platform.h"
 
@@ -26,27 +26,39 @@ namespace {
         --count_;
       }
     };
+
+    std::optional<DeskGap::PlatformException> executeAndCatch(const std::function<void()>& action) {
+      try {
+        action();
+      }
+      catch (const Glib::Error& gerror) {
+        return DeskGap::PlatformException {
+           Glib::QueryQuark(gerror.domain()).operator Glib::ustring(),
+           gerror.what()
+        };
+      }
+      return std::nullopt;
+    }
 }
 
 std::optional<DeskGap::PlatformException> DeskGap::UISyncPlatform(std::function<void()>&& action) {
-    struct SyncDispatchData {
-        std::function<void()> action;
-        Semaphore semaphore;
-        std::optional<DeskGap::PlatformException> exception;
-    };
-    SyncDispatchData data { std::move(action), Semaphore(), std::nullopt };
-    g_idle_add([](void* data) -> gboolean {
-        SyncDispatchData* dispatchData = static_cast<SyncDispatchData*>(data);
-        dispatchData->action();
-        dispatchData->semaphore.signal();
-        return FALSE;
-    }, &data);
+    Semaphore semaphore;
+    std::optional<DeskGap::PlatformException> exception;
+    Glib::signal_idle().connect([&]() {
+      exception = executeAndCatch(action);
+      semaphore.signal();
+      return false;
+    });
+    semaphore.wait();
 
-    data.semaphore.wait();
-
-    return data.exception;
+    return exception;
 }
 
 void DeskGap::UIASyncPlatform(std::function<void()>&& action, std::function<void(std::optional<PlatformException>&&)> callback) {
-    
+  Glib::signal_idle().connect([
+    action = std::move(action), callback = std::move(callback)
+  ]() {
+    callback(executeAndCatch(action));
+    return false;
+  });
 }

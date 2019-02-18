@@ -9,6 +9,7 @@
 namespace DeskGap {
     struct BrowserWindow::Impl {
     	std::unique_ptr<Gtk::Window> gtkWindow;
+    	sigc::connection deleteConnection;
     };
 }
 

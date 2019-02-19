@@ -9,13 +9,13 @@ let mainWindow;
 app.once('ready', () => {
 
     mainWindow = new BrowserWindow({
-        show: true,
+        show: false,
         width: 1200, height: 840
     }).once('ready-to-show', () => {
         mainWindow.show();
     });
     
-    if (process.platform === 'darwin') {
+    if (process.platform !== 'win32') {
         mainWindow.webView.setDevToolsEnabled(true);
     }
 

@@ -13,7 +13,7 @@
 
 ## Steps
 
-1. Run `npm install` in `core`, `scripts` and `test`.
+1. Run `npm ci` in `core`, `scripts` and `test`.
 2. Download Node.js and the other dependencies: `node scripts/download-deps.js`
 3. Build Node.js as a static library (this may take a while): `node scripts/build-node.js`
 4. Build the native addon of DeskGap: run `npm run configure-native && npm run build-native` in `core`

@@ -25,19 +25,6 @@ namespace {
     }
     const std::string localURLScheme = "deskgap-local";
 
-    std::optional<std::vector<char>> readContentFromPath(const fs::path& filePath) {
-        std::ifstream fileStream(filePath, std::ios::binary);
-        if (fileStream.fail()) {
-            return std::nullopt;
-        }
-        try {
-            return std::vector<char>(std::istreambuf_iterator<char>(fileStream), { });
-        }
-        catch (...) {
-            return std::nullopt;
-        }
-    }
-
     void local_file_uri_scheme_request_cb(WebKitURISchemeRequest *request, gpointer servedPathPtr) {
         const auto& servedPath = *static_cast<std::optional<fs::path>*>(servedPathPtr);
         if (!servedPath.has_value()) {
@@ -75,9 +62,8 @@ namespace {
 
 namespace DeskGap {
 
-    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>(Impl {
-        nullptr, std::move(callbacks)
-    })) {
+    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
+        impl_->callbacks = std::move(callbacks);
         
         WebKitWebContext* context = webkit_web_context_new();
         webkit_web_context_register_uri_scheme(
@@ -87,16 +73,24 @@ namespace DeskGap {
         );
 
         impl_->gtkWebView = WEBKIT_WEB_VIEW(g_object_ref_sink(webkit_web_view_new_with_context(context)));
-
         g_object_unref(context);
 
+        WebKitUserContentManager* contentManager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
+
+        static gchar* preloadScript = nullptr;
+        if (preloadScript == nullptr) {
+            
+        }
+
         gtk_widget_show(GTK_WIDGET(impl_->gtkWebView));
-        g_signal_connect(impl_->gtkWebView, "load-changed", G_CALLBACK(webview_load_changed), &(impl_->callbacks));
+        impl_->loadChangedHandler = g_signal_connect(impl_->gtkWebView, "load-changed", G_CALLBACK(webview_load_changed), &(impl_->callbacks));
     }
 
 
     WebView::~WebView() {
-        gtk_widget_destroy(GTK_WIDGET(impl_->gtkWebView));
+        for (gulong handler: { impl_->loadChangedHandler }) {
+            g_signal_handler_disconnect(impl_->gtkWebView, handler);
+        }
         g_object_unref(impl_->gtkWebView);
     }
 
@@ -122,7 +116,18 @@ namespace DeskGap {
         const std::vector<HTTPHeader>& headers,
         const std::optional<std::string>& body
     ) {
-        
+        impl_->servedPath.reset();
+
+        WebKitURIRequest* request = webkit_uri_request_new(urlString.c_str());
+
+        SoupMessageHeaders* requestHeaders = webkit_uri_request_get_http_headers(request);
+
+        for (const HTTPHeader& header: headers) {
+            soup_message_headers_append(requestHeaders, header.field.c_str(), header.value.c_str());
+        }
+
+        webkit_web_view_load_request(impl_->gtkWebView, request);
+        g_object_unref(request);
     }
 
     void WebView::SetDevToolsEnabled(bool enabled) {
@@ -131,10 +136,10 @@ namespace DeskGap {
     }
 
     void WebView::Reload() {
-
+        webkit_web_view_reload_bypass_cache(impl_->gtkWebView);
     }
 
     void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
-        
+        //printf("%s\n", scriptString.c_str());
     }
 }

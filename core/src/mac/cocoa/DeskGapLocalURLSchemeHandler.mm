@@ -1,39 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 #import "DeskGapLocalURLSchemeHandler.h"
+#include "../util/string_convert.h"
+#include "../../util/mime.h"
 
 namespace {
-    NSDictionary* const mimeTypes = @ {
-        @"txt": @"text/plain",
-        @"bmp": @"image/bmp",
-        @"css": @"text/css",
-        @"git": @"image/gif",
-        @"htm": @"text/html",
-        @"html": @"text/html",
-        @"ico": @"image/vnd.microsoft.icon",
-        @"jpg": @"image/jpeg",
-        @"jpeg": @"image/jpeg",
-        @"js": @"text/javascript",
-        @"json": @"application/json",
-        @"mjs": @"application/javascript",
-        @"mp3": @"audio/mpeg",
-        @"mpeg": @"video/mpeg",
-        @"png": @"image/png",
-        @"pdf": @"application/pdf",
-        @"svg": @"image/svg+xml",
-        @"tif": @"image/tiff",
-        @"tiff": @"image/tiff",
-        @"tff": @"font/ttf",
-        @"wav": @"audio/wav",
-        @"weba" :@"audio/webm",
-        @"webm" :@"video/webm",
-        @"webp" :@"image/webp",
-        @"woff" :@"font/woff",
-        @"woff2":@"font/woff2",
-        @"xhtml":@"application/xhtml+xml",
-        @"xml"  :@"application/xml",
-    };
-
     API_AVAILABLE(macosx(10.13))
     void respond404(id<WKURLSchemeTask> urlSchemeTask) {
         [urlSchemeTask didReceiveResponse: [[NSHTTPURLResponse alloc]
@@ -66,10 +37,7 @@ namespace {
         return respond404(urlSchemeTask);
     }
 
-    NSString* mimeType = [mimeTypes objectForKey:urlSchemeTask.request.URL.pathExtension];
-    if (!mimeType) {
-        mimeType = @"application/octet-stream";
-    }
+    NSString* mimeType = NSStr(DeskGap::GetMimeTypeOfExtension(StdStr(urlSchemeTask.request.URL.pathExtension)));
     
     [urlSchemeTask didReceiveResponse: [[NSURLResponse alloc]
         initWithURL: urlSchemeTask.request.URL

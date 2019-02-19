@@ -46,9 +46,7 @@ namespace DeskGap {
         void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&);
 
 
-    #ifdef __APPLE__
         void SetDevToolsEnabled(bool enabled);
-    #endif
 
         ~WebView();
     };

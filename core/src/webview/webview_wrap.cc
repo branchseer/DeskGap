@@ -13,9 +13,7 @@ namespace DeskGap {
             InstanceMethod("loadRequest", &WebViewWrap::LoadRequest),
             InstanceMethod("evaluateJavaScript", &WebViewWrap::EvaluateJavaScript),
             InstanceMethod("reload", &WebViewWrap::Reload),
-        #ifdef __APPLE__
             InstanceMethod("setDevToolsEnabled", &WebViewWrap::SetDevToolsEnabled),
-        #endif
         });
     }
 
@@ -103,14 +101,12 @@ namespace DeskGap {
         });
     }
 
-#ifdef __APPLE__
     void WebViewWrap::SetDevToolsEnabled(const Napi::CallbackInfo& info) {
         bool enabled = info[0].As<Napi::Boolean>().Value();
         UISyncDelayable(info.Env(), [this, enabled]() {
             this->webview_->SetDevToolsEnabled(enabled);
         });
     }
-#endif
 
     void WebViewWrap::EvaluateJavaScript(const Napi::CallbackInfo& info) {
         std::optional<WebView::JavaScriptEvaluationCallback> optionalCallback;

@@ -12,6 +12,8 @@ namespace DeskGap {
 		WebKitWebView* gtkWebView;
 		WebView::EventCallbacks callbacks;
 		std::optional<std::filesystem::path> servedPath;
+		
+		gulong loadChangedHandler;
     };
 }
 

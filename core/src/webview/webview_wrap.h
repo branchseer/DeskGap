@@ -16,9 +16,7 @@ namespace DeskGap {
         void LoadRequest(const Napi::CallbackInfo& info);
         void EvaluateJavaScript(const Napi::CallbackInfo& info);
         void Reload(const Napi::CallbackInfo&);
-    #ifdef __APPLE__
         void SetDevToolsEnabled(const Napi::CallbackInfo& info);
-    #endif
     
     public:
         WebViewWrap(const Napi::CallbackInfo& info);

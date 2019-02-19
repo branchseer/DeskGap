@@ -204,6 +204,10 @@ namespace DeskGap {
         }
     }
 
+    void WebView::SetDevToolsEnabled(bool enabled) { 
+
+    }
+
     void WebView::Reload() {
         impl_->PrepareScript();
         impl_->uwpWebView->Refresh();

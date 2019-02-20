@@ -244,7 +244,7 @@ namespace DeskGap {
             },
         };
         UISyncDelayable(info.Env(), [this, webViewWrap, callbacks = std::move(callbacks)]() mutable {
-            this->browser_window_ = std::make_shared<BrowserWindow>(*(webViewWrap->webview_), std::move(callbacks));
+            this->browser_window_ = std::make_unique<BrowserWindow>(*(webViewWrap->webview_), std::move(callbacks));
         });
     }
     Napi::Function BrowserWindowWrap::Constructor(Napi::Env env) {
@@ -277,7 +277,7 @@ namespace DeskGap {
             InstanceMethod("minimize", &BrowserWindowWrap::Minimize),
         });
     }
-    std::shared_ptr<BrowserWindow> BrowserWindowWrap::UnderlyingObject() {
-        return browser_window_;
+    std::reference_wrapper<BrowserWindow> BrowserWindowWrap::UnderlyingObject() {
+        return *browser_window_;
     }
 }

@@ -7,7 +7,7 @@ namespace DeskGap {
     }
 
     void Dialog::ShowOpenDialog(
-        const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+        std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
         const OpenDialogOptions& options,
         Callback<OpenDialogResult>&& callback
     ) {
@@ -15,7 +15,7 @@ namespace DeskGap {
     }
 
     void Dialog::ShowSaveDialog(
-        const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+        std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
         const SaveDialogOptions& options,
         Callback<SaveDialogResult>&& callback
     ) {

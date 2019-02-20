@@ -4,8 +4,6 @@
 #include "../window/browser_window_wrap.h"
 
 namespace DeskGap::JSNativeConvertion {
-    // template<class Self, class UnderlyingObject>
-    // class 
 
     template<class Wrap>
     using UnderlyingObjectOf = decltype(std::declval<Wrap>().UnderlyingObject());

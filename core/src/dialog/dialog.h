@@ -60,12 +60,12 @@ namespace DeskGap {
         using Callback = std::function<void(Result&&)>;
 
         static void ShowOpenDialog(
-            const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+            std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
             const OpenDialogOptions& options,
             Callback<OpenDialogResult>&& callback
         );
         static void ShowSaveDialog(
-            const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+            std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
             const SaveDialogOptions& options,
             Callback<SaveDialogResult>&& callback
         );

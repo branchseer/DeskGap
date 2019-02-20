@@ -8,7 +8,7 @@
 namespace DeskGap {
     class BrowserWindowWrap: public Napi::ObjectWrap<BrowserWindowWrap> {
     private:
-        std::shared_ptr<BrowserWindow> browser_window_;
+        std::unique_ptr<BrowserWindow> browser_window_;
         void Show(const Napi::CallbackInfo& info);
         void SetSize(const Napi::CallbackInfo& info);
         void SetPosition(const Napi::CallbackInfo& info);
@@ -41,7 +41,7 @@ namespace DeskGap {
     public:
         BrowserWindowWrap(const Napi::CallbackInfo& info);
         static Napi::Function Constructor(Napi::Env env);
-        std::shared_ptr<BrowserWindow> UnderlyingObject();
+        std::reference_wrapper<BrowserWindow> UnderlyingObject();
     };
 }
 

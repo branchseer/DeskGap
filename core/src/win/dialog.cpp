@@ -15,7 +15,7 @@ namespace DeskGap {
     }
 
     struct Dialog::Impl {
-        static DialogResult PresentDialog(const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow, CommonDialog^ dialog) {
+        static DialogResult PresentDialog(std::optional<std::reference_wrapper<BrowserWindow>> browserWindow, CommonDialog^ dialog) {
             if (browserWindow.has_value()) {
                 Form^ form = browserWindow.value()->impl_->form;
                 return dialog->ShowDialog(form);
@@ -63,7 +63,7 @@ namespace DeskGap {
     }
 
     void Dialog::ShowOpenDialog(
-        const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+        std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
         const OpenDialogOptions& options,
         Callback<OpenDialogResult>&& callback
     ) {
@@ -96,7 +96,7 @@ namespace DeskGap {
     }
 
     void Dialog::ShowSaveDialog(
-        const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+        std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
         const SaveDialogOptions& options,
         Callback<SaveDialogResult>&& callback
     ) {

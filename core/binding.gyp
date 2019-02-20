@@ -138,10 +138,12 @@
             "src/gtk/webview.cpp",
             "src/gtk/shell.cpp",
             "src/gtk/dialog.cpp",
+            "src/gtk/glib_exception.cpp",
           ],
           'cflags': [
             '<!@(pkg-config --cflags gtk+-3.0)',
             '<!@(pkg-config --cflags webkit2gtk-4.0)',
+            '-lstd++fs',
             '-Wno-parentheses'
           ],
           'link_settings': {

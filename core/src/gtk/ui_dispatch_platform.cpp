@@ -6,6 +6,7 @@
 #include <gtk/gtk.h>
 
 #include "../dispatch/ui_dispatch_platform.h"
+#include "./glib_exception.h"
 
 namespace {
     using Action = std::function<void()>;
@@ -29,7 +30,14 @@ namespace {
     };
 
     std::optional<DeskGap::PlatformException> executeAndCatch(const std::function<void()>& action) {
-        action();
+        try {
+            action();
+        }
+        catch (const DeskGap::GlibException& glibException) {
+            return DeskGap::PlatformException {
+                glibException.domain(), glibException.message()
+            };
+        }
         return std::nullopt;
     }
 
@@ -59,6 +67,5 @@ void DeskGap::UIASyncPlatform(Action&& action, std::function<void(std::optional<
     action = std::move(action), callback = std::move(callback)
   ]() {
     callback(executeAndCatch(action));
-    return false;
   });
 }

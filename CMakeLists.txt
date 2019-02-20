@@ -39,11 +39,11 @@ endif()
 
 if (LINUX)
     FIND_PACKAGE(PkgConfig REQUIRED)
-    PKG_CHECK_MODULES(GTKMM REQUIRED gtkmm-3.0)
+    PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
 
     add_library(DeskGapPlatform STATIC src/platform_gtk.cpp)
-    target_include_directories(DeskGapPlatform PRIVATE ${GTKMM_INCLUDE_DIRS})
-    target_link_libraries(DeskGapPlatform stdc++fs ${GTKMM_LIBRARIES} ${GTKMM_CFLAGS_OTHER})
+    target_include_directories(DeskGapPlatform PRIVATE ${GTK_INCLUDE_DIRS})
+    target_link_libraries(DeskGapPlatform stdc++fs ${GTK_LIBRARIES} ${GTK_CFLAGS_OTHER})
 
     # Find All Node.js static dependencies
     file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/*/*.a)

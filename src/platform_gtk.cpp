@@ -1,25 +1,28 @@
 #include <filesystem>
 #include <memory>
-#include <gtkmm.h>
+#include <gtk/gtk.h>
 
 #include "platform.h"
 
 namespace fs = std::filesystem;
 
 namespace {
-    Glib::RefPtr<Gtk::Application> app;
+    GtkApplication* gtkApp;
 }
 
 void DeskGapPlatform::InitUIThread() {
-    app = Gtk::Application::create();
-    app->hold();
+    gtkApp = gtk_application_new(nullptr, G_APPLICATION_FLAGS_NONE);
+    g_application_hold(G_APPLICATION(gtkApp));
+    
+    // Suppress no activate handler warning:
+    g_signal_connect(gtkApp, "activate", G_CALLBACK([](){ }), NULL);
 }
 
 void DeskGapPlatform::InitNodeThread() { }
 
 void DeskGapPlatform::Run() {
-    app->run();
-    app.reset();
+    g_application_run(G_APPLICATION(gtkApp), 0, NULL);
+    g_object_unref(gtkApp);
 }
 
 std::string DeskGapPlatform::PathOfResource(const std::vector<const char*>& paths) {

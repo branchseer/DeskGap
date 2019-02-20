@@ -20,7 +20,6 @@ export interface WebViewEvents extends IEventMap {
 }
 
 export class WebView extends EventEmitter<WebViewEvents> {
-    /** @internal */ private isDestroyed_ = false;
     /** @internal */ private id_: number;
     /** @internal */ private native_: any;
 
@@ -34,11 +33,11 @@ export class WebView extends EventEmitter<WebViewEvents> {
 
         this.native_ = new WebViewNative({
             didStartLoading: () => {
-                if (this.isDestroyed_) return;
+                if (this.isDestroyed()) return;
                 this.trigger_('did-start-loading');
             },
             didStopLoading: (...args: [] | [number, string]) => {
-                if (this.isDestroyed_) return;
+                if (this.isDestroyed()) return;
                 try {
                     if (args.length === 0) {
                         this.trigger_('did-finish-load');
@@ -57,13 +56,13 @@ export class WebView extends EventEmitter<WebViewEvents> {
                 }
             },
             onStringMessage: (stringMessage: string) => {
-                if (this.isDestroyed_) return;
+                if (this.isDestroyed()) return;
                 const [channelName, args]: [string, any] = JSON.parse(stringMessage);
                 messageNode['trigger_'](channelName, { sender: this }, ...args);
             },
             onPageTitleUpdated: (title: string) => {
                 try {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     this.trigger_('page-title-updated', null, title);
                 }
                 finally {
@@ -71,20 +70,13 @@ export class WebView extends EventEmitter<WebViewEvents> {
                 }
             }
         });
-
-    }
-
-    /** @internal */ 
-    private destroy_() {
-        this.isDestroyed_ = true;
-        this.native_.destroy();
     }
 
     get id(): number {
         return this.id_;
     }
     isDestroyed(): boolean {
-        return this.isDestroyed_;
+        return this.native_ == null;
     }
     loadHTMLString(html: string): void {
         this.native_.loadHTMLString(html);
@@ -99,7 +91,7 @@ export class WebView extends EventEmitter<WebViewEvents> {
         }
     }
     send(channelName: string, ...args: any[]): void {
-        if (this.isDestroyed_) return;
+        if (this.isDestroyed()) return;
         this.native_.evaluateJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(channelName)}, ${JSON.stringify(args)})`, null);
     }
 

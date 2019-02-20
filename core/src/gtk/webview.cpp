@@ -190,8 +190,6 @@ namespace DeskGap {
         return FALSE;
     }
 
-
-
     WebView::~WebView() {
         for (gulong connection: { 
             impl_->loadChangedConnection,
@@ -267,15 +265,45 @@ namespace DeskGap {
     }
 
     void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
-        printf("%s\n", scriptString.c_str());
         if (!optionalCallback.has_value()) {
             webkit_web_view_run_javascript(impl_->gtkWebView, scriptString.c_str(), nullptr, nullptr, nullptr);
         }
         else {
             webkit_web_view_run_javascript(
                 impl_->gtkWebView, scriptString.c_str(), nullptr,
-                [](GObject*, GAsyncResult* asyncResult, gpointer user_data) {
+                [](GObject* object, GAsyncResult* asyncResult, gpointer user_data) {
+                    JavaScriptEvaluationCallback* callbackPtr = static_cast<JavaScriptEvaluationCallback*>(user_data);
+                    JavaScriptEvaluationCallback callback(std::move(*callbackPtr));
+                    delete callbackPtr;
 
+                    WebKitJavascriptResult *jsResult;
+                    JSCValue *jsResultValue;
+                    GError *error = NULL;
+
+                    jsResult = webkit_web_view_run_javascript_finish(WEBKIT_WEB_VIEW(object), asyncResult, &error);
+                    if (jsResult == nullptr) {
+                        callback(true, error->message);
+                        g_error_free (error);
+                        return;
+                    }
+                    jsResultValue = webkit_javascript_result_get_js_value(jsResult);
+                    if (jsc_value_is_string(jsResultValue)) {
+                        JSCException* jsException;
+                        gchar* stringResult;
+
+                        stringResult = jsc_value_to_string(jsResultValue);
+                        jsException = jsc_context_get_exception(jsc_value_get_context(jsResultValue));
+                        if (jsException != nullptr) {
+                            callback(true, jsc_exception_get_message(jsException));
+                        }
+                        else {
+                            callback(true, stringResult);
+                        }
+                        g_free(stringResult);
+                    } else {
+                        callback(true, std::string());
+                    }
+                    webkit_javascript_result_unref(jsResult);
                 },
                 new JavaScriptEvaluationCallback(std::move(*optionalCallback))
             );

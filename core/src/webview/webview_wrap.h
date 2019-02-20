@@ -17,6 +17,7 @@ namespace DeskGap {
         void EvaluateJavaScript(const Napi::CallbackInfo& info);
         void Reload(const Napi::CallbackInfo&);
         void SetDevToolsEnabled(const Napi::CallbackInfo& info);
+        void Destroy(const Napi::CallbackInfo& info);
     
     public:
         WebViewWrap(const Napi::CallbackInfo& info);

@@ -11,7 +11,7 @@ namespace DeskGap {
     	GtkWindow* gtkWindow;
     	BrowserWindow::EventCallbacks callbacks;
     	gulong deleteEventConnection;
-    	static bool handleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow*);
+    	static bool HandleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow*);
     };
 }
 

@@ -11,8 +11,27 @@ namespace DeskGap {
 		WebKitWebView* gtkWebView;
 		WebView::EventCallbacks callbacks;
 		std::optional<std::string> servedPath;
+
+		static void HandleLocalFileUriSchemeRequest(WebKitURISchemeRequest *request, gpointer);
 		
-		gulong loadChangedHandler;
+		gulong loadChangedConnection;
+		static void HandleLoadChanged(GtkWidget*, WebKitLoadEvent, WebView*);
+
+		gulong buttonPressEventConnection;
+		static gboolean HandleButtonPressEvent(GtkWidget*, GdkEventButton*, WebView*);
+
+		gulong buttonReleaseEventConnection;
+		static gboolean HandleButtonReleaseEvent(GtkWidget*, GdkEventButton*, WebView*);
+
+		std::optional<GdkEventButton> lastLeftMouseDownEvent;
+
+		gulong scriptWindowDragConnection;
+		static void HandleScriptWindowDrag(WebKitUserContentManager*, WebKitJavascriptResult*, WebView*);
+
+		gulong scriptStringMessageConnection;
+		static void HandleScriptStringMessage(WebKitUserContentManager*, WebKitJavascriptResult*, WebView*);
+
+		//static void HandleJavaScriptFinished();
     };
 }
 

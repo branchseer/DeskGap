@@ -1,0 +1,19 @@
+window.deskgap = {
+    platform: 'linux',
+    postStringMessage: function (string) {
+        window.webkit.messageHandlers.stringMessage.postMessage(string);
+    }
+}
+
+window.addEventListener('mousedown', function(e) {
+    var currentElement = e.target;
+    while (currentElement != null) {
+        if (currentElement.hasAttribute('data-deskgap-no-drag')) {
+            break;
+        }
+        else if (currentElement.hasAttribute('data-deskgap-drag')) {
+            window.webkit.messageHandlers.windowDrag.postMessage(null);
+        }
+        currentElement = currentElement.parentElement;
+    }
+});

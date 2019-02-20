@@ -4,20 +4,38 @@
 #include "./BrowserWindow_impl.h"
 
 namespace DeskGap {
+
+
+    bool BrowserWindow::Impl::handleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow* window) {
+        window->impl_->callbacks.onClose();
+        return true;
+    }
+
     
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
-        auto gtkWindow = std::make_unique<Gtk::Window>();
-        Gtk::Widget* gtkWebView = Glib::wrap(GTK_WIDGET(webView.impl_->gtkWebView));
-        gtkWindow->add(*gtkWebView);
-        impl_->deleteConnection = gtkWindow->signal_delete_event().connect([onClose = std::move(callbacks.onClose)](GdkEventAny*) {
-            onClose();
-            return true;
-        });
-        impl_->gtkWindow = std::move(gtkWindow);
+        impl_->callbacks = std::move(callbacks);
+
+        GtkWindow* gtkWindow = GTK_WINDOW(g_object_ref_sink(gtk_window_new(GTK_WINDOW_TOPLEVEL)));
+
+        gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(webView.impl_->gtkWebView));
+
+        impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::handleDeleteEvent), this);
+        
+        impl_->gtkWindow = gtkWindow;
+    }
+
+    BrowserWindow::~BrowserWindow() {
+        printf("deinit browser_window\n");
+        for (gulong connection: { impl_->deleteEventConnection }) {
+            if (connection > 0) {
+                g_signal_handler_disconnect(impl_->gtkWindow, connection);
+            }
+        }
+        g_object_unref(impl_->gtkWindow);
     }
 
     void BrowserWindow::Show() {
-        impl_->gtkWindow->show();
+        gtk_widget_show(GTK_WIDGET(impl_->gtkWindow));
     }
 
     void BrowserWindow::SetMaximizable(bool maximizable) {
@@ -27,59 +45,59 @@ namespace DeskGap {
 
     }
     void BrowserWindow::SetResizable(bool resizable) {
-        impl_->gtkWindow->set_resizable(resizable);
+        gtk_window_set_resizable(impl_->gtkWindow, resizable);
     }
     void BrowserWindow::SetHasFrame(bool hasFrame) {
-        impl_->gtkWindow->set_decorated(hasFrame);
+        gtk_window_set_decorated(impl_->gtkWindow, hasFrame);
     }
 
     void BrowserWindow::SetTitle(const std::string& utf8title) {
-        impl_->gtkWindow->set_title(utf8title);
+        gtk_window_set_title(impl_->gtkWindow, utf8title.c_str());
     }
 
     void BrowserWindow::SetClosable(bool closable) {
-        impl_->gtkWindow->set_deletable(closable);
+        gtk_window_set_deletable(impl_->gtkWindow, closable);
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
-        impl_->gtkWindow->resize(width, height);
+        gtk_window_resize(impl_->gtkWindow, width, height);
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
-        Gdk::Geometry geometry; 
+        GdkGeometry geometry; 
         geometry.max_height = (height == 0 ? INT_MAX: height);
         geometry.max_width = (width == 0 ? INT_MAX: width);
-        impl_->gtkWindow->set_geometry_hints(*(impl_->gtkWindow), geometry, Gdk::HINT_MAX_SIZE); 
+        gtk_window_set_geometry_hints(impl_->gtkWindow, nullptr, &geometry, GDK_HINT_MAX_SIZE);
     }
     void BrowserWindow::SetMinimumSize(int width, int height) {
-        Gdk::Geometry geometry; 
+        GdkGeometry geometry; 
         geometry.min_height = height;
         geometry.min_width = width;
-        impl_->gtkWindow->set_geometry_hints(*(impl_->gtkWindow), geometry, Gdk::HINT_MIN_SIZE); 
+        gtk_window_set_geometry_hints(impl_->gtkWindow, nullptr, &geometry, GDK_HINT_MIN_SIZE); 
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-        impl_->gtkWindow->move(x, y);
+        gtk_window_move(impl_->gtkWindow, x, y);
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {
         int width, height;
-        impl_->gtkWindow->get_size(width, height);
+        gtk_window_get_size(impl_->gtkWindow, &width, &height);
         return { width, height };
     }
 
     std::array<int, 2> BrowserWindow::GetPosition() {
         int x, y;
-        impl_->gtkWindow->get_position(x, y);
+        gtk_window_get_position(impl_->gtkWindow, &x, &y);
         return { x, y };
     }
 
     void BrowserWindow::Minimize() {
-        impl_->gtkWindow->iconify();
+        gtk_window_iconify(impl_->gtkWindow);
     }
 
     void BrowserWindow::Center() {
-        impl_->gtkWindow->set_position(Gtk::WIN_POS_CENTER);
+        gtk_window_set_position(impl_->gtkWindow, GTK_WIN_POS_CENTER);
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
@@ -88,25 +106,27 @@ namespace DeskGap {
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {
         if (iconPath.has_value()) {
-            impl_->gtkWindow->set_icon_from_file(*iconPath);
+            GError* error;
+            gtk_window_set_icon_from_file(impl_->gtkWindow, iconPath->c_str(), &error);
+            //throw...
         }
         else {
-            impl_->gtkWindow->set_icon({ });
+            gtk_window_set_icon(impl_->gtkWindow, nullptr);
         }
     }
 
 
     void BrowserWindow::Destroy() {
-        impl_->deleteConnection.disconnect();
-        impl_->gtkWindow->close();
+        g_signal_handler_disconnect(impl_->gtkWindow, impl_->deleteEventConnection);
+        impl_->deleteEventConnection = 0;
+        gtk_window_close(impl_->gtkWindow);
     }
     void BrowserWindow::Close() {
-        impl_->gtkWindow->close();
+        gtk_window_close(impl_->gtkWindow);
     }
 
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
         
     }
 
-    BrowserWindow::~BrowserWindow() = default;
 }

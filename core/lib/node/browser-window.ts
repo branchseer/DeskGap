@@ -71,7 +71,6 @@ export interface BrowserWindowEvents extends IEventMap {
 export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     /** @internal */ private id_: number;
     /** @internal */ private hasBeenShown_ = false;
-    /** @internal */ private isDestroyed_ = false;
     /** @internal */ private webview_: WebView;
     /** @internal */ private native_: any;
     /** @internal */ private title_: string;
@@ -113,13 +112,13 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         bulkUISync(() => {
             this.webview_ = new WebView({
                 onPageTitleUpdated: (title: string) => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     this.trigger_('page-title-updated', {
                         defaultAction: () => this.setTitle(title)
                     }, title);
                 },
                 onReadyToShow: () => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     if (!this.hasBeenShown_) {
                         this.trigger_('ready-to-show');
                     }
@@ -128,27 +127,27 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
 
             this.native_ = new BrowserWindowNative(this.webview_['native_'],  {
                 onBlur: () => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     if (globals.focusedBrowserWindow === this) {
                         globals.focusedBrowserWindow = null;
                     };
                     this.trigger_('blur');
                 },
                 onFocus: () => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     globals.focusedBrowserWindow = this;
                     this.trigger_('focus');
                 },
                 onResize: () => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     this.trigger_('resize')
                 },
                 onMove: () => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     this.trigger_('move')
                 },
                 onClose: () => {
-                    if (this.isDestroyed_) return;
+                    if (this.isDestroyed()) return;
                     this.trigger_('close', { defaultAction: () => this.destroy() })
                 }
             });
@@ -307,10 +306,11 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     }
     destroy(): void {
         bulkUISync(() => {
-            this.isDestroyed_ = true;
-            this.webview_['destroy_']();
+            this.webview_['native_'].destroy();
             this.native_.destroy();
         });
+        this.webview_['native_'] = null;
+        this.native_ = null;
 
         if (globals.focusedBrowserWindow === this) {
             globals.focusedBrowserWindow = null;
@@ -330,7 +330,7 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         }
     }
     isDestroyed(): boolean {
-        return this.isDestroyed_;
+        return this.native_ == null;
     }
 
     minimize(): void {

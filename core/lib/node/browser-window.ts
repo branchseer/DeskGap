@@ -305,12 +305,12 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     getSize(): [number, number] {
         return this.native_.getSize();
     }
-    destroy(): void { 
-        this.isDestroyed_ = true;
-        this.webview_['isDestroyed_'] = true;
-        this.native_.destroy();
-        this.webview_['native_'] = null;
-        this.native_ = null;
+    destroy(): void {
+        bulkUISync(() => {
+            this.isDestroyed_ = true;
+            this.webview_['destroy_']();
+            this.native_.destroy();
+        });
 
         if (globals.focusedBrowserWindow === this) {
             globals.focusedBrowserWindow = null;

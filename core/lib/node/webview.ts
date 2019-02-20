@@ -73,6 +73,13 @@ export class WebView extends EventEmitter<WebViewEvents> {
         });
 
     }
+
+    /** @internal */ 
+    private destroy_() {
+        this.isDestroyed_ = true;
+        this.native_.destroy();
+    }
+
     get id(): number {
         return this.id_;
     }

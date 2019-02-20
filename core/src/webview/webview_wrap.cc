@@ -14,6 +14,7 @@ namespace DeskGap {
             InstanceMethod("evaluateJavaScript", &WebViewWrap::EvaluateJavaScript),
             InstanceMethod("reload", &WebViewWrap::Reload),
             InstanceMethod("setDevToolsEnabled", &WebViewWrap::SetDevToolsEnabled),
+            InstanceMethod("destroy", &WebViewWrap::Destroy),
         });
     }
 
@@ -125,6 +126,12 @@ namespace DeskGap {
             optionalCallback { std::move(optionalCallback) }
         ]() mutable {
             this->webview_->EvaluateJavaScript(script, std::move(optionalCallback));
+        });
+    }
+
+    void WebViewWrap::Destroy(const Napi::CallbackInfo& info) {
+        UISyncDelayable(info.Env(), [this]() {
+            this->webview_.reset();
         });
     }
 }

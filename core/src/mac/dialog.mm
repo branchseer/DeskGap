@@ -95,7 +95,7 @@ namespace DeskGap {
 
     struct Dialog::Impl {
         typedef void (^CallbackBlock)(NSModalResponse returnCode);
-        static void PresentDialog(std::optional<std::shared_ptr<BrowserWindow>> browserWindow, NSSavePanel* panel, CallbackBlock callbackBlock) {
+        static void PresentDialog(std::optional<std::reference_wrapper<BrowserWindow>> browserWindow, NSSavePanel* panel, CallbackBlock callbackBlock) {
             if (browserWindow.has_value()) {
                 NSWindow* cocoaWindow = browserWindow.value()->impl_->nsWindow;
                 [panel beginSheetModalForWindow: cocoaWindow completionHandler: ^(NSModalResponse returnCode) {
@@ -165,7 +165,7 @@ namespace DeskGap {
     }
 
     void Dialog::ShowOpenDialog(
-        const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+        std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
         const OpenDialogOptions& options,
         Callback<OpenDialogResult>&& callback
     ) {
@@ -201,7 +201,7 @@ namespace DeskGap {
     }
 
     void Dialog::ShowSaveDialog(
-        const std::optional<std::shared_ptr<BrowserWindow>>& browserWindow,
+        std::optional<std::reference_wrapper<BrowserWindow>> browserWindow,
         const SaveDialogOptions& options,
         Callback<SaveDialogResult>&& callback
     ) {

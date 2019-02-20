@@ -6,6 +6,8 @@ window.deskgap = {
 }
 
 window.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+
     var currentElement = e.target;
     while (currentElement != null) {
         if (currentElement.hasAttribute('data-deskgap-no-drag')) {

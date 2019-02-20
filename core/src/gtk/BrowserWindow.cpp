@@ -2,11 +2,12 @@
 #include "menu_impl.h"
 #include "webview_impl.h"
 #include "./BrowserWindow_impl.h"
+#include "./glib_exception.h"
 
 namespace DeskGap {
 
 
-    bool BrowserWindow::Impl::handleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow* window) {
+    bool BrowserWindow::Impl::HandleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow* window) {
         window->impl_->callbacks.onClose();
         return true;
     }
@@ -19,13 +20,12 @@ namespace DeskGap {
 
         gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(webView.impl_->gtkWebView));
 
-        impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::handleDeleteEvent), this);
+        impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::HandleDeleteEvent), this);
         
         impl_->gtkWindow = gtkWindow;
     }
 
     BrowserWindow::~BrowserWindow() {
-        printf("deinit browser_window\n");
         for (gulong connection: { impl_->deleteEventConnection }) {
             if (connection > 0) {
                 g_signal_handler_disconnect(impl_->gtkWindow, connection);
@@ -97,7 +97,17 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Center() {
-        gtk_window_set_position(impl_->gtkWindow, GTK_WIN_POS_CENTER);
+        GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(impl_->gtkWindow));
+        GdkWindow *gdkWindow = gtk_widget_get_window(GTK_WIDGET(impl_->gtkWindow));
+        GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, gdkWindow);
+
+        GdkRectangle geometry;
+        gdk_monitor_get_geometry(monitor, &geometry);
+
+        int windowWidth, windowHeight;
+        gtk_window_get_size(impl_->gtkWindow, &windowWidth, &windowHeight);
+
+        gtk_window_move(impl_->gtkWindow, (geometry.width - windowWidth) / 2, (geometry.height - windowHeight) / 2);
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
@@ -108,7 +118,7 @@ namespace DeskGap {
         if (iconPath.has_value()) {
             GError* error;
             gtk_window_set_icon_from_file(impl_->gtkWindow, iconPath->c_str(), &error);
-            //throw...
+            GlibException::ThrowAndFree(error);
         }
         else {
             gtk_window_set_icon(impl_->gtkWindow, nullptr);

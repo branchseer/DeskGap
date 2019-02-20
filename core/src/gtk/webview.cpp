@@ -7,26 +7,20 @@
 #include "webview_impl.h"
 #include "../lib_path.h"
 #include "../util/mime.h"
+#include "../lib_path.h"
+#include "./glib_exception.h"
+
 
 namespace fs = std::filesystem;
 
 namespace {
-    void webview_load_changed(GtkWidget*, WebKitLoadEvent load_event, DeskGap::WebView::EventCallbacks* callbacks) {
-        switch (load_event) {
-        case WEBKIT_LOAD_STARTED:
-            callbacks->didStartLoading();
-            break;
-        case WEBKIT_LOAD_FINISHED:
-            callbacks->didStopLoading(std::nullopt);
-            break;
-        default:
-            break;
-        }
-    }
     const gchar* localURLScheme = "deskgap-local";
+}
 
-    void local_file_uri_scheme_request_cb(WebKitURISchemeRequest *request, gpointer servedPathPtr) {
-        const auto& servedPath = *static_cast<std::optional<std::string>*>(servedPathPtr);
+namespace DeskGap {
+
+    void WebView::Impl::HandleLocalFileUriSchemeRequest(WebKitURISchemeRequest *request, gpointer webView) {
+        const auto& servedPath = static_cast<WebView*>(webView)->impl_->servedPath;
         if (!servedPath.has_value()) {
             GError *error = g_error_new(WEBKIT_NETWORK_ERROR, 404, "Requesting Local Files Not Allowed");
             webkit_uri_scheme_request_finish_error (request, error);
@@ -68,9 +62,20 @@ namespace {
         webkit_uri_scheme_request_finish(request, stream, fileSize, DeskGap::GetMimeTypeOfExtension(fileExtension).c_str());
         g_object_unref(stream);
     }
-}
 
-namespace DeskGap {
+
+    void WebView::Impl::HandleLoadChanged(GtkWidget*, WebKitLoadEvent loadEvent, WebView* webView) {
+        switch (loadEvent) {
+        case WEBKIT_LOAD_STARTED:
+            webView->impl_->callbacks.didStartLoading();
+            break;
+        case WEBKIT_LOAD_FINISHED:
+            webView->impl_->callbacks.didStopLoading(std::nullopt);
+            break;
+        default:
+            break;
+        }
+    }
 
     WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         impl_->callbacks = std::move(callbacks);
@@ -78,31 +83,136 @@ namespace DeskGap {
         WebKitWebContext* context = webkit_web_context_new();
         webkit_web_context_register_uri_scheme(
             context,
-            localURLScheme, local_file_uri_scheme_request_cb,
-            &(impl_->servedPath), nullptr
+            localURLScheme, Impl::HandleLocalFileUriSchemeRequest,
+            this, nullptr
         );
 
         impl_->gtkWebView = WEBKIT_WEB_VIEW(g_object_ref_sink(webkit_web_view_new_with_context(context)));
         g_object_unref(context);
 
-        WebKitUserContentManager* contentManager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
+        WebKitUserContentManager* manager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
 
         static gchar* preloadScript = nullptr;
         if (preloadScript == nullptr) {
-            
+            fs::path scriptFolder = fs::path(LibPath()) / "dist" / "ui";
+
+            for (const char* scriptFilename: { "preload_gtk.js", "preload.js" }) {
+                fs::path scriptPath = scriptFolder / scriptFilename;
+
+                gchar* fileContent;
+                gsize fileSize;
+                GError* error = nullptr;
+                g_file_get_contents(scriptPath.c_str(), &fileContent, &fileSize, &error);
+                GlibException::ThrowAndFree(error);
+
+                if (preloadScript == nullptr) {
+                    preloadScript = fileContent;
+                }
+                else {
+                    gchar* oldPreloadScript = preloadScript;
+                    preloadScript = g_strconcat(preloadScript, fileContent, nullptr);
+                    g_free(oldPreloadScript);
+                    g_free(fileContent);
+                }
+            }
         }
 
+
+
+        impl_->scriptWindowDragConnection = g_signal_connect(
+            manager,
+            "script-message-received::windowDrag",
+            G_CALLBACK(Impl::HandleScriptWindowDrag),
+            this
+        );
+        webkit_user_content_manager_register_script_message_handler(manager, "windowDrag");
+
+        impl_->scriptStringMessageConnection = g_signal_connect(
+            manager,
+            "script-message-received::stringMessage",
+            G_CALLBACK(Impl::HandleScriptStringMessage),
+            this
+        );
+        webkit_user_content_manager_register_script_message_handler(manager, "stringMessage");
+
+        WebKitUserScript* preloadUserScript = webkit_user_script_new(
+            preloadScript, 
+            WEBKIT_USER_CONTENT_INJECT_TOP_FRAME,
+            WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START,
+            nullptr, nullptr
+        );
+        webkit_user_content_manager_add_script(manager, preloadUserScript);
+        webkit_user_script_unref(preloadUserScript);
+
         gtk_widget_show(GTK_WIDGET(impl_->gtkWebView));
-        impl_->loadChangedHandler = g_signal_connect(impl_->gtkWebView, "load-changed", G_CALLBACK(webview_load_changed), &(impl_->callbacks));
+        impl_->loadChangedConnection = g_signal_connect(impl_->gtkWebView, "load-changed", G_CALLBACK(Impl::HandleLoadChanged), this);
+        impl_->buttonPressEventConnection = g_signal_connect(impl_->gtkWebView, "button-press-event", G_CALLBACK(Impl::HandleButtonPressEvent), this);
+        impl_->buttonReleaseEventConnection = g_signal_connect(impl_->gtkWebView, "button-release-event", G_CALLBACK(Impl::HandleButtonReleaseEvent), this);
+    }
+
+    void WebView::Impl::HandleScriptWindowDrag(WebKitUserContentManager*, WebKitJavascriptResult*, WebView* webView) {
+        printf("drag?\n");
+        std::optional<GdkEventButton>& lastLeftMouseDownEvent = webView->impl_->lastLeftMouseDownEvent;
+        if (!lastLeftMouseDownEvent.has_value()) return;
+
+        GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(webView->impl_->gtkWebView));
+        if (!GTK_IS_WINDOW(window)) return;
+
+        gtk_window_begin_move_drag(GTK_WINDOW(window),
+            lastLeftMouseDownEvent->button,
+            lastLeftMouseDownEvent->x_root, lastLeftMouseDownEvent->y_root,
+            lastLeftMouseDownEvent->time
+        );
+        lastLeftMouseDownEvent.reset();
+    }
+    void WebView::Impl::HandleScriptStringMessage(WebKitUserContentManager*, WebKitJavascriptResult* jsResult, WebView* webView) {
+        JSCValue* jsValue = webkit_javascript_result_get_js_value(jsResult);
+        GBytes* stringMessageGBytes = jsc_value_to_string_as_bytes(jsValue);
+
+        gsize size;
+        gconstpointer stringMessageBytes = g_bytes_get_data(stringMessageGBytes, &size);
+        std::string stringMessage(static_cast<const char*>(stringMessageBytes), size);
+
+        g_bytes_unref(stringMessageGBytes);
+
+        webView->impl_->callbacks.onStringMessage(std::move(stringMessage));
+    }
+    gboolean WebView::Impl::HandleButtonPressEvent(GtkWidget*, GdkEventButton* event, WebView* webView) {
+        if (event->button == 1 && event->type == GDK_BUTTON_PRESS) {
+            webView->impl_->lastLeftMouseDownEvent.emplace(*event);
+        }
+        return FALSE;
+    }
+    gboolean WebView::Impl::HandleButtonReleaseEvent(GtkWidget*, GdkEventButton* event, WebView* webView) {
+        if (event->button == 1 && event->type == GDK_BUTTON_RELEASE) {
+            webView->impl_->lastLeftMouseDownEvent.reset();
+        }
+        return FALSE;
     }
 
 
-    WebView::~WebView() {
-        printf("deinit webview\n");
 
-        for (gulong handler: { impl_->loadChangedHandler }) {
-            g_signal_handler_disconnect(impl_->gtkWebView, handler);
+    WebView::~WebView() {
+        for (gulong connection: { 
+            impl_->loadChangedConnection,
+            impl_->buttonPressEventConnection,
+            impl_->buttonReleaseEventConnection
+        }) {
+            if (connection > 0) {
+                g_signal_handler_disconnect(impl_->gtkWebView, connection);
+            }
         }
+
+        WebKitUserContentManager* manager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
+        for (gulong connection: {
+            impl_->scriptStringMessageConnection,
+            impl_->scriptWindowDragConnection
+        }) {
+            if (connection > 0) {
+                g_signal_handler_disconnect(manager, connection);
+            }
+        }
+
         g_object_unref(impl_->gtkWebView);
     }
 
@@ -112,7 +222,6 @@ namespace DeskGap {
     }
 
     void WebView::LoadLocalFile(const std::string& path) {
-        printf("%s\n", "LoadLocalFile");
         const char* cpath = path.c_str();
         gchar* folderPath = g_path_get_dirname(cpath);
         gchar* filename = g_path_get_basename(cpath);
@@ -158,6 +267,18 @@ namespace DeskGap {
     }
 
     void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
-        //printf("%s\n", scriptString.c_str());
+        printf("%s\n", scriptString.c_str());
+        if (!optionalCallback.has_value()) {
+            webkit_web_view_run_javascript(impl_->gtkWebView, scriptString.c_str(), nullptr, nullptr, nullptr);
+        }
+        else {
+            webkit_web_view_run_javascript(
+                impl_->gtkWebView, scriptString.c_str(), nullptr,
+                [](GObject*, GAsyncResult* asyncResult, gpointer user_data) {
+
+                },
+                new JavaScriptEvaluationCallback(std::move(*optionalCallback))
+            );
+        };
     }
 }

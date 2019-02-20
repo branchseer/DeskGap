@@ -1,6 +1,6 @@
 #include <filesystem>
 
-#include <gtkmm.h>
+#include <gtk/gtk.h>
 #include <fstream>
 
 #include "../webview/webview.h"
@@ -23,39 +23,49 @@ namespace {
             break;
         }
     }
-    const std::string localURLScheme = "deskgap-local";
+    const gchar* localURLScheme = "deskgap-local";
 
     void local_file_uri_scheme_request_cb(WebKitURISchemeRequest *request, gpointer servedPathPtr) {
-        const auto& servedPath = *static_cast<std::optional<fs::path>*>(servedPathPtr);
+        const auto& servedPath = *static_cast<std::optional<std::string>*>(servedPathPtr);
         if (!servedPath.has_value()) {
             GError *error = g_error_new(WEBKIT_NETWORK_ERROR, 404, "Requesting Local Files Not Allowed");
             webkit_uri_scheme_request_finish_error (request, error);
             g_error_free(error);
             return;
         }
+        
         const gchar* urlPath = webkit_uri_scheme_request_get_path(request);
-        while (*urlPath == '/') ++urlPath;
 
-        std::string filename = Glib::uri_unescape_string(urlPath);
-        fs::path fullPath = servedPath.value() / filename;
-
+        const gchar* encodedFilename = urlPath;
+        while (*encodedFilename == '/') ++encodedFilename;
 
         gchar* fileContent;
         gsize fileSize;
-        GError* error = nullptr;
-        g_file_get_contents(fullPath.c_str(), &fileContent, &fileSize, &error);
+        std::string fileExtension;
+        {
+            gchar* fullPath;
+            {
+                gchar* filename = g_uri_unescape_string(encodedFilename, nullptr);
 
-        if (error != nullptr) {
-            webkit_uri_scheme_request_finish_error(request, error);
-            g_error_free(error);
-            return;
+                fullPath = g_build_filename(servedPath.value().c_str(), filename, nullptr);
+
+                if (const char* firstDot = strrchr(filename, '.'); firstDot != nullptr) {
+                    fileExtension = std::string(firstDot + 1);
+                }
+                g_free(filename);
+            }
+            GError* error = nullptr;
+            g_file_get_contents(fullPath, &fileContent, &fileSize, &error);
+
+            if (error != nullptr) {
+                webkit_uri_scheme_request_finish_error(request, error);
+                g_error_free(error);
+                return;
+            }
         }
 
         GInputStream *stream = g_memory_input_stream_new_from_data(fileContent, fileSize, g_free);
-
-        const char* extension  = fullPath.extension().c_str();
-        while (*extension == '.') ++extension;
-        webkit_uri_scheme_request_finish(request, stream, fileSize, DeskGap::GetMimeTypeOfExtension(extension).c_str());
+        webkit_uri_scheme_request_finish(request, stream, fileSize, DeskGap::GetMimeTypeOfExtension(fileExtension).c_str());
         g_object_unref(stream);
     }
 }
@@ -68,7 +78,7 @@ namespace DeskGap {
         WebKitWebContext* context = webkit_web_context_new();
         webkit_web_context_register_uri_scheme(
             context,
-            localURLScheme.c_str(), local_file_uri_scheme_request_cb,
+            localURLScheme, local_file_uri_scheme_request_cb,
             &(impl_->servedPath), nullptr
         );
 
@@ -88,6 +98,8 @@ namespace DeskGap {
 
 
     WebView::~WebView() {
+        printf("deinit webview\n");
+
         for (gulong handler: { impl_->loadChangedHandler }) {
             g_signal_handler_disconnect(impl_->gtkWebView, handler);
         }
@@ -100,14 +112,20 @@ namespace DeskGap {
     }
 
     void WebView::LoadLocalFile(const std::string& path) {
-        auto fsPath = fs::path(path);
+        printf("%s\n", "LoadLocalFile");
+        const char* cpath = path.c_str();
+        gchar* folderPath = g_path_get_dirname(cpath);
+        gchar* filename = g_path_get_basename(cpath);
+        gchar* encodedFilename = g_uri_escape_string(filename, nullptr, false);
+        gchar* url = g_strdup_printf("%s://host/%s", localURLScheme, encodedFilename);
 
-        impl_->servedPath.emplace(fsPath.parent_path());
+        impl_->servedPath.emplace(folderPath);
+        webkit_web_view_load_uri(impl_->gtkWebView, url);
 
-        std::string filename = fsPath.filename();
-        std::string urlEncodedFilename = Glib::uri_escape_string(filename, std::string(), false);
-
-        webkit_web_view_load_uri(impl_->gtkWebView, (localURLScheme + "://host/" + urlEncodedFilename).c_str());
+        g_free(folderPath);
+        g_free(filename);
+        g_free(encodedFilename);
+        g_free(url);
     }
 
     void WebView::LoadRequest(

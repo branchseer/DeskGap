@@ -88,7 +88,10 @@ namespace DeskGap {
     }
 
     void BrowserWindowWrap::Destroy(const Napi::CallbackInfo& info) {
-        UISyncDelayable(info.Env(), [this] { this->browser_window_->Destroy(); });
+        UISyncDelayable(info.Env(), [this] { 
+            this->browser_window_->Destroy();
+            this->browser_window_.reset();
+        });
     }
 
     void BrowserWindowWrap::Close(const Napi::CallbackInfo& info) {

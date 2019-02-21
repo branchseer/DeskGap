@@ -196,9 +196,7 @@ namespace DeskGap {
             impl_->buttonPressEventConnection,
             impl_->buttonReleaseEventConnection
         }) {
-            if (connection > 0) {
-                g_signal_handler_disconnect(impl_->gtkWebView, connection);
-            }
+            g_signal_handler_disconnect(impl_->gtkWebView, connection);
         }
 
         WebKitUserContentManager* manager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
@@ -206,9 +204,7 @@ namespace DeskGap {
             impl_->scriptStringMessageConnection,
             impl_->scriptWindowDragConnection
         }) {
-            if (connection > 0) {
-                g_signal_handler_disconnect(manager, connection);
-            }
+            g_signal_handler_disconnect(manager, connection);
         }
 
         g_object_unref(impl_->gtkWebView);

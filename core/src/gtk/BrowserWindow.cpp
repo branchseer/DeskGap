@@ -98,8 +98,7 @@ namespace DeskGap {
 
     void BrowserWindow::Center() {
         GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(impl_->gtkWindow));
-        GdkWindow *gdkWindow = gtk_widget_get_window(GTK_WIDGET(impl_->gtkWindow));
-        GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, gdkWindow);
+        GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
 
         GdkRectangle geometry;
         gdk_monitor_get_geometry(monitor, &geometry);

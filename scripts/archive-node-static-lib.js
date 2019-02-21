@@ -8,10 +8,23 @@ const archive = require('archiver')('zip', {
     throw err;
 });
 
-archive.glob('out/Release/*.a', {
-    cwd: path.resolve(__dirname, '..', 'deps', 'node'),
-    ignore: ['gtest', 'v8_nosnapshot']
-});
+const nodeSrcFolder = path.resolve(__dirname, '..', 'deps', 'node');
+
+switch (process.platform) {
+case 'darwin':
+	archive.glob('out/Release/*.a', {
+	    cwd: nodeSrcFolder,
+	});
+	break;
+case 'linux':
+	archive.glob('out/Release/obj.target/**/@(*.a|*.o)', {
+	    cwd: nodeSrcFolder,
+	});
+	break;
+default:
+	console.error(`Unsupported platform: ${process.platform}`);
+	process.exit(1);
+}
 
 archive.pipe(fs.createWriteStream(path.resolve(__dirname, '..', 'deps', 'node.zip')));
 archive.finalize();

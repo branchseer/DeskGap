@@ -20,7 +20,3 @@ markdown_extensions:
   - codehilite
   - toc:
       permalink: True
-
-google_analytics:
-  - 'UA-123589308-2'
-  - 'auto'

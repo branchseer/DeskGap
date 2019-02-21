@@ -151,7 +151,6 @@ namespace DeskGap {
     }
 
     void WebView::Impl::HandleScriptWindowDrag(WebKitUserContentManager*, WebKitJavascriptResult*, WebView* webView) {
-        printf("drag?\n");
         std::optional<GdkEventButton>& lastLeftMouseDownEvent = webView->impl_->lastLeftMouseDownEvent;
         if (!lastLeftMouseDownEvent.has_value()) return;
 

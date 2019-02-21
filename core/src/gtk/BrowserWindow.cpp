@@ -18,11 +18,17 @@ namespace DeskGap {
 
         GtkWindow* gtkWindow = GTK_WINDOW(g_object_ref_sink(gtk_window_new(GTK_WINDOW_TOPLEVEL)));
 
-        gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(webView.impl_->gtkWebView));
+        GtkBox* gtkBox = GTK_BOX(g_object_ref_sink(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0)));
+        gtk_widget_show(GTK_WIDGET(gtkBox));
+
+        gtk_container_add(GTK_CONTAINER(gtkBox), GTK_WIDGET(webView.impl_->gtkWebView));
+        gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(gtkBox));
 
         impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::HandleDeleteEvent), this);
-        
+
         impl_->gtkWindow = gtkWindow;
+        impl_->gtkBox = gtkBox;
+        impl_->menuBar = nullptr;
     }
 
     BrowserWindow::~BrowserWindow() {
@@ -31,6 +37,7 @@ namespace DeskGap {
                 g_signal_handler_disconnect(impl_->gtkWindow, connection);
             }
         }
+        g_object_unref(impl_->gtkBox);
         g_object_unref(impl_->gtkWindow);
     }
 
@@ -110,7 +117,18 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
-        
+        if (impl_->menuBar != nullptr) {
+            //Remove existing menubar
+            gtk_container_remove(GTK_CONTAINER(impl_->gtkBox), impl_->menuBar);
+            impl_->menuBar = nullptr;
+        }
+
+        if (menu != nullptr) {
+            impl_->menuBar = GTK_WIDGET(menu->impl_->gtkMenuShell);
+            gtk_box_pack_start(impl_->gtkBox, impl_->menuBar, FALSE, FALSE, 0);
+            gtk_box_reorder_child(impl_->gtkBox, impl_->menuBar, 0);
+        }
+
     }
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {
@@ -124,7 +142,6 @@ namespace DeskGap {
         }
     }
 
-
     void BrowserWindow::Destroy() {
         gtk_widget_destroy(GTK_WIDGET(impl_->gtkWindow));
     }
@@ -135,5 +152,4 @@ namespace DeskGap {
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
         
     }
-
 }

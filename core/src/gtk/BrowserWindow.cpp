@@ -26,8 +26,8 @@ namespace DeskGap {
     }
 
     BrowserWindow::~BrowserWindow() {
-        for (gulong connection: { impl_->deleteEventConnection }) {
-            if (connection > 0) {
+        if (gtk_widget_in_destruction(GTK_WIDGET(impl_->gtkWindow))) {
+            for (gulong connection: { impl_->deleteEventConnection }) {
                 g_signal_handler_disconnect(impl_->gtkWindow, connection);
             }
         }
@@ -127,9 +127,7 @@ namespace DeskGap {
 
 
     void BrowserWindow::Destroy() {
-        g_signal_handler_disconnect(impl_->gtkWindow, impl_->deleteEventConnection);
-        impl_->deleteEventConnection = 0;
-        gtk_window_close(impl_->gtkWindow);
+        gtk_widget_destroy(GTK_WIDGET(impl_->gtkWindow));
     }
     void BrowserWindow::Close() {
         gtk_window_close(impl_->gtkWindow);

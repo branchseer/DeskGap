@@ -9,6 +9,9 @@
 namespace DeskGap {
     struct BrowserWindow::Impl {
     	GtkWindow* gtkWindow;
+    	GtkBox* gtkBox;
+    	GtkWidget* menuBar;
+
     	BrowserWindow::EventCallbacks callbacks;
     	gulong deleteEventConnection;
     	static bool HandleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow*);

@@ -6,11 +6,15 @@
 
 namespace DeskGap {
     struct MenuItem::Impl {
-    	GtkMenuItem* gtkMenuItem;
+        GtkMenuItem* gtkMenuItem;
+        MenuItem::EventCallbacks callbacks;
+
+        gulong activateConnection;
+        static void HandleActivate(GtkMenuItem*, MenuItem*);
     };
     
     struct Menu::Impl {
-
+        GtkMenuShell* gtkMenuShell;
     };
 }
 

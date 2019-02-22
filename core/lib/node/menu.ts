@@ -96,8 +96,8 @@ export class Menu {
         this.createdNativeTypeCode_ = type;
         this.native_ = new MenuNative(type, this.nativeCallbacks_);
         for (const item of this.items) {
-            (<any>item).createNative_();
-            this.native_.append((<any>item).native_);
+            item['createNative_']();
+            this.native_.append(item['native_']);
         }
     }
 

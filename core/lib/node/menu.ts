@@ -56,7 +56,6 @@ export class Menu {
             location = [fullOptions.x, fullOptions.y];
         }
 
-
         if (fullOptions.window == null) {
             return;
         }

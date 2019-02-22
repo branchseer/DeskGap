@@ -25,6 +25,7 @@ export class WebView extends EventEmitter<WebViewEvents> {
 
     /** @internal */ private asyncNodeObjectsById_ = new Map<number, any>();
     /** @internal */ private asyncNodeValuesByName_ = new Map<string, any>();
+    /** @internal */ private isDevToolsEnabled_: boolean = false;
 
     constructor(callbacks: { onPageTitleUpdated: (title: string) => void, onReadyToShow: () => void }) {
         super();
@@ -97,6 +98,11 @@ export class WebView extends EventEmitter<WebViewEvents> {
 
     setDevToolsEnabled(enabled: boolean): void {
         this.native_.setDevToolsEnabled(enabled);
+        this.isDevToolsEnabled_ = enabled;
+    }
+    
+    isDevToolsEnabled(): boolean {
+        return this.isDevToolsEnabled_ ;
     }
     
     reload(): void {

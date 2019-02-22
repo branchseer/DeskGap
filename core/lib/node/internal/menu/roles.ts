@@ -111,6 +111,10 @@ const roleDefaults: Record<string, Partial<MenuItemConstructorOptions>> = {
       label: 'Stop Speaking'
     },
     toggledevtools: {
+      label: "Enable/Disable Developer Tools",
+      click(item, window) {
+        window.webView.setDevToolsEnabled(!window.webView.isDevToolsEnabled());
+      },
       accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
     },
     togglefullscreen: {

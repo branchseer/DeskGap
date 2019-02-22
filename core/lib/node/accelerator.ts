@@ -11,7 +11,12 @@ const acceleratorTokenAliases = {
 
 acceleratorTokenAliases['commandorcontrol'] = acceleratorTokenAliases['cmdorctrl'];
 
-export const parseAcceleratorToTokens = (expr: string): string[] => expr.split('+').map(t => {
-    let token = t.trim().toLowerCase();
-    return acceleratorTokenAliases[token] || token;
-});
+export const parseAcceleratorToTokens = (expr: string): string[] => {
+	const tokens: string[] = [];
+	for (let token of expr.split('+')) {
+		token = token.trim().toLowerCase();
+		if (token.length === 0) continue;
+		tokens.push(acceleratorTokenAliases[token] || token);
+	}
+	return tokens;
+}

@@ -117,18 +117,23 @@ namespace DeskGap {
 
     WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         impl_->callbacks = std::move(callbacks);
+        {
+            WebKitWebContext* context = webkit_web_context_new();
+            webkit_web_context_register_uri_scheme(
+                context,
+                localURLScheme, Impl::HandleLocalFileUriSchemeRequest,
+                this, nullptr
+            );
+
+            impl_->gtkWebView = WEBKIT_WEB_VIEW(g_object_ref_sink(webkit_web_view_new_with_context(context)));
+            g_object_unref(context);
+        }
+
+        {
+            WebKitSettings* settings = webkit_web_view_get_settings(impl_->gtkWebView);
+            webkit_settings_set_javascript_can_access_clipboard(settings, true);
+        }
         
-        WebKitWebContext* context = webkit_web_context_new();
-        webkit_web_context_register_uri_scheme(
-            context,
-            localURLScheme, Impl::HandleLocalFileUriSchemeRequest,
-            this, nullptr
-        );
-
-        impl_->gtkWebView = WEBKIT_WEB_VIEW(g_object_ref_sink(webkit_web_view_new_with_context(context)));
-        g_object_unref(context);
-
-        WebKitUserContentManager* manager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
 
         static gchar* preloadScript = nullptr;
         if (preloadScript == nullptr) {
@@ -155,32 +160,36 @@ namespace DeskGap {
             }
         }
 
+        {
+            WebKitUserContentManager* manager = webkit_web_view_get_user_content_manager(impl_->gtkWebView);
 
+            impl_->scriptWindowDragConnection = g_signal_connect(
+                manager,
+                "script-message-received::windowDrag",
+                G_CALLBACK(Impl::HandleScriptWindowDrag),
+                this
+            );
+            webkit_user_content_manager_register_script_message_handler(manager, "windowDrag");
 
-        impl_->scriptWindowDragConnection = g_signal_connect(
-            manager,
-            "script-message-received::windowDrag",
-            G_CALLBACK(Impl::HandleScriptWindowDrag),
-            this
-        );
-        webkit_user_content_manager_register_script_message_handler(manager, "windowDrag");
+            impl_->scriptStringMessageConnection = g_signal_connect(
+                manager,
+                "script-message-received::stringMessage",
+                G_CALLBACK(Impl::HandleScriptStringMessage),
+                this
+            );
+            webkit_user_content_manager_register_script_message_handler(manager, "stringMessage");
 
-        impl_->scriptStringMessageConnection = g_signal_connect(
-            manager,
-            "script-message-received::stringMessage",
-            G_CALLBACK(Impl::HandleScriptStringMessage),
-            this
-        );
-        webkit_user_content_manager_register_script_message_handler(manager, "stringMessage");
-
-        WebKitUserScript* preloadUserScript = webkit_user_script_new(
-            preloadScript, 
-            WEBKIT_USER_CONTENT_INJECT_TOP_FRAME,
-            WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START,
-            nullptr, nullptr
-        );
-        webkit_user_content_manager_add_script(manager, preloadUserScript);
-        webkit_user_script_unref(preloadUserScript);
+            {
+                WebKitUserScript* preloadUserScript = webkit_user_script_new(
+                    preloadScript, 
+                    WEBKIT_USER_CONTENT_INJECT_TOP_FRAME,
+                    WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START,
+                    nullptr, nullptr
+                );
+                webkit_user_content_manager_add_script(manager, preloadUserScript);
+                webkit_user_script_unref(preloadUserScript);
+            }
+        }
 
         gtk_widget_show(GTK_WIDGET(impl_->gtkWebView));
 

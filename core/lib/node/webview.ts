@@ -96,6 +96,11 @@ export class WebView extends EventEmitter<WebViewEvents> {
         this.native_.evaluateJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(channelName)}, ${JSON.stringify(args)})`, null);
     }
 
+    executeJavaScript(code: string): void {
+        this.native_.evaluateJavaScript(code, null);
+    }
+
+
     setDevToolsEnabled(enabled: boolean): void {
         this.native_.setDevToolsEnabled(enabled);
         this.isDevToolsEnabled_ = enabled;

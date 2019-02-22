@@ -1,12 +1,17 @@
 import * as AppModule from '../../app';
 import appInfo from '../app-info';
+import { MenuItemConstructorOptions } from '../../menu'
+import { BrowserWindow } from '../../browser-window'
 
 const lazyApp = (): AppModule.App => {
   const theAppModule = require('../../app') as typeof AppModule;
   return theAppModule.default;
 };
 
-import { MenuItemConstructorOptions } from '../../menu'
+const execCommand = (window: BrowserWindow, command: string): void => {
+  window.webView.executeJavaScript(`document.execCommand('${command}')`);
+}
+
 
 export type Role = 'about' | 'close' | 'copy' | 'cut' | 'delete' | 'front' | 'help' | 'hide' |
     'hideothers' | 'minimize' | 'paste' | 'pasteAndMatchStyle' | 'quit' | 'redo' | 'reload' | 
@@ -30,10 +35,16 @@ const roleDefaults: Record<string, Partial<MenuItemConstructorOptions>> = {
     copy: {
       label: 'Copy',
       accelerator: 'CommandOrControl+C',
+      click(item, window) {
+        execCommand(window, 'copy');
+      }
     },
     cut: {
       label: 'Cut',
       accelerator: 'CommandOrControl+X',
+      click(item, window) {
+        execCommand(window, 'cut');
+      }
     },
     delete: {
       label: 'Delete',
@@ -62,6 +73,9 @@ const roleDefaults: Record<string, Partial<MenuItemConstructorOptions>> = {
     paste: {
       label: 'Paste',
       accelerator: 'CommandOrControl+V',
+      click(item, window) {
+        execCommand(window, 'paste');
+      }
     },
     pasteandmatchstyle: {
       label: 'Paste and Match Style',
@@ -83,6 +97,9 @@ const roleDefaults: Record<string, Partial<MenuItemConstructorOptions>> = {
     redo: {
       label: 'Redo',
       accelerator: process.platform === 'win32' ? 'Control+Y' : 'Shift+CommandOrControl+Z',
+      click(item, window) {
+        execCommand(window, 'redo');
+      }
     },
     reload: {
       label: 'Reload',
@@ -94,6 +111,9 @@ const roleDefaults: Record<string, Partial<MenuItemConstructorOptions>> = {
     selectall: {
       label: 'Select All',
       accelerator: 'CommandOrControl+A',
+      click(item, window) {
+        execCommand(window, 'selectAll');
+      }
     },
     services: {
       label: 'Services'
@@ -124,6 +144,9 @@ const roleDefaults: Record<string, Partial<MenuItemConstructorOptions>> = {
     undo: {
       label: 'Undo',
       accelerator: 'CommandOrControl+Z',
+      click(item, window) {
+        execCommand(window, 'undo');
+      }
     },
     unhide: {
       label: 'Show All'

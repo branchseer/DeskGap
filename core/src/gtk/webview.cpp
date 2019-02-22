@@ -10,11 +10,49 @@
 #include "../lib_path.h"
 #include "./glib_exception.h"
 
+#include <unordered_set>
+
 
 namespace fs = std::filesystem;
 
 namespace {
     const gchar* localURLScheme = "deskgap-local";
+    gboolean HandleContextMenu(WebKitWebView*, WebKitContextMenu *menu, GdkEvent*, WebKitHitTestResult*, gpointer) {
+        static const std::unordered_set<WebKitContextMenuAction> kActionsToBeDeleted {
+            WEBKIT_CONTEXT_MENU_ACTION_OPEN_LINK,
+            WEBKIT_CONTEXT_MENU_ACTION_OPEN_LINK_IN_NEW_WINDOW,
+            WEBKIT_CONTEXT_MENU_ACTION_DOWNLOAD_LINK_TO_DISK,
+            WEBKIT_CONTEXT_MENU_ACTION_COPY_LINK_TO_CLIPBOARD,
+            WEBKIT_CONTEXT_MENU_ACTION_OPEN_IMAGE_IN_NEW_WINDOW,
+            WEBKIT_CONTEXT_MENU_ACTION_DOWNLOAD_IMAGE_TO_DISK,
+            WEBKIT_CONTEXT_MENU_ACTION_COPY_IMAGE_TO_CLIPBOARD,
+            WEBKIT_CONTEXT_MENU_ACTION_COPY_IMAGE_URL_TO_CLIPBOARD,
+            WEBKIT_CONTEXT_MENU_ACTION_OPEN_FRAME_IN_NEW_WINDOW,
+            WEBKIT_CONTEXT_MENU_ACTION_GO_BACK,
+            WEBKIT_CONTEXT_MENU_ACTION_GO_FORWARD,
+            WEBKIT_CONTEXT_MENU_ACTION_STOP,
+            WEBKIT_CONTEXT_MENU_ACTION_RELOAD,
+            WEBKIT_CONTEXT_MENU_ACTION_OPEN_VIDEO_IN_NEW_WINDOW,
+            WEBKIT_CONTEXT_MENU_ACTION_OPEN_AUDIO_IN_NEW_WINDOW,
+            WEBKIT_CONTEXT_MENU_ACTION_COPY_VIDEO_LINK_TO_CLIPBOARD,
+            WEBKIT_CONTEXT_MENU_ACTION_COPY_AUDIO_LINK_TO_CLIPBOARD,
+            WEBKIT_CONTEXT_MENU_ACTION_DOWNLOAD_VIDEO_TO_DISK,
+            WEBKIT_CONTEXT_MENU_ACTION_DOWNLOAD_AUDIO_TO_DISK,
+        };
+
+        guint itemCount = webkit_context_menu_get_n_items(menu);
+        for (gint i = itemCount - 1; i >= 0; --i) {
+            WebKitContextMenuItem* item = webkit_context_menu_get_item_at_position(menu, i);
+            WebKitContextMenuAction action = webkit_context_menu_item_get_stock_action(item);
+            if (kActionsToBeDeleted.find(action) != kActionsToBeDeleted.end()) {
+                webkit_context_menu_remove(menu, item);
+            }
+        }
+        if (webkit_context_menu_get_n_items(menu) == 0) {
+            return TRUE;
+        }
+        return FALSE;
+    }
 }
 
 namespace DeskGap {
@@ -145,9 +183,21 @@ namespace DeskGap {
         webkit_user_script_unref(preloadUserScript);
 
         gtk_widget_show(GTK_WIDGET(impl_->gtkWebView));
-        impl_->loadChangedConnection = g_signal_connect(impl_->gtkWebView, "load-changed", G_CALLBACK(Impl::HandleLoadChanged), this);
-        impl_->buttonPressEventConnection = g_signal_connect(impl_->gtkWebView, "button-press-event", G_CALLBACK(Impl::HandleButtonPressEvent), this);
-        impl_->buttonReleaseEventConnection = g_signal_connect(impl_->gtkWebView, "button-release-event", G_CALLBACK(Impl::HandleButtonReleaseEvent), this);
+
+        g_signal_connect(impl_->gtkWebView, "context-menu", G_CALLBACK(HandleContextMenu), nullptr);
+
+        impl_->loadChangedConnection = g_signal_connect(
+            impl_->gtkWebView, "load-changed", 
+            G_CALLBACK(Impl::HandleLoadChanged), this
+        );
+        impl_->buttonPressEventConnection = g_signal_connect(
+            impl_->gtkWebView, "button-press-event",
+            G_CALLBACK(Impl::HandleButtonPressEvent), this
+        );
+        impl_->buttonReleaseEventConnection = g_signal_connect(
+            impl_->gtkWebView, "button-release-event",
+            G_CALLBACK(Impl::HandleButtonReleaseEvent), this
+        );
     }
 
     void WebView::Impl::HandleScriptWindowDrag(WebKitUserContentManager*, WebKitJavascriptResult*, WebView* webView) {
@@ -252,7 +302,7 @@ namespace DeskGap {
 
     void WebView::SetDevToolsEnabled(bool enabled) {
         WebKitSettings* settings = webkit_web_view_get_settings(impl_->gtkWebView);
-        webkit_settings_set_enable_developer_extras(settings, true);
+        webkit_settings_set_enable_developer_extras(settings, enabled);
     }
 
     void WebView::Reload() {

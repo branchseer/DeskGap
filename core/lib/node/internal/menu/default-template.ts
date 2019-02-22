@@ -3,7 +3,7 @@ import shell from '../../shell';
 
 /** @internal */
 const template: Array<Partial<MenuItemConstructorOptions> | null> = [
-    process.platform === 'darwin' ? {
+    process.platform !== 'win32' ? {
       role: 'editMenu'
     }: null,
     {

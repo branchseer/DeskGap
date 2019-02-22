@@ -10,7 +10,15 @@ namespace DeskGap {
     struct BrowserWindow::Impl {
     	GtkWindow* gtkWindow;
     	GtkBox* gtkBox;
-    	GtkWidget* menuBar;
+
+    	struct AccelGroupMenu
+    	{
+    		GtkAccelGroup* accelGroup;
+    		GtkWidget* menuBar;
+    		AccelGroupMenu(const Menu& menu);
+    		~AccelGroupMenu();
+    	};
+    	std::optional<AccelGroupMenu> accelGroupMenu;
 
     	BrowserWindow::EventCallbacks callbacks;
     	gulong deleteEventConnection;

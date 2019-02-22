@@ -31,10 +31,8 @@ namespace DeskGap {
 		gulong scriptStringMessageConnection;
 		static void HandleScriptStringMessage(WebKitUserContentManager*, WebKitJavascriptResult*, WebView*);
 		
-		gulong scriptStringMessageConnection;
-		static void HandleScriptStringMessage(WebKitUserContentManager*, WebKitJavascriptResult*, WebView*);
-
-		//static void HandleJavaScriptFinished();
+		gulong titleChangedConnection;
+		static void HandleTitleChanged(GObject*, GParamSpec* pspec, WebView*);
     };
 }
 

@@ -279,6 +279,9 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         if (this.hasBeenShown_) {
             this.actuallySetTheMenu_();
         }
+        if (this.menu_ != null) {
+            this.menu_['setWindow_'](this);
+        }
     }
 
     /** @internal */ 

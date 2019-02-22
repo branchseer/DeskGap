@@ -100,6 +100,17 @@ export class Menu {
             this.native_.append((<any>item).native_);
         }
     }
+
+    
+    /** @internal */ 
+    private setWindow_(window: BrowserWindow | null) {
+        for (const item of this.items) {
+            item['window_'] = window;
+            if (item.submenu != null) {
+                item.submenu.setWindow_(window);
+            }
+        }
+    }
 };
 
 export class MenuItem {
@@ -112,6 +123,7 @@ export class MenuItem {
     /** @internal */ private checked_: boolean;
     /** @internal */ private accelerator_: string;
     /** @internal */ private role_: string; 
+    /** @internal */ private window_: BrowserWindow | null; 
 
     constructor(options: Partial<MenuItemConstructorOptions> = {}) {
         if (options.role != null) {
@@ -191,7 +203,7 @@ export class MenuItem {
                     this.checked = !this.checked;
                 }
                 if (this.click != null) {
-                    this.click(this, globals.focusedBrowserWindow);
+                    this.click(this, this.window_ || globals.focusedBrowserWindow);
                 }
             }
         });

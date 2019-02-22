@@ -12,6 +12,14 @@ namespace DeskGap {
         return true;
     }
 
+    BrowserWindow::Impl::AccelGroupMenu::AccelGroupMenu(const Menu& menu): menuBar(GTK_WIDGET(menu.impl_->gtkMenuShell)) {
+        accelGroup = gtk_accel_group_new();
+        menu.impl_->SetAccelGroup(accelGroup);
+    }
+    BrowserWindow::Impl::AccelGroupMenu::~AccelGroupMenu() {
+        g_object_unref(accelGroup);
+    }
+
     
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         impl_->callbacks = std::move(callbacks);
@@ -28,7 +36,6 @@ namespace DeskGap {
 
         impl_->gtkWindow = gtkWindow;
         impl_->gtkBox = gtkBox;
-        impl_->menuBar = nullptr;
     }
 
     BrowserWindow::~BrowserWindow() {
@@ -117,16 +124,17 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
-        if (impl_->menuBar != nullptr) {
-            //Remove existing menubar
-            gtk_container_remove(GTK_CONTAINER(impl_->gtkBox), impl_->menuBar);
-            impl_->menuBar = nullptr;
+        if (impl_->accelGroupMenu.has_value()) {
+            gtk_container_remove(GTK_CONTAINER(impl_->gtkBox), impl_->accelGroupMenu->menuBar);
+            gtk_window_remove_accel_group(impl_->gtkWindow, impl_->accelGroupMenu->accelGroup);
+            impl_->accelGroupMenu.reset();
         }
 
         if (menu != nullptr) {
-            impl_->menuBar = GTK_WIDGET(menu->impl_->gtkMenuShell);
-            gtk_box_pack_start(impl_->gtkBox, impl_->menuBar, FALSE, FALSE, 0);
-            gtk_box_reorder_child(impl_->gtkBox, impl_->menuBar, 0);
+            impl_->accelGroupMenu.emplace(*menu);
+            gtk_window_add_accel_group(impl_->gtkWindow, impl_->accelGroupMenu->accelGroup);
+            gtk_box_pack_start(impl_->gtkBox, impl_->accelGroupMenu->menuBar, FALSE, FALSE, 0);
+            gtk_box_reorder_child(impl_->gtkBox, impl_->accelGroupMenu->menuBar, 0);
         }
 
     }

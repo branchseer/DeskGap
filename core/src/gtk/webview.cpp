@@ -207,6 +207,16 @@ namespace DeskGap {
             impl_->gtkWebView, "button-release-event",
             G_CALLBACK(Impl::HandleButtonReleaseEvent), this
         );
+        impl_->titleChangedConnection = g_signal_connect(
+            impl_->gtkWebView, "notify::title",
+            G_CALLBACK(Impl::HandleTitleChanged), this
+        );
+    }
+
+    void WebView::Impl::HandleTitleChanged(GObject*, GParamSpec*, WebView* webView) {
+        webView->impl_->callbacks.onPageTitleUpdated(
+            webkit_web_view_get_title(webView->impl_->gtkWebView)
+        );
     }
 
     void WebView::Impl::HandleScriptWindowDrag(WebKitUserContentManager*, WebKitJavascriptResult*, WebView* webView) {
@@ -252,7 +262,8 @@ namespace DeskGap {
         for (gulong connection: { 
             impl_->loadChangedConnection,
             impl_->buttonPressEventConnection,
-            impl_->buttonReleaseEventConnection
+            impl_->buttonReleaseEventConnection,
+            impl_->titleChangedConnection
         }) {
             g_signal_handler_disconnect(impl_->gtkWebView, connection);
         }

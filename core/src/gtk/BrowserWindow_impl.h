@@ -21,8 +21,22 @@ namespace DeskGap {
     	std::optional<AccelGroupMenu> accelGroupMenu;
 
     	BrowserWindow::EventCallbacks callbacks;
-    	gulong deleteEventConnection;
-    	static bool HandleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow*);
+
+        gulong deleteEventConnection;
+        static bool HandleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow*);
+
+        gulong focusInEventConnection;
+        static bool HandleFocusInEvent(GtkWidget*, GdkEvent*, BrowserWindow*);
+
+        gulong focusOutEventConnection;
+        static bool HandleFocusOutEvent(GtkWidget*, GdkEvent*, BrowserWindow*);
+
+        gulong configureEventConnection;
+        static bool HandleConfigureEvent(GtkWidget*, GdkEventConfigure*, BrowserWindow*);
+        struct Rect {
+            gint x, y, width, height;
+        };
+        std::optional<Rect> lastRect;
     };
 }
 

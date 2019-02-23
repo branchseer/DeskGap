@@ -17,7 +17,7 @@ namespace DeskGap {
     struct Dialog::Impl {
         static DialogResult PresentDialog(std::optional<std::reference_wrapper<BrowserWindow>> browserWindow, CommonDialog^ dialog) {
             if (browserWindow.has_value()) {
-                Form^ form = browserWindow.value()->impl_->form;
+                Form^ form = browserWindow->get().impl_->form;
                 return dialog->ShowDialog(form);
             }
             else {

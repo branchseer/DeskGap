@@ -1,7 +1,7 @@
 #include <filesystem>
+#include <unordered_set>
 
 #include <gtk/gtk.h>
-#include <fstream>
 
 #include "../webview/webview.h"
 #include "webview_impl.h"
@@ -9,8 +9,6 @@
 #include "../util/mime.h"
 #include "../lib_path.h"
 #include "./glib_exception.h"
-
-#include <unordered_set>
 
 
 namespace fs = std::filesystem;

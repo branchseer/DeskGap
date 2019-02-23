@@ -13,6 +13,7 @@ const spawnDeskGapAsync = (entryPath, args) => {
     const spawnedDeskGap = spawn(process.argv0, args, {
         windowsHide: false,
         env: {
+            ...process.env,
             'DESKGAP_ENTRY': entryPath
         }
     });

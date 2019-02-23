@@ -23,11 +23,15 @@ exports.runDeskGap = (distPath, entryPath, args) => {
     else if (process.platform === 'win32') {
         executablePath = path.join(distPath, 'DeskGap/DeskGap.exe');
     }
+    else if (process.platform === 'linux') {
+        executablePath = path.join(distPath, 'DeskGap/DeskGap');
+    }
 
     const deskgapProcess = spawn(executablePath, args, {
         stdio: 'inherit',
         windowsHide: false,
         env: {
+            ...process.env,
             'DESKGAP_ENTRY': path.resolve(entryPath)
         }
     });

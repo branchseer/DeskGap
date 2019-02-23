@@ -6,7 +6,8 @@ Napi::Object DeskGap::ShellObject(const Napi::Env& env) {
     Napi::Object shellObject = Napi::Object::New(env);
     shellObject.Set("openExternal",  Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
         bool success;
-        UISync(info.Env(), [&success, urlString = info[0].As<Napi::String>()]() {
+        std::string urlString = info[0].As<Napi::String>();
+        UISync(info.Env(), [&]() {
         	success = Shell::OpenExternal(urlString);
         });
         return Napi::Boolean::New(info.Env(), success);

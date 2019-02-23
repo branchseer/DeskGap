@@ -5,11 +5,40 @@
 #include "./glib_exception.h"
 
 namespace DeskGap {
-
+    int i = 0;
 
     bool BrowserWindow::Impl::HandleDeleteEvent(GtkWidget*, GdkEvent*, BrowserWindow* window) {
         window->impl_->callbacks.onClose();
         return true;
+    }
+
+    bool BrowserWindow::Impl::HandleFocusInEvent(GtkWidget*, GdkEvent*, BrowserWindow* window) {
+        window->impl_->callbacks.onFocus();
+        return FALSE;
+    }
+
+    bool BrowserWindow::Impl::HandleFocusOutEvent(GtkWidget*, GdkEvent*, BrowserWindow* window) {
+        window->impl_->callbacks.onBlur();
+        return FALSE;
+    }
+
+    bool BrowserWindow::Impl::HandleConfigureEvent(GtkWidget*, GdkEventConfigure* eventConfigure, BrowserWindow* window) {
+        std::optional<Rect>& lastRect = window->impl_->lastRect;
+        const BrowserWindow::EventCallbacks& callbacks = window->impl_->callbacks;
+        if (!lastRect.has_value()) {
+            callbacks.onResize();
+            callbacks.onMove();
+        }
+        else {
+            if (eventConfigure->x != lastRect->x || eventConfigure->y != lastRect->y) {
+                callbacks.onMove();
+            }
+            if (eventConfigure->width != lastRect->width || eventConfigure->height != lastRect->height) {
+                callbacks.onResize();
+            }
+        }
+        lastRect.emplace(Rect { eventConfigure->x, eventConfigure->y, eventConfigure->width, eventConfigure->height });
+        return FALSE;
     }
 
     BrowserWindow::Impl::AccelGroupMenu::AccelGroupMenu(const Menu& menu): menuBar(GTK_WIDGET(menu.impl_->gtkMenuShell)) {
@@ -33,6 +62,9 @@ namespace DeskGap {
         gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(gtkBox));
 
         impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::HandleDeleteEvent), this);
+        impl_->focusInEventConnection = g_signal_connect(gtkWindow, "focus-in-event", G_CALLBACK(Impl::HandleFocusInEvent), this);
+        impl_->focusOutEventConnection = g_signal_connect(gtkWindow, "focus-out-event", G_CALLBACK(Impl::HandleFocusOutEvent), this);
+        impl_->configureEventConnection = g_signal_connect(gtkWindow, "configure-event", G_CALLBACK(Impl::HandleConfigureEvent), this);
 
         impl_->gtkWindow = gtkWindow;
         impl_->gtkBox = gtkBox;
@@ -40,7 +72,12 @@ namespace DeskGap {
 
     BrowserWindow::~BrowserWindow() {
         if (gtk_widget_in_destruction(GTK_WIDGET(impl_->gtkWindow))) {
-            for (gulong connection: { impl_->deleteEventConnection }) {
+            for (gulong connection: { 
+                impl_->deleteEventConnection,
+                impl_->focusInEventConnection,
+                impl_->focusOutEventConnection,
+                impl_->configureEventConnection
+            }) {
                 g_signal_handler_disconnect(impl_->gtkWindow, connection);
             }
         }

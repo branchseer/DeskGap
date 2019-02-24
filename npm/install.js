@@ -15,15 +15,16 @@ if (process.platform === 'darwin') {
 else if (process.platform === 'win32') {
     deskGapPlatform = 'win32-ia32';
 }
+else if (process.platform === 'linux') {
+    deskGapPlatform = 'linux-x64';
+}
 
 if (deskGapPlatform == null) {
     console.error('DeskGap doesn’t support your platform: ' + process.platform);
     process.exit(1);
 }
 
-
-const distFiles = require('./dist_files');
-const distZipFile = distFiles[deskGapPlatform];
+const distZipFile = require('./dist_files/' + deskGapPlatform);
 const distZipFilePath = path.join(__dirname, distZipFile.filename);
 const downloadURL = "https://dl.bintray.com/patr0nus/DeskGap/" + distZipFile.filename;
 

@@ -58,7 +58,7 @@ namespace DeskGap {
         GtkBox* gtkBox = GTK_BOX(g_object_ref_sink(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0)));
         gtk_widget_show(GTK_WIDGET(gtkBox));
 
-        gtk_container_add(GTK_CONTAINER(gtkBox), GTK_WIDGET(webView.impl_->gtkWebView));
+        gtk_box_pack_start(gtkBox, GTK_WIDGET(webView.impl_->gtkWebView), true, true, 0);
         gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(gtkBox));
 
         impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::HandleDeleteEvent), this);

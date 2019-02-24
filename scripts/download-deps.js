@@ -15,7 +15,7 @@ process.on('unhandledRejection', e => { throw e });
         const nugetPackage = 'webview_nuget.zip';
 
         await downloadFile(
-            'https://www.nuget.org/api/v2/package/Microsoft.Toolkit.Forms.UI.Controls.WebView/5.0.1',
+            'https://www.nuget.org/api/v2/package/Microsoft.Toolkit.Forms.UI.Controls.WebView/5.1.0',
             nugetPackage
         );
 

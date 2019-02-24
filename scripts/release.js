@@ -37,12 +37,15 @@ function build() {
     
     const cmakeConfigureCommands = {
         "darwin": `cmake -D CMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.10 -G Xcode ${JSON.stringify(projectFolder)}`,
-        "win32": `cmake -G "Visual Studio 15 2017" ${JSON.stringify(projectFolder)}`
+        "win32": `cmake -G "Visual Studio 15 2017" ${JSON.stringify(projectFolder)}`,
+        "linux": `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ${JSON.stringify(projectFolder)}`
     };
+
+    const cmakeBuildCommand = (process.platform === 'linux' ? 'make': 'cmake --build . --target ALL_BUILD --config Release');
     
     runCommands([
         cmakeConfigureCommands[process.platform],
-        'cmake --build . --target ALL_BUILD --config Release'
+        cmakeBuildCommand
     ], buildFolder);
     
     
@@ -74,16 +77,16 @@ function archive() {
             ignore: ['.DS_Store']
         });
     }
-    else if (process.platform === 'win32') {
+    else {
         archive.glob('DeskGap/**', {
             cwd: buildReleaseFolder,
             ignore: ['.DS_Store']
         });
-        
-        const vcRedisDllFolder = 'SysWOW64';
-    
-        for (const vcRedisDll of ['vcruntime140.dll', 'msvcp140.dll']) {
-            archive.file(path.join(process.env.SYSTEMROOT, vcRedisDllFolder, vcRedisDll), { name: 'DeskGap/' + vcRedisDll });
+        if (process.platform === 'win32') {
+            const vcRedisDllFolder = 'SysWOW64';
+            for (const vcRedisDll of ['vcruntime140.dll', 'msvcp140.dll']) {
+                archive.file(path.join(process.env.SYSTEMROOT, vcRedisDllFolder, vcRedisDll), { name: 'DeskGap/' + vcRedisDll });
+            }
         }
     }
     
@@ -92,19 +95,16 @@ function archive() {
         if (data) {
             const sha256hex = data.toString('hex');
     
-            const npmDistFilesJSONPath = path.join(npmFolder, 'dist_files.json');
-    
-            let npmDistFilesJSON = {};
-            try {
-                npmDistFilesJSON = require(npmDistFilesJSONPath);
-            }
-            catch (e) { }
-            npmDistFilesJSON[platformAndArch] = {
-                filename: zipFileName,
-                sha256: sha256hex
-            };
-    
-            fs.writeFileSync(npmDistFilesJSONPath, JSON.stringify(npmDistFilesJSON), 'utf8');
+            const npmDistFileFolder = path.join(npmFolder, 'dist_files');
+            fse.mkdirpSync(npmDistFileFolder);
+            fs.writeFileSync(
+                path.join(npmDistFileFolder, platformAndArch + ".json"),
+                JSON.stringify({
+                    filename: zipFileName,
+                    sha256: sha256hex
+                }),
+                'utf8'
+            );
         }
     });
     archive.pipe(fs.createWriteStream(zipFullPath));

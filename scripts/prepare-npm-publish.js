@@ -10,7 +10,7 @@ const coreFolder = path.join(projectFolder, 'core');
 
 clean();
 build();
-execSync('npm publish --dry-run .', { stdio: 'inherit', cwd: npmFolder });
+execSync('npm pack .', { stdio: 'inherit', cwd: npmFolder });
 
 
 function clean() {
@@ -21,7 +21,7 @@ function clean() {
     
     for (const deletingPath of deletingPaths) {
         fse.removeSync(path.join(npmFolder, deletingPath));
-    }   
+    }
 }
 
 function build() {

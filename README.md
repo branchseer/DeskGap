@@ -8,8 +8,10 @@ To enable native capabilities while keeping the size down, DeskGap bundles a [No
 
 - Mac OS X Yosemite (version 10.10) or later
 - Windows 10 October 2018 Update (version 1809) or later
-- Linux x86_64 with libwebkit2gtk-4.0 installed (tested on Ubuntu 18.04.2)
-
+- Linux x86_64 with webkit2gtk installed, tested on:
+  * Ubuntu 18.04.2 with `libwebkit2gtk-4.0-37 2.22.6`
+  * openSUSE Leap 15.0 with `libwebkit2gtk-4_0-37 2.20.2`
+  
 ## Downloads
 
 ### Prebuilt Binaries

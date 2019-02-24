@@ -1,5 +1,5 @@
 const path = require('path');
-const del = require('del');
+const fse = require('fs-extra');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
@@ -21,7 +21,7 @@ function clean() {
     ]
     
     for (const deletingPath of deletingPaths) {
-        del.sync(path.resolve(projectFolder, deletingPath), { force: true });
+        fse.removeSync(path.resolve(projectFolder, deletingPath));
     }   
 }
 

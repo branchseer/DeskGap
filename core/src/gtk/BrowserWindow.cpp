@@ -52,13 +52,14 @@ namespace DeskGap {
     
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         impl_->callbacks = std::move(callbacks);
+        impl_->webViewWidget = GTK_WIDGET(webView.impl_->gtkWebView);
 
         GtkWindow* gtkWindow = GTK_WINDOW(g_object_ref_sink(gtk_window_new(GTK_WINDOW_TOPLEVEL)));
 
         GtkBox* gtkBox = GTK_BOX(g_object_ref_sink(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0)));
         gtk_widget_show(GTK_WIDGET(gtkBox));
 
-        gtk_box_pack_start(gtkBox, GTK_WIDGET(webView.impl_->gtkWebView), true, true, 0);
+        gtk_box_pack_end(gtkBox, impl_->webViewWidget, true, true, 0);
         gtk_container_add(GTK_CONTAINER(gtkWindow), GTK_WIDGET(gtkBox));
 
         impl_->deleteEventConnection = g_signal_connect(gtkWindow, "delete-event", G_CALLBACK(Impl::HandleDeleteEvent), this);
@@ -171,7 +172,7 @@ namespace DeskGap {
             impl_->accelGroupMenu.emplace(*menu);
             gtk_window_add_accel_group(impl_->gtkWindow, impl_->accelGroupMenu->accelGroup);
             gtk_box_pack_start(impl_->gtkBox, impl_->accelGroupMenu->menuBar, FALSE, FALSE, 0);
-            gtk_box_reorder_child(impl_->gtkBox, impl_->accelGroupMenu->menuBar, 0);
+            //gtk_box_reorder_child(impl_->gtkBox, impl_->accelGroupMenu->menuBar, 0);
         }
 
     }
@@ -195,6 +196,30 @@ namespace DeskGap {
     }
 
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
-        
+        GtkMenuPositionFunc positionFunc = nullptr;
+        gpointer positionFuncData = nullptr;
+
+        if (location != nullptr) {
+            auto rootLocation = new std::array<int, 2>();
+            GdkWindow* webViewGDKWindow = gtk_widget_get_window(impl_->webViewWidget);
+            gdk_window_get_root_coords(
+                webViewGDKWindow,
+                std::get<0>(*location), std::get<1>(*location),
+                &((*rootLocation)[0]), &((*rootLocation)[1])
+            );
+
+            positionFuncData = rootLocation;
+            positionFunc = [](GtkMenu*, gint *x, gint *y, gboolean* push_in, gpointer user_data) {
+                auto rootLocation = static_cast<std::array<int, 2>*>(user_data);
+                *x = std::get<0>(*rootLocation);
+                *y = std::get<1>(*rootLocation);
+                delete rootLocation;
+            };
+        }
+        gtk_menu_popup(
+            GTK_MENU(menu.impl_->gtkMenuShell), nullptr, nullptr, 
+            positionFunc, positionFuncData,
+            0, GDK_CURRENT_TIME
+        );
     }
 }

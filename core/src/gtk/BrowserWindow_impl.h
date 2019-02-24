@@ -10,6 +10,7 @@ namespace DeskGap {
     struct BrowserWindow::Impl {
     	GtkWindow* gtkWindow;
     	GtkBox* gtkBox;
+        GtkWidget* webViewWidget;
 
     	struct AccelGroupMenu
     	{

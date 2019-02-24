@@ -1,6 +1,6 @@
 {
   "name": "deskgap",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "types": "deskgap.d.ts",
   "author": "patr0nus",
   "license": "MIT",

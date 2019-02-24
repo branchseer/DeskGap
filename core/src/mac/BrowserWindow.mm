@@ -78,6 +78,8 @@ namespace DeskGap {
             backing: NSBackingStoreBuffered defer: NO
         ];
 
+        [window setReleasedWhenClosed: NO];
+
         [window setBackgroundColor: [NSColor whiteColor]];
 
         if (@available(macOS 10.12, *)) {
@@ -380,7 +382,6 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Destroy() {
-        impl_->webview->impl_->Destroy(); //Sending close to NSWindow won't close the page in WKWebView, so we need to manually destroy the WKWebView
         [impl_->nsWindow close];
     }
     void BrowserWindow::Close() {

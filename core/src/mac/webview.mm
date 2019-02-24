@@ -149,12 +149,6 @@ namespace {
 
 
 namespace DeskGap {
-    void WebView::Impl::Destroy() {
-        [wkWebView setNavigationDelegate: nil];
-        [wkWebView setUIDelegate: nil];
-        [[wkWebView configuration] setUserContentController: [WKUserContentController new]];
-        [wkWebView loadHTMLString: @"" baseURL: nil];
-    }
     void WebView::Impl::ServePath(NSString* path) {
         if (@available(macOS 10.13, *)) {
             [(DeskGapLocalURLSchemeHandler*)localURLSchemeHandler servePath: path];

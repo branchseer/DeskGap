@@ -97,7 +97,7 @@ namespace DeskGap {
         typedef void (^CallbackBlock)(NSModalResponse returnCode);
         static void PresentDialog(std::optional<std::reference_wrapper<BrowserWindow>> browserWindow, NSSavePanel* panel, CallbackBlock callbackBlock) {
             if (browserWindow.has_value()) {
-                NSWindow* cocoaWindow = browserWindow.value()->impl_->nsWindow;
+                NSWindow* cocoaWindow = browserWindow->get().impl_->nsWindow;
                 [panel beginSheetModalForWindow: cocoaWindow completionHandler: ^(NSModalResponse returnCode) {
                     [panel orderOut: nil];
                     callbackBlock(returnCode);

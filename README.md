@@ -8,8 +8,7 @@ To enable native capabilities while keeping the size down, DeskGap bundles a [No
 
 - Mac OS X Yosemite (version 10.10) or later
 - Windows 10 October 2018 Update (version 1809) or later
-
-Linux support is [work in progress. ![branch status](https://img.shields.io/github/last-commit/patr0nus/DeskGap/gtkwebkit.svg?style=flat)](https://github.com/patr0nus/DeskGap/tree/gtkwebkit)
+- Linux x86_64 with libwebkit2gtk-4.0 installed (tested on Ubuntu 18.04.2)
 
 ## Downloads
 

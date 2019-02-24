@@ -9,7 +9,6 @@ namespace DeskGap {
         WKWebView* wkWebView;
         NSObject* webViewDelegate;
         NSObject* localURLSchemeHandler;
-        void Destroy();
         void ServePath(NSString* path);
     };
 }

@@ -9,6 +9,7 @@
 #include "../util/mime.h"
 #include "../lib_path.h"
 #include "./glib_exception.h"
+#include "./util/convert_js_result.h"
 
 
 namespace fs = std::filesystem;
@@ -232,16 +233,10 @@ namespace DeskGap {
         lastLeftMouseDownEvent.reset();
     }
     void WebView::Impl::HandleScriptStringMessage(WebKitUserContentManager*, WebKitJavascriptResult* jsResult, WebView* webView) {
-        JSCValue* jsValue = webkit_javascript_result_get_js_value(jsResult);
-        GBytes* stringMessageGBytes = jsc_value_to_string_as_bytes(jsValue);
+        std::optional<std::string> resultMessage = std::move(jsResultToString(jsResult));
+        webkit_javascript_result_unref(jsResult);
 
-        gsize size;
-        gconstpointer stringMessageBytes = g_bytes_get_data(stringMessageGBytes, &size);
-        std::string stringMessage(static_cast<const char*>(stringMessageBytes), size);
-
-        g_bytes_unref(stringMessageGBytes);
-
-        webView->impl_->callbacks.onStringMessage(std::move(stringMessage));
+        webView->impl_->callbacks.onStringMessage(std::move(*resultMessage));
     }
     gboolean WebView::Impl::HandleButtonPressEvent(GtkWidget*, GdkEventButton* event, WebView* webView) {
         if (event->button == 1 && event->type == GDK_BUTTON_PRESS) {
@@ -340,7 +335,6 @@ namespace DeskGap {
                     delete callbackPtr;
 
                     WebKitJavascriptResult *jsResult;
-                    JSCValue *jsResultValue;
                     GError *error = NULL;
 
                     jsResult = webkit_web_view_run_javascript_finish(WEBKIT_WEB_VIEW(object), asyncResult, &error);
@@ -349,23 +343,9 @@ namespace DeskGap {
                         g_error_free (error);
                         return;
                     }
-                    jsResultValue = webkit_javascript_result_get_js_value(jsResult);
-                    if (jsc_value_is_string(jsResultValue)) {
-                        JSCException* jsException;
-                        gchar* stringResult;
 
-                        stringResult = jsc_value_to_string(jsResultValue);
-                        jsException = jsc_context_get_exception(jsc_value_get_context(jsResultValue));
-                        if (jsException != nullptr) {
-                            callback(true, jsc_exception_get_message(jsException));
-                        }
-                        else {
-                            callback(true, stringResult);
-                        }
-                        g_free(stringResult);
-                    } else {
-                        callback(true, std::string());
-                    }
+                    callback(false, jsResultToString(jsResult).value_or(""));
+
                     webkit_javascript_result_unref(jsResult);
                 },
                 new JavaScriptEvaluationCallback(std::move(*optionalCallback))

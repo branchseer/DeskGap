@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "../app/app.h"
-#include "xdg-user-dir-lookup.h"
+#include "util/xdg-user-dir-lookup.h"
 
 using std::shared_ptr;
 using std::function;

@@ -1,6 +1,6 @@
 #include <filesystem>
 #include <unordered_set>
-
+#include <cstring>
 #include <gtk/gtk.h>
 
 #include "../webview/webview.h"
@@ -80,7 +80,7 @@ namespace DeskGap {
 
                 fullPath = g_build_filename(servedPath.value().c_str(), filename, nullptr);
 
-                if (const char* firstDot = strrchr(filename, '.'); firstDot != nullptr) {
+                if (const char* firstDot = std::strrchr(filename, '.'); firstDot != nullptr) {
                     fileExtension = std::string(firstDot + 1);
                 }
                 g_free(filename);

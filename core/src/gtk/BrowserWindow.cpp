@@ -149,16 +149,16 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Center() {
-        GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(impl_->gtkWindow));
-        GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+        GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(impl_->gtkWindow));
+        GdkScreen* screen = gdk_display_get_default_screen(display);
 
-        GdkRectangle geometry;
-        gdk_monitor_get_geometry(monitor, &geometry);
+        gint screenWidth = gdk_screen_get_width(screen);
+        gint screenHeight = gdk_screen_get_height(screen);
 
         int windowWidth, windowHeight;
         gtk_window_get_size(impl_->gtkWindow, &windowWidth, &windowHeight);
 
-        gtk_window_move(impl_->gtkWindow, (geometry.width - windowWidth) / 2, (geometry.height - windowHeight) / 2);
+        gtk_window_move(impl_->gtkWindow, (screenWidth - windowWidth) / 2, (screenHeight - windowHeight) / 2);
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {

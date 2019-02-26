@@ -25,7 +25,8 @@ The DeskGap API Demos app shows some of the DeskGap features and APIs with inter
 
 |macOS|Windows|Linux|Source Code|
 |-|-|-|-|
-|[![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-darwin-x64/images/download.svg)](https://deskgap.com/dl/macos) | [![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-win32-ia32/images/download.svg)](https://deskgap.com/dl/win32) | [![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-linux-x64/images/download.svg)](https://deskgap.com/dl/linux) |[GitHub](https://github.com/patr0nus/DeskGap/tree/master/app) |
+|[![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-darwin-x64/images/download.svg)](https://deskgap.com/dl/macos) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpatr0nus%2FDeskGap.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpatr0nus%2FDeskGap?ref=badge_shield)
+| [![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-win32-ia32/images/download.svg)](https://deskgap.com/dl/win32) | [![Download](https://api.bintray.com/packages/patr0nus/DeskGap/deskgap-linux-x64/images/download.svg)](https://deskgap.com/dl/linux) |[GitHub](https://github.com/patr0nus/DeskGap/tree/master/app) |
 
 ### Pym: A Real-Life App Built With DeskGap
 To test DeskGap on field, [squoosh](https://squoosh.app) is wrapped into a desktop app "Pym" with DeskGap and submitted to the app stores.
@@ -125,3 +126,7 @@ const { app, BrowserWindow } = appEngine;
 
 Probably no. The DeskGap API is still quite limited. If you start building an app with DeskGap, getting it running on Electron may be easy, but not the other way around.
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpatr0nus%2FDeskGap.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpatr0nus%2FDeskGap?ref=badge_large)

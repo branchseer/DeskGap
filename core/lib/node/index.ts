@@ -1,4 +1,3 @@
-
 import { entryPath, NativeException } from './internal/bootstrap';
 import app from './app';
 import { BrowserWindow } from './browser-window';
@@ -9,8 +8,6 @@ import shell from './shell';
 import './async-node';
 import systemPreferences from './system-preferences';
 import os = require('os');
-
-
 
 if (process.platform === 'win32') {
     const gte = (release1: number[], release2: number[]): boolean => {

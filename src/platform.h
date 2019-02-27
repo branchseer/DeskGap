@@ -11,7 +11,7 @@
 #endif
 
 namespace DeskGapPlatform {
-    PLATFORM_EXPORT void InitUIThread();
+    PLATFORM_EXPORT void* InitUIThread();
     PLATFORM_EXPORT void InitNodeThread();
     PLATFORM_EXPORT void Run();
 

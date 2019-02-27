@@ -1,4 +1,5 @@
-import { libPath, entryPath } from './internal/paths';
+
+import { entryPath, NativeException } from './internal/bootstrap';
 import app from './app';
 import { BrowserWindow } from './browser-window';
 import { Menu, MenuItem } from './menu';
@@ -8,6 +9,8 @@ import shell from './shell';
 import './async-node';
 import systemPreferences from './system-preferences';
 import os = require('os');
+
+
 
 if (process.platform === 'win32') {
     const gte = (release1: number[], release2: number[]): boolean => {
@@ -37,20 +40,6 @@ if (process.platform === 'win32') {
         process.exit();
     }
 }
-
-
-//The native land doesn't have a mechanism to get __dirname, so we need to tell it from the js land.
-const { setLibPath, setNativeExceptionConstructor } = require('./bindings');
-setLibPath(libPath);
-
-class NativeException extends Error {
-    constructor(name: string, message: string) {
-        super(message);
-        this.name = name;
-    }
-}
-
-setNativeExceptionConstructor(NativeException);
 
 export = {
     app,

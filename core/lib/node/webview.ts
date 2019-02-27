@@ -1,7 +1,7 @@
 import { bulkUISync } from './internal/dispatch';
 import { EventEmitter, IEventMap } from '../common/events';
 
-import { entryPath } from './internal/paths';
+import { entryPath } from './internal/bootstrap';
 import path = require('path');
 import globals from './globals';
 

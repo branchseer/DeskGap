@@ -1,5 +1,5 @@
 import { messageNode as untypedMessageNode, WebView } from './webview';
-import { entryPath } from './internal/paths'
+import { entryPath } from './internal/bootstrap'
 import { 
     ChannelNames, GLOBAL_OBJECT_ID, CURRENT_WINDOW_ID, CURRENT_WEBVIEW_ID,
     INodeValueRequest,

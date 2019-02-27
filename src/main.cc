@@ -42,45 +42,20 @@ namespace {
 
 //Reference: https://github.com/nodejs/node/blob/v10.15.0/src/node_main.cc
 #ifdef WIN32
-#include <Windows.h>
+#include "../core/src/win/util/wstring_utf8.h"
 int wmain(int argc, wchar_t* wargv[]) {
-
-    char** argv = new char*[argc + 1];
+    auto nodeArgs = std::vector<std::string>();
+    nodeArgs.reserve(argc);
     for (int i = 0; i < argc; ++i) {
-        DWORD utf8ByteCount = WideCharToMultiByte(
-            CP_UTF8,
-            0,
-            wargv[i],
-            -1,
-            nullptr,
-            0,
-            nullptr,
-            nullptr
-        );
-        assert(utf8ByteCount != 0);
-
-        argv[i] = new char[utf8ByteCount];
-        DWORD result = WideCharToMultiByte(CP_UTF8,
-            0,
-            wargv[i],
-            -1,
-            argv[i],
-            utf8ByteCount,
-            nullptr,
-            nullptr
-        );
-        assert(result != 0);
+        nodeArgs.emplace_back(std::move(WStringToUTF8(wargv[i])));
     }
-    argv[argc] = nullptr;
-
 #else
 int main(int argc, char* argv[])
 {
+    auto nodeArgs = std::vector<std::string>(argv, argv + argc);
 #endif
 
     DeskGapPlatform::InitUIThread();
-
-    auto nodeArgs = std::vector<std::string>(argv, argv + argc);
 
     std::string entry = DeskGapPlatform::PathOfResource({ "app" });
     
@@ -100,7 +75,11 @@ int main(int argc, char* argv[])
 
     std::thread nodeThread([nodeArgs = std::move(nodeArgs)] () {
         DeskGapPlatform::InitNodeThread();
-        exit(nodeStart(nodeArgs));
+        for (const auto& a: nodeArgs) {
+            printf("%s ", a.c_str());
+        }
+        printf("\n");
+        //exit(nodeStart(nodeArgs));
     });
     DeskGapPlatform::Run();
 	return 0;

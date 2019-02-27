@@ -2,8 +2,9 @@
 #include "platform.h"
 #include <utility>
 
-void DeskGapPlatform::InitUIThread() {
+void* DeskGapPlatform::InitUIThread() {
     [NSApplication sharedApplication];
+    return nullptr;
 }
 
 void DeskGapPlatform::InitNodeThread() { }

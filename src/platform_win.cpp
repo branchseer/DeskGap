@@ -23,8 +23,9 @@ namespace {
 
 
 
-void DeskGapPlatform::InitUIThread() { 
+void* DeskGapPlatform::InitUIThread() { 
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    return new DWORD(GetCurrentThreadId());
 }
 
 void DeskGapPlatform::InitNodeThread() {

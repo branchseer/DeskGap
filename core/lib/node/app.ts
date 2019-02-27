@@ -4,7 +4,6 @@ import appInfo from './internal/app-info'
 
 import globals from './globals';
 import { EventEmitter, IEventMap } from '../common/events';
-import { entryPath } from './internal/paths';
 import { bulkUISync } from './internal/dispatch';
 
 import path = require('path');

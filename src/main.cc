@@ -3,6 +3,7 @@
 #include <thread>
 #include <memory>
 #include <cassert>
+#include <sstream>
 #include "platform.h"
 
 namespace node {
@@ -55,7 +56,9 @@ int main(int argc, char* argv[])
     auto nodeArgs = std::vector<std::string>(argv, argv + argc);
 #endif
 
-    DeskGapPlatform::InitUIThread();
+    void* platformData = DeskGapPlatform::InitUIThread();
+    std::string serializedPlatformData = (std::ostringstream() << platformData).str();
+    
 
     std::string entry = DeskGapPlatform::PathOfResource({ "app" });
     
@@ -68,18 +71,15 @@ int main(int argc, char* argv[])
 
     std::vector<std::string> insertingArgv = {
         DeskGapPlatform::PathOfResource({ "node_modules", "deskgap" }),
-        entry
+        entry,
+        serializedPlatformData
     };
     
     nodeArgs.insert(nodeArgs.begin() + 1, insertingArgv.begin(), insertingArgv.end());
 
     std::thread nodeThread([nodeArgs = std::move(nodeArgs)] () {
         DeskGapPlatform::InitNodeThread();
-        for (const auto& a: nodeArgs) {
-            printf("%s ", a.c_str());
-        }
-        printf("\n");
-        //exit(nodeStart(nodeArgs));
+        exit(nodeStart(nodeArgs));
     });
     DeskGapPlatform::Run();
 	return 0;

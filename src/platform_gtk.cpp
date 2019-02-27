@@ -10,12 +10,13 @@ namespace {
     GtkApplication* gtkApp;
 }
 
-void DeskGapPlatform::InitUIThread() {
+void* DeskGapPlatform::InitUIThread() {
     gtkApp = gtk_application_new(nullptr, G_APPLICATION_FLAGS_NONE);
     g_application_hold(G_APPLICATION(gtkApp));
     
     // Suppress no activate handler warning:
     g_signal_connect(gtkApp, "activate", G_CALLBACK([](){ }), NULL);
+    return nullptr;
 }
 
 void DeskGapPlatform::InitNodeThread() { }

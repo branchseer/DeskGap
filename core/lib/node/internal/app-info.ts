@@ -1,5 +1,5 @@
 import path = require('path');
-import { entryPath } from './paths';
+import { entryPath } from './bootstrap';
 
 const info = {
     name: 'DeskGap',

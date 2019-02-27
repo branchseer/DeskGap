@@ -22,16 +22,13 @@ if(APPLE)
 endif()
 
 if(WIN32)
-
-    add_library(DeskGapPlatform SHARED src/platform_win.cpp)
+    add_library(DeskGapPlatform STATIC src/platform_win.cpp)
+    set_target_properties(
+        DeskGapPlatform PROPERTIES
+        COMPILE_OPTIONS "/MT"
+        COMPILE_DEFINITIONS WIN32_LEAN_AND_MEAN=1
+    )
     target_link_libraries(DeskGapPlatform shcore)
-    set_property(TARGET DeskGapPlatform PROPERTY VS_DOTNET_REFERENCES
-        "System" "System.Windows.Forms"
-    )
-    set_target_properties(DeskGapPlatform PROPERTIES
-        VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7"
-        COMMON_LANGUAGE_RUNTIME ""
-    )
     
     target_link_libraries(DeskGap ws2_32 dbghelp crypt32 winmm iphlpapi psapi userenv)
     file(GLOB nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/Release/lib/*.lib)
@@ -100,16 +97,11 @@ if (WIN32)
 
     set_target_properties(
         DeskGap PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
         LINK_FLAGS "/ENTRY:\"wmainCRTStartup\""
         COMPILE_OPTIONS "/MT"
+        COMPILE_DEFINITIONS WIN32_LEAN_AND_MEAN=1
     )
-
-    add_custom_target(
-        WebViewDll ALL
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/deps/Microsoft.Toolkit.Forms.UI.Controls.WebView.dll $<TARGET_FILE_DIR:DeskGap>
-    )
-    add_dependencies(WebViewDll DeskGap)
 endif()
 
 

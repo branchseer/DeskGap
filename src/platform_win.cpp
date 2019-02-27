@@ -1,76 +1,66 @@
 #include <Windows.h>
-#include <Commctrl.h>
 #include <Combaseapi.h>
 #include <Shellscalingapi.h>
-#include <vcclr.h>
 #include <utility>
+#include <filesystem>
+#include <functional>
+#include <cassert>
 
 #include "platform.h"
 
-using namespace System;
-using namespace System::Threading;
-using namespace System::Windows::Forms;
+#include "../core/src/win/util/wstring_utf8.h"
+
+namespace fs = std::filesystem;
 
 namespace {
-    gcroot<SynchronizationContext^> syncContext;
-
-    inline String^ ClrStr(const char* utf8string) {
-        return gcnew System::String(
-            utf8string, 0, strlen(utf8string), System::Text::Encoding::UTF8
-        );
-    }
-
-    inline std::string StdStr(System::String^ clrString) {
-        array<unsigned char>^ bytes = System::Text::Encoding::UTF8->GetBytes(clrString);
-        if (bytes->Length == 0) {
-            return { };
-        }
-        else {
-            pin_ptr<System::Byte> pinned = &bytes[0];
-            unsigned char* cstr = pinned;
-            return reinterpret_cast<char*>(cstr);
-        }
-    }
-
-    String^ pathOfResource(const std::vector<const char*>& paths) {
-        array<String^>^ allPaths = gcnew array<String^>(paths.size() + 2);
-        allPaths[0] = Application::StartupPath;
-        allPaths[1] = "resources";
-        for (size_t i = 0; i < paths.size(); ++i) {
-            allPaths[i + 2] = ClrStr(paths[i]);
-        }
-        return System::IO::Path::Combine(allPaths);
+    std::string GetExecutablePath() {
+        wchar_t path[MAX_PATH];
+        DWORD result = GetModuleFileNameW(nullptr, path, MAX_PATH);
+        assert(result > 0);
+        return WStringToUTF8(path);
     }
 }
 
+
+
 void DeskGapPlatform::InitUIThread() { 
-    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-
-    Application::EnableVisualStyles();
-    Application::SetCompatibleTextRenderingDefault(false);
-
-    //A control need to be constructed for SynchronizationContext to be ready for the UI thread.
-    gcnew Control();
-
-    syncContext = SynchronizationContext::Current;
 }
 
 void DeskGapPlatform::InitNodeThread() {
-    //Attach the SynchronizationContext to the node thread.
-    //So the nodejs native addon will be able to obtain it and use it to dispatch actions to the UI thread.
-    SynchronizationContext::SetSynchronizationContext(syncContext);
-    syncContext = nullptr;
+    
 }
 
 void DeskGapPlatform::Run() {
-    Application::Run();
+    MSG msg;
+	BOOL res;
+	while ((res = GetMessageW(&msg, nullptr, 0, 0)) != -1) {
+		if (msg.hwnd) {
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+		}
+		else if (msg.message == WM_APP) {
+			auto action = reinterpret_cast<std::function<void()>*>(msg.lParam);
+			(*action)();
+			delete action;
+		}
+		else if (msg.message == WM_QUIT) {
+			return;
+		}
+	}
 }
 
 std::string DeskGapPlatform::PathOfResource(const std::vector<const char*>& paths) {
-    return StdStr(System::IO::Path::Combine(pathOfResource(paths)));
+    static fs::path resourcesFolder = fs::path(GetExecutablePath()).parent_path() / "resources";
+    
+    fs::path resourcePath = resourcesFolder;
+    for (const char* component: paths) {
+        resourcePath.append(component);
+    }
+
+    return resourcePath.string();
 }
 
 bool DeskGapPlatform::ResourceExists(const std::vector<const char*>& paths) {
-    return System::IO::File::Exists(pathOfResource(paths));
+    return fs::exists(PathOfResource(paths));
 }

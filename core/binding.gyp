@@ -6,7 +6,7 @@
             'VCCLCompilerTool': {
               'AdditionalOptions': [
                 '/std:c++17',
-                '/EHa', '/MD'
+                '/EHsc', '/MT'
               ]
             }
           },
@@ -74,31 +74,14 @@
         ['OS == "win"', {
           "sources": [
             "src/win/ui_dispatch_platform.cpp",
-            "src/win/util/control_geometry.cpp",
             "src/win/app.cpp",
             "src/win/menu.cpp",
             "src/win/BrowserWindow.cpp",
             "src/win/webview.cpp",
             "src/win/shell.cpp",
             "src/win/dialog.cpp",
-          ],
-          "msbuild_settings": {
-            "ClCompile": {
-              "CompileAsManaged": "true",
-              "ExceptionHandling": "Async",
-              "AdditionalOptions": [
-                '/AI"<(module_root_dir)\\..\\deps\"',
-                '/FU mscorlib.dll',
-                '/FU System.dll',
-                '/FU System.Drawing.dll',
-                '/FU System.Windows.Forms.dll',
-                '/FU "<!(echo %ProgramFiles(x86)%)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7\\System.Net.Http.dll"',
-                '/FU Microsoft.Toolkit.Forms.UI.Controls.WebView.dll',
-                '/std:c++17'
-              ]
-            }
-          },
-          "dependencies": [ 'deskgap_native_unmanaged_win' ]
+            "src/win/system_preferences.cpp",
+          ]
         }],
 
         ['OS == "mac"', {
@@ -154,17 +137,6 @@
           }
         }]
       ] # conditions
-    },
-    {
-      'target_name': 'deskgap_native_unmanaged_win',
-      'type': 'static_library',
-      'conditions': [
-        ['OS == "win"', {
-          'sources': [
-            "src/win/system_preferences.cpp",
-          ]
-        }]
-      ]
     }
   ]
 }

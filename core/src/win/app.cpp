@@ -1,26 +1,10 @@
 #include <cstdlib>
 #include <shlobj_core.h>
 #include <fileapi.h>
+#include "./util/wstring_utf8.h"
 
 #include "../app/app.h"
 
-using namespace System;
-
-namespace {
-    std::string UTF8FromWideChars(const wchar_t* wideChars, size_t wideCharCount) {
-        if (wideCharCount == 0) return std::string();
-		size_t resultSize = WideCharToMultiByte(
-			CP_UTF8, 0, wideChars, wideCharCount,
-			NULL, 0, NULL, NULL
-		);
-		std::string result(resultSize, 0);
-		WideCharToMultiByte(
-			CP_UTF8, 0, wideChars, wideCharCount,
-			result.data(), resultSize, NULL, NULL
-		);
-		return result;
-    }
-}
 
 namespace DeskGap {
     struct App::Impl {
@@ -35,7 +19,7 @@ namespace DeskGap {
     }
     
     void App::Exit(int exitCode) {
-        Environment::Exit(exitCode);
+        ExitProcess(static_cast<UINT>(exitCode));
     }
 
     std::string App::GetPath(PathName name) {
@@ -55,13 +39,13 @@ namespace DeskGap {
             DWORD length = GetTempPathW(0, NULL);
             std::vector<wchar_t> pathBuffer(length);
             GetTempPathW(length, pathBuffer.data());
-            return UTF8FromWideChars(pathBuffer.data(), length);
+            return WStringToUTF8(pathBuffer.data());
         }
         else {
             KNOWNFOLDERID folderId = folderIdByName[name];
             PWSTR pwPath = NULL;
             SHGetKnownFolderPath(folderId, KF_FLAG_CREATE, NULL, &pwPath);
-            std::string result = UTF8FromWideChars(pwPath, wcslen(pwPath));
+            std::string result = WStringToUTF8(pwPath);
             CoTaskMemFree(pwPath);
             return result;
         }

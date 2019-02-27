@@ -1,10 +1,23 @@
 #include <Windows.h>
 #include "../dispatch/ui_dispatch_platform.h"
 #include "../platform_data.h"
+#include "util/wstring_utf8.h"
+
+#include <winrt/base.h>
+
+//#pragma comment(lib, "RuntimeObject")
 
 namespace {
    std::optional<DeskGap::PlatformException> ExecuteAction(const std::function<void()>& action) {
-      action();
+      try {
+         action();
+      }
+      catch (const winrt::hresult_error& error) {
+         DeskGap::PlatformException platformException {
+            std::to_string(error.code()), winrt::to_string(error.message())
+         };
+         return platformException;
+      }
       return std::nullopt;
    }
 }

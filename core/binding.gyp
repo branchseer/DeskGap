@@ -47,15 +47,6 @@
       'dependencies': [ 'deskgap_native_platform' ],
 
       'conditions': [
-        ['OS =="win"', {
-          'msvs_settings': {
-            'VCCLCompilerTool': {
-              'AdditionalOptions': [
-
-              ]
-            }
-          },
-        }],
         ['OS == "mac"', {
           'xcode_settings': {
             'OTHER_LDFLAGS': [
@@ -72,6 +63,11 @@
       
       'conditions': [
         ['OS == "win"', {
+          'msvs_settings': {
+            'VCLibrarianTool': {
+              'AdditionalDependencies': [ 'windowsapp.lib' ]
+            }
+          },
           "sources": [
             "src/win/ui_dispatch_platform.cpp",
             "src/win/app.cpp",

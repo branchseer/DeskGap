@@ -5,16 +5,17 @@
 
 #include <winrt/base.h>
 
-//#pragma comment(lib, "RuntimeObject")
+#pragma comment(lib, "WindowsApp")
 
 namespace {
    std::optional<DeskGap::PlatformException> ExecuteAction(const std::function<void()>& action) {
       try {
          action();
       }
-      catch (const winrt::hresult_error& error) {
+      catch (const winrt::hresult_error& winrtError) {
          DeskGap::PlatformException platformException {
-            std::to_string(error.code()), winrt::to_string(error.message())
+            "HRESULT " + std::to_string(winrtError.code()),
+            winrt::to_string(winrtError.message())
          };
          return platformException;
       }

@@ -4,17 +4,79 @@
 #include "webview_impl.h"
 #include "./BrowserWindow_impl.h"
 
+namespace {
+	const wchar_t* const BrowserWindowWndClassName = L"DeskGapBrowserWindow";
+}
+
 namespace DeskGap {
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
+        static bool isClassRegistered = false;
+        if (!isClassRegistered) {
+            isClassRegistered = true;
+            WNDCLASSEXW wndClass { };
+            wndClass.cbSize = sizeof(WNDCLASSEXW);
+            wndClass.hInstance = GetModuleHandleW(nullptr);
+            wndClass.lpszClassName = BrowserWindowWndClassName;
+            wndClass.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
+                BrowserWindow* browserWindow = reinterpret_cast<BrowserWindow*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+                if (browserWindow != nullptr) {
+                    switch (msg)
+                    {
+                        case WM_CLOSE: {
+                            browserWindow->impl_->callbacks.onClose();
+                            return 0;
+                        }
+                        case WM_SIZE: {
+                            RECT rect { };
+                            GetClientRect(hwnd, &rect);
+                            LONG width = rect.right - rect.left;
+                            LONG height = rect.bottom - rect.top;
+                            SetWindowPos(
+                                browserWindow->impl_->webView->impl_->controlWnd, nullptr,
+                                0, 0, width, height,
+                                SWP_NOZORDER
+                            );
+                            browserWindow->impl_->webView->impl_->Layout();
+
+                            browserWindow->impl_->callbacks.onResize();
+                            break;
+                        }
+                    }
+                }
+                return DefWindowProcW(hwnd, msg, wp, lp);
+            };
+            wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+            wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+            RegisterClassExW(&wndClass);
+        }
+        impl_->callbacks = std::move(callbacks);
+        impl_->windowWnd = CreateWindowW(
+            BrowserWindowWndClassName,
+            L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
+            CW_USEDEFAULT, 640, 480,
+            nullptr, nullptr,
+            GetModuleHandleW(nullptr),
+            nullptr
+        );
+        SetWindowLongPtrW(impl_->windowWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+        
+        webView.impl_->InitControl(impl_->windowWnd);
+        impl_->webView = &webView;
 
     }
 
     void BrowserWindow::Show() {
-        
+        ShowWindow(impl_->windowWnd, SW_SHOW);
+        UpdateWindow(impl_->windowWnd);
+
+        ShowWindow(impl_->webView->impl_->controlWnd, SW_SHOW);
+        UpdateWindow(impl_->webView->impl_->controlWnd);
+
+        SetFocus(impl_->windowWnd);
     }
 
     void BrowserWindow::SetMaximizable(bool maximizable) {
-
+        
     }
     void BrowserWindow::SetMinimizable(bool minimizable) {
 
@@ -75,7 +137,8 @@ namespace DeskGap {
 
 
     void BrowserWindow::Destroy() {
-        
+        SetWindowLongPtrW(impl_->windowWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
+        DestroyWindow(impl_->windowWnd);
     }
     void BrowserWindow::Close() {
 

@@ -85,7 +85,6 @@ namespace DeskGap {
         );
         SetWindowLongPtrW(controlWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
-
         IAsyncOperation<WebViewControl> asyncOperation = process.CreateWebViewControlAsync(
             reinterpret_cast<int64_t>(controlWnd),
             { }
@@ -106,13 +105,34 @@ namespace DeskGap {
         assert(asyncOperation.Status() == AsyncStatus::Completed);
 
         webViewControl = asyncOperation.GetResults();
+
+        navigationCompletedRevoker = webViewControl.NavigationCompleted(
+            winrt::auto_revoke, 
+            [this](const auto&, const WebViewControlNavigationCompletedEventArgs& e) {
+                if (e.IsSuccess()) {
+                    this->callbacks.didStopLoading(std::nullopt);
+                }
+                else {
+                    this->callbacks.didStopLoading(DeskGap::WebView::LoadingError {
+                        static_cast<long>(e.WebErrorStatus()), "WebErrorStatus"
+                    });
+                }
+            }
+        );
+
+        navigationStartingRevoker = webViewControl.NavigationStarting(
+            winrt::auto_revoke,
+            [this](const auto&, const auto&) {
+                this->callbacks.didStartLoading();
+            }
+        );
     }
 
 
     WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         WebViewControlProcessOptions options;
         options.PrivateNetworkClientServerCapability(WebViewControlProcessCapabilityState::Enabled);
-    
+        impl_->callbacks = std::move(callbacks);
         impl_->process = WebViewControlProcess(options);
     }
     void WebView::LoadHTMLString(const std::string& html) {

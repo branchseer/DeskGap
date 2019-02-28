@@ -14,8 +14,13 @@ namespace DeskGap {
         winrt::Windows::Web::UI::Interop::WebViewControlProcess process;
         winrt::Windows::Web::UI::Interop::WebViewControl webViewControl;
 
+        winrt::Windows::Web::UI::Interop::WebViewControl::NavigationCompleted_revoker navigationCompletedRevoker;
+        winrt::Windows::Web::UI::Interop::WebViewControl::NavigationStarting_revoker navigationStartingRevoker;
+
         class StreamResolver;
         std::unique_ptr<StreamResolver> streamResolver;
+
+        WebView::EventCallbacks callbacks;
 
 		Impl();
 

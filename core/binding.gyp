@@ -5,8 +5,8 @@
           'msvs_settings': {
             'VCCLCompilerTool': {
               'AdditionalOptions': [
-                '/std:c++17',
-                '/EHsc', '/MT'
+                '/std:c++17', '/GR',
+                '/EHa', '/MT', '/await'
               ]
             }
           },
@@ -63,11 +63,6 @@
       
       'conditions': [
         ['OS == "win"', {
-          'msvs_settings': {
-            'VCLibrarianTool': {
-              'AdditionalDependencies': [ 'windowsapp.lib' ]
-            }
-          },
           "sources": [
             "src/win/ui_dispatch_platform.cpp",
             "src/win/app.cpp",

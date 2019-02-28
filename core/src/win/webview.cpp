@@ -6,9 +6,12 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <cctype>
 
 #include <winrt/Windows.Storage.h>
 #include <winrt/Windows.Storage.Streams.h>
+#include <winrt/Windows.Web.Http.h>
+#include <winrt/Windows.Web.Http.Headers.h>
 
 #include "../webview/webview.h"
 #include "webview_impl.h"
@@ -159,7 +162,10 @@ namespace DeskGap {
         impl_->process = WebViewControlProcess(options);
     }
     void WebView::LoadHTMLString(const std::string& html) {
-        
+        impl_->PrepareScript();
+        impl_->streamResolver->setFolder(std::nullopt);
+
+        impl_->webViewControl.NavigateToString(winrt::to_hstring(html));
     }
 
     void WebView::LoadLocalFile(const std::string& path) {
@@ -177,7 +183,35 @@ namespace DeskGap {
         const std::vector<HTTPHeader>& headers,
         const std::optional<std::string>& body
     ) {
-        
+        impl_->PrepareScript();
+        impl_->streamResolver->setFolder(std::nullopt);
+
+        Http::HttpRequestMessage httpMessage(
+            Http::HttpMethod(winrt::to_hstring(method)),
+            Uri(winrt::to_hstring(urlString))
+        );
+        if (body.has_value()) {
+            httpMessage.Content(Http::HttpStringContent(winrt::to_hstring(*body)));
+        }
+        for (const HTTPHeader& header: headers) {
+            static const std::string contentTypeField = "content-type";
+            if (std::equal(
+                header.field.begin(), header.field.end(),
+                contentTypeField.begin(), contentTypeField.end(),
+                [](char a, char b) { return std::tolower(a) == b;}
+            )) {
+                httpMessage.Content().Headers().ContentType(
+                    Http::Headers::HttpMediaTypeHeaderValue(winrt::to_hstring(header.value))
+                );
+            }
+            else {
+                httpMessage.Headers().Append(
+                    winrt::to_hstring(header.field),
+                    winrt::to_hstring(header.value)
+                );
+            }
+        }
+        impl_->webViewControl.NavigateWithHttpRequestMessage(httpMessage);
     }
 
     void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {

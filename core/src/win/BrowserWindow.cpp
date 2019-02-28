@@ -32,14 +32,12 @@ namespace DeskGap {
                             LONG width = rect.right - rect.left;
                             LONG height = rect.bottom - rect.top;
                             SetWindowPos(
-                                browserWindow->impl_->webView->impl_->controlWnd, nullptr,
+                                browserWindow->impl_->webViewControlWnd, nullptr,
                                 0, 0, width, height,
                                 SWP_NOZORDER
                             );
-                            browserWindow->impl_->webView->impl_->Layout();
-
                             browserWindow->impl_->callbacks.onResize();
-                            break;
+                            return 0;
                         }
                     }
                 }
@@ -61,16 +59,15 @@ namespace DeskGap {
         SetWindowLongPtrW(impl_->windowWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
         
         webView.impl_->InitControl(impl_->windowWnd);
-        impl_->webView = &webView;
-
+        impl_->webViewControlWnd = webView.impl_->controlWnd;
     }
 
     void BrowserWindow::Show() {
         ShowWindow(impl_->windowWnd, SW_SHOW);
         UpdateWindow(impl_->windowWnd);
 
-        ShowWindow(impl_->webView->impl_->controlWnd, SW_SHOW);
-        UpdateWindow(impl_->webView->impl_->controlWnd);
+        ShowWindow(impl_->webViewControlWnd, SW_SHOW);
+        UpdateWindow(impl_->webViewControlWnd);
 
         SetFocus(impl_->windowWnd);
     }

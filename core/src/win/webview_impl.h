@@ -16,6 +16,7 @@ namespace DeskGap {
 
         winrt::Windows::Web::UI::Interop::WebViewControl::NavigationCompleted_revoker navigationCompletedRevoker;
         winrt::Windows::Web::UI::Interop::WebViewControl::NavigationStarting_revoker navigationStartingRevoker;
+        winrt::Windows::Web::UI::Interop::WebViewControl::ScriptNotify_revoker scriptNotifyRevoker;
 
         class StreamResolver;
         std::unique_ptr<StreamResolver> streamResolver;
@@ -24,6 +25,7 @@ namespace DeskGap {
 
 		Impl();
 
+        void PrepareScript();
         void InitControl(HWND parentWnd);
     };
 }

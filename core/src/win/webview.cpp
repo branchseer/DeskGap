@@ -3,6 +3,8 @@
 #include <string>
 #include <optional>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <cassert>
 
 #include <winrt/Windows.Storage.h>
@@ -22,10 +24,13 @@ using namespace winrt::Windows::Web::UI;
 using namespace winrt::Windows::Web::UI::Interop;
 using namespace winrt::Windows::Storage;
 
-
 namespace {
     const wchar_t* const WebViewHostWndClassName = L"DeskGapWebViewHost";
     const winrt::hstring LocalContentIdentifier = L"DeskGapLocalContent";
+
+    const wchar_t MessageNotifyStringPrefix = L'm';
+    const wchar_t WindowDragNotifyStringPrefix = L'd';
+    const wchar_t TitleUpdatedNotifyStringPrefix = L't';
 }
 
 namespace DeskGap {
@@ -49,12 +54,30 @@ namespace DeskGap {
         }
     };
     WebView::Impl::Impl(): process(nullptr), webViewControl(nullptr), streamResolver(std::make_unique<StreamResolver>()) { }
+    void WebView::Impl::PrepareScript() {
+        static std::unique_ptr<winrt::hstring> preloadScript = nullptr;
+        
+        if (preloadScript == nullptr) {
+            std::ostringstream scriptStream;
+            fs::path scriptFolder = fs::path(LibPath()) / "dist" / "ui";
+
+            for (const std::string& scriptFilename: { "preload_win.js", "preload.js" }) {
+                winrt::hstring scriptFullPath = winrt::to_hstring((scriptFolder / scriptFilename).string());
+                std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
+                scriptStream << scriptFile.rdbuf();
+            }
+
+            preloadScript = std::make_unique<winrt::hstring>(winrt::to_hstring(scriptStream.str()));
+        }
+
+        webViewControl.AddInitializeScript(*preloadScript);
+    }
 
     void WebView::Impl::InitControl(HWND parentWnd) {
         static bool isClassRegistered = false;
         if (!isClassRegistered) {
             isClassRegistered = true;
-            WNDCLASSEXW wndClass{ };
+            WNDCLASSEXW wndClass { };
             wndClass.cbSize = sizeof(WNDCLASSEXW);
             wndClass.hInstance = GetModuleHandleW(nullptr);
             wndClass.lpszClassName = WebViewHostWndClassName;
@@ -140,6 +163,7 @@ namespace DeskGap {
     }
 
     void WebView::LoadLocalFile(const std::string& path) {
+        impl_->PrepareScript();
         fs::path fsPath(path);
         impl_->streamResolver->setFolder(fsPath.parent_path());
 

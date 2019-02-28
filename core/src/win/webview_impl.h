@@ -18,7 +18,7 @@ namespace DeskGap {
         std::unique_ptr<StreamResolver> streamResolver;
 
 		Impl();
-        void Layout();
+
         void InitControl(HWND parentWnd);
     };
 }

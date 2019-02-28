@@ -9,7 +9,7 @@
 namespace DeskGap {
     struct BrowserWindow::Impl {
         HWND windowWnd;
-        const WebView* webView;
+        HWND webViewControlWnd;
         BrowserWindow::EventCallbacks callbacks;
     };
 }

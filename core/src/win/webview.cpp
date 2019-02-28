@@ -50,16 +50,6 @@ namespace DeskGap {
     };
     WebView::Impl::Impl(): process(nullptr), webViewControl(nullptr), streamResolver(std::make_unique<StreamResolver>()) { }
 
-    void WebView::Impl::Layout() {
-        RECT rect { };
-        GetWindowRect(controlWnd, &rect);
-        webViewControl.Bounds(Rect(
-            0, 0,
-            static_cast<float>(rect.right-rect.left),
-            static_cast<float>(rect.bottom-rect.top)
-        ));
-    }
-
     void WebView::Impl::InitControl(HWND parentWnd) {
         static bool isClassRegistered = false;
         if (!isClassRegistered) {
@@ -69,6 +59,19 @@ namespace DeskGap {
             wndClass.hInstance = GetModuleHandleW(nullptr);
             wndClass.lpszClassName = WebViewHostWndClassName;
             wndClass.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
+                WebView::Impl* impl_ = reinterpret_cast<WebView::Impl*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+                if (impl_ != nullptr) {
+                    if (msg == WM_SIZE) {
+                        RECT rect { };
+                        GetWindowRect(impl_->controlWnd, &rect);
+                        impl_->webViewControl.Bounds(Rect(
+                            0, 0,
+                            static_cast<float>(rect.right-rect.left),
+                            static_cast<float>(rect.bottom-rect.top)
+                        ));
+                        return 0;
+                    }
+                }
                 return DefWindowProcW(hwnd, msg, wp, lp);
             };
             wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -80,6 +83,8 @@ namespace DeskGap {
             WS_CHILD,
             0, 0, 0, 0, parentWnd, nullptr, nullptr, 0
         );
+        SetWindowLongPtrW(controlWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
 
         IAsyncOperation<WebViewControl> asyncOperation = process.CreateWebViewControlAsync(
             reinterpret_cast<int64_t>(controlWnd),
@@ -101,10 +106,6 @@ namespace DeskGap {
         assert(asyncOperation.Status() == AsyncStatus::Completed);
 
         webViewControl = asyncOperation.GetResults();
-
-        Layout();
-
-        webViewControl.Navigate(winrt::Windows::Foundation::Uri(L"https://www.v2ex.com/"));
     }
 
 
@@ -147,5 +148,7 @@ namespace DeskGap {
         
     }
 
-    WebView::~WebView() = default;
+    WebView::~WebView() {
+        SetWindowLongPtrW(impl_->controlWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
+    }
 }

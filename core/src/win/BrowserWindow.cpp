@@ -129,9 +129,9 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-        int dpi = GetDpiForWindow(impl_->windowWnd);
-        int dpiScaledX = MulDiv(x, dpi, 96);
-        int dpiScaledY = MulDiv(y, dpi, 96);
+        UINT dpi = GetDpiForWindow(impl_->windowWnd);
+        LONG dpiScaledX = MulDiv(x, dpi, 96);
+        LONG dpiScaledY = MulDiv(y, dpi, 96);
         SetWindowPos(
             impl_->windowWnd, nullptr,
             dpiScaledX, dpiScaledY, 0, 0,
@@ -174,7 +174,8 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
-        
+        ::SetMenu(impl_->windowWnd, menu == nullptr ? nullptr : menu->impl_->hmenu);
+        DrawMenuBar(impl_->windowWnd);
     }
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {

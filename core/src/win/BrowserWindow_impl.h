@@ -11,9 +11,6 @@ namespace DeskGap {
         HWND windowWnd;
         HWND webViewControlWnd;
         BrowserWindow::EventCallbacks callbacks;
-        void Layout();
-
-        //int x, y, width, height;
     };
 }
 

@@ -3,6 +3,7 @@
 #include "menu_impl.h"
 #include "webview_impl.h"
 #include "./BrowserWindow_impl.h"
+#include "./util/wstring_utf8.h"
 
 namespace {
 	const wchar_t* const BrowserWindowWndClassName = L"DeskGapBrowserWindow";
@@ -35,7 +36,7 @@ namespace DeskGap {
                     {
                         case WM_CLOSE: {
                             browserWindow->impl_->callbacks.onClose();
-                            break;
+                            return 0;
                         }
                         case WM_SIZE: {
                             browserWindow->impl_->Layout();
@@ -64,7 +65,7 @@ namespace DeskGap {
             wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
             RegisterClassExW(&wndClass);
         }
-        //x = 0; y = 0; width = 0; height = 0;
+
         impl_->callbacks = std::move(callbacks);
         impl_->windowWnd = CreateWindowW(
             BrowserWindowWndClassName,
@@ -104,7 +105,8 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetTitle(const std::string& utf8title) {
-        
+        std::wstring wtitle = UTF8ToWString(utf8title.c_str());
+        SetWindowTextW(impl_->windowWnd, wtitle.c_str());
     }
 
     void BrowserWindow::SetClosable(bool closable) {
@@ -130,9 +132,9 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-        int dpi = GetDpiForWindow(impl_->windowWnd); 
-        int dpiScaledX = MulDiv(x, dpi, 96); 
-        int dpiScaledY = MulDiv(y, dpi, 96); 
+        int dpi = GetDpiForWindow(impl_->windowWnd);
+        int dpiScaledX = MulDiv(x, dpi, 96);
+        int dpiScaledY = MulDiv(y, dpi, 96);
         SetWindowPos(
             impl_->windowWnd, nullptr,
             dpiScaledX, dpiScaledY, 0, 0,
@@ -153,7 +155,25 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Center() {
-        
+        RECT workAreaRect { };
+        SystemParametersInfoW(SPI_GETWORKAREA, 0, &workAreaRect, 0);
+
+        int desktopWidth = workAreaRect.right -workAreaRect.left;
+        int desktopHeight = workAreaRect.bottom - workAreaRect.top;
+
+        RECT windowRect { };
+        GetClientRect(impl_->windowWnd, &windowRect);
+
+        int windowWidth = windowRect.right - windowRect.left;
+        int windowHeight = windowRect.bottom - windowRect.top;
+
+        SetWindowPos(
+            impl_->windowWnd, nullptr,
+            workAreaRect.left + (desktopWidth - windowWidth) / 2,
+            workAreaRect.top + (desktopHeight - windowHeight) / 2, 0, 0,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE
+        );
+
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
@@ -170,7 +190,7 @@ namespace DeskGap {
         DestroyWindow(impl_->windowWnd);
     }
     void BrowserWindow::Close() {
-        
+
     }
 
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {

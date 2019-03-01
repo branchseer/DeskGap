@@ -131,6 +131,7 @@ namespace DeskGap {
         assert(asyncOperation.Status() == AsyncStatus::Completed);
 
         webViewControl = asyncOperation.GetResults();
+        webViewControl.Settings().IsScriptNotifyAllowed(true);
 
         navigationCompletedRevoker = webViewControl.NavigationCompleted(
             winrt::auto_revoke, 
@@ -152,6 +153,34 @@ namespace DeskGap {
                 this->callbacks.didStartLoading();
             }
         );
+
+        scriptNotifyRevoker = webViewControl.ScriptNotify(
+            winrt::auto_revoke,
+            [this](const auto&, const WebViewControlScriptNotifyEventArgs& e) {
+                winrt::hstring notifyString = e.Value();
+                wchar_t notifyStringPrefix = notifyString[0];
+                std::string notifyContent = winrt::to_string(notifyString.c_str() + 1);
+                switch (notifyStringPrefix) {
+                case MessageNotifyStringPrefix: {
+                    callbacks.onStringMessage(std::move(notifyContent));
+                    break;
+                }
+                case WindowDragNotifyStringPrefix: {
+                    if (HWND windowWnd = GetParent(controlWnd); windowWnd != nullptr) {
+                        if (SetFocus(windowWnd) != nullptr) {
+                            SendMessage(windowWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+                        }
+                    }
+                    break;
+                }
+                case TitleUpdatedNotifyStringPrefix: {
+                    callbacks.onPageTitleUpdated(std::move(notifyContent));
+                }
+                default:
+                    break;
+                }
+            }
+        );
     }
 
 
@@ -160,6 +189,8 @@ namespace DeskGap {
         options.PrivateNetworkClientServerCapability(WebViewControlProcessCapabilityState::Enabled);
         impl_->callbacks = std::move(callbacks);
         impl_->process = WebViewControlProcess(options);
+        //The real creation of WebViewControl happens in WebView::Impl::InitControl,
+        //which is called by BrowserWindow, because it needs the handle of the window.
     }
     void WebView::LoadHTMLString(const std::string& html) {
         impl_->PrepareScript();
@@ -215,7 +246,22 @@ namespace DeskGap {
     }
 
     void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
-        
+        IAsyncOperation<winrt::hstring> resultPromise = impl_->webViewControl.InvokeScriptAsync(
+            L"eval", { winrt::to_hstring(scriptString) }
+        );
+        if (optionalCallback.has_value()) {
+            resultPromise.Completed([
+                callback = std::move(*optionalCallback)
+            ](const auto& resultPromise, AsyncStatus status) {
+                if (status == AsyncStatus::Completed) {
+                    callback(false, winrt::to_string(resultPromise.GetResults()));
+                }
+                else {
+                    winrt::hresult_error error(resultPromise.ErrorCode());
+                    callback(true, "HRESULT " + std::to_string(error.code()) + ": " + winrt::to_string(error.message()));
+                }
+            });
+        }
     }
 
     void WebView::SetDevToolsEnabled(bool enabled) { 

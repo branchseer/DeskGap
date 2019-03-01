@@ -35,12 +35,16 @@ namespace DeskGap {
                     {
                         case WM_CLOSE: {
                             browserWindow->impl_->callbacks.onClose();
-                            return 0;
+                            break;
                         }
                         case WM_SIZE: {
                             browserWindow->impl_->Layout();
                             browserWindow->impl_->callbacks.onResize();
-                            return 0;
+                            break;
+                        }
+                        case WM_MOVE: {
+                            browserWindow->impl_->callbacks.onMove();
+                            break;
                         }
                         case WM_DPICHANGED: {
                             RECT* rect = reinterpret_cast<RECT*>(lp);
@@ -65,7 +69,7 @@ namespace DeskGap {
         impl_->windowWnd = CreateWindowW(
             BrowserWindowWndClassName,
             L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
-            CW_USEDEFAULT, 640, 480,
+            CW_USEDEFAULT, 0, 0,
             nullptr, nullptr,
             GetModuleHandleW(nullptr),
             nullptr
@@ -108,14 +112,14 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
-        
-        // SetWindowPos(
-        //     window, nullptr,
-        //     rect->left, rect->top,
-        //     rect->right - rect->left, rect->bottom - rect->top,
-        //     SWP_NOZORDER | SWP_NOACTIVATE
-        // );
-        // impl_->Layout();
+        int dpi = GetDpiForWindow(impl_->windowWnd); 
+        int dpiScaledWidth = MulDiv(width, dpi, 96); 
+        int dpiScaledHeight = MulDiv(height, dpi, 96); 
+        SetWindowPos(
+            impl_->windowWnd, nullptr, 0, 0,
+            dpiScaledWidth, dpiScaledHeight,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE
+        );
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
@@ -126,9 +130,14 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-        // impl_->x = x;
-        // impl_->y = y;
-        // impl_->Layout();
+        int dpi = GetDpiForWindow(impl_->windowWnd); 
+        int dpiScaledX = MulDiv(x, dpi, 96); 
+        int dpiScaledY = MulDiv(y, dpi, 96); 
+        SetWindowPos(
+            impl_->windowWnd, nullptr,
+            dpiScaledX, dpiScaledY, 0, 0,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE
+        );
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {
@@ -161,7 +170,7 @@ namespace DeskGap {
         DestroyWindow(impl_->windowWnd);
     }
     void BrowserWindow::Close() {
-
+        
     }
 
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {

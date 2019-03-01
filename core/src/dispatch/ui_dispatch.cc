@@ -35,7 +35,7 @@ void DeskGap::CommitUISync(napi_env env) {
 
 void DeskGap::UISyncDelayable(napi_env env, std::function<void()>&& action) {
     if (shouldUISyncDispatchesBeDelayed) {
-        delayedUISyncActions.push(std::move(action));
+        delayedUISyncActions.emplace(std::move(action));
     }
     else {
         UISync(env, std::move(action));

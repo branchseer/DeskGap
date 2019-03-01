@@ -24,7 +24,6 @@ namespace {
 
 
 void* DeskGapPlatform::InitUIThread() { 
-    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     return new DWORD(GetCurrentThreadId());
 }

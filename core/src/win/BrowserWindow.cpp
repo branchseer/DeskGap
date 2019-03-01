@@ -10,17 +10,6 @@ namespace {
 }
 
 namespace DeskGap {
-    void BrowserWindow::Impl::Layout() {
-        RECT rect { };
-        GetClientRect(windowWnd, &rect);
-        LONG width = rect.right - rect.left;
-        LONG height = rect.bottom - rect.top;
-        SetWindowPos(
-            webViewControlWnd, nullptr,
-            0, 0, width, height,
-            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER
-        );
-    }
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         static bool isClassRegistered = false;
         if (!isClassRegistered) {
@@ -39,7 +28,15 @@ namespace DeskGap {
                             return 0;
                         }
                         case WM_SIZE: {
-                            browserWindow->impl_->Layout();
+                            RECT rect { };
+                            GetClientRect(hwnd, &rect);
+                            LONG width = rect.right - rect.left;
+                            LONG height = rect.bottom - rect.top;
+                            SetWindowPos(
+                                browserWindow->impl_->webViewControlWnd, nullptr,
+                                0, 0, width, height,
+                                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER
+                            );
                             browserWindow->impl_->callbacks.onResize();
                             break;
                         }

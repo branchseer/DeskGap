@@ -9,6 +9,17 @@ namespace {
 }
 
 namespace DeskGap {
+    void BrowserWindow::Impl::Layout() {
+        RECT rect { };
+        GetClientRect(windowWnd, &rect);
+        LONG width = rect.right - rect.left;
+        LONG height = rect.bottom - rect.top;
+        SetWindowPos(
+            webViewControlWnd, nullptr,
+            0, 0, width, height,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER
+        );
+    }
     BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         static bool isClassRegistered = false;
         if (!isClassRegistered) {
@@ -27,17 +38,19 @@ namespace DeskGap {
                             return 0;
                         }
                         case WM_SIZE: {
-                            RECT rect { };
-                            GetClientRect(hwnd, &rect);
-                            LONG width = rect.right - rect.left;
-                            LONG height = rect.bottom - rect.top;
-                            SetWindowPos(
-                                browserWindow->impl_->webViewControlWnd, nullptr,
-                                0, 0, width, height,
-                                SWP_NOZORDER
-                            );
+                            browserWindow->impl_->Layout();
                             browserWindow->impl_->callbacks.onResize();
                             return 0;
+                        }
+                        case WM_DPICHANGED: {
+                            RECT* rect = reinterpret_cast<RECT*>(lp);
+                            SetWindowPos(
+                                browserWindow->impl_->windowWnd, nullptr,
+                                rect->left, rect->top,
+                                rect->right - rect->left, rect->bottom - rect->top,
+                                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER
+                            );
+                            break;
                         }
                     }
                 }
@@ -47,6 +60,7 @@ namespace DeskGap {
             wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
             RegisterClassExW(&wndClass);
         }
+        //x = 0; y = 0; width = 0; height = 0;
         impl_->callbacks = std::move(callbacks);
         impl_->windowWnd = CreateWindowW(
             BrowserWindowWndClassName,
@@ -79,7 +93,7 @@ namespace DeskGap {
 
     }
     void BrowserWindow::SetResizable(bool resizable) {
-        
+
     }
     void BrowserWindow::SetHasFrame(bool hasFrame) {
         
@@ -95,6 +109,13 @@ namespace DeskGap {
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
         
+        // SetWindowPos(
+        //     window, nullptr,
+        //     rect->left, rect->top,
+        //     rect->right - rect->left, rect->bottom - rect->top,
+        //     SWP_NOZORDER | SWP_NOACTIVATE
+        // );
+        // impl_->Layout();
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
@@ -105,7 +126,9 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-        
+        // impl_->x = x;
+        // impl_->y = y;
+        // impl_->Layout();
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {

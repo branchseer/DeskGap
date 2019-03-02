@@ -166,7 +166,7 @@ namespace DeskGap {
                     break;
                 }
                 case WindowDragNotifyStringPrefix: {
-                    if (HWND windowWnd = GetParent(controlWnd); windowWnd != nullptr) {
+                    if (HWND windowWnd = GetAncestor(controlWnd, GA_ROOT); windowWnd != nullptr) {
                         if (SetFocus(windowWnd) != nullptr) {
                             SendMessage(windowWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
                         }

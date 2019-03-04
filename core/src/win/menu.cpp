@@ -33,6 +33,7 @@ namespace DeskGap {
     void MenuItem::Impl::AddAction(Action&& action) {
         if (parentHMenu_.has_value()) {
             action(*parentHMenu_);
+            if (windowWnd) DrawMenuBar(windowWnd);
         }
         else {
             pendingActions_.emplace(std::move(action));
@@ -58,6 +59,7 @@ namespace DeskGap {
         }
     }
     MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, EventCallbacks&& eventCallbacks): impl_(std::make_unique<Impl>()) {
+        impl_->windowWnd = nullptr;
         impl_->callbacks = std::move(eventCallbacks);
         impl_->role = role;
         impl_->type = type;
@@ -187,7 +189,14 @@ namespace DeskGap {
         SetMenuInfo(impl_->hmenu, &info);
     }
 
+    void Menu::Impl::SetWindowWnd(HWND windowWnd) {
+        for (const MenuItem* item: items) {
+            item->impl_->windowWnd = windowWnd;
+        }
+    }
+
     void Menu::AppendItem(const MenuItem& menuItem) {
+        impl_->items.push_back(&menuItem);
         impl_->clickHandlers.push_back(&(menuItem.impl_->callbacks.onClick));
         menuItem.impl_->AppendTo(impl_->hmenu);
     }

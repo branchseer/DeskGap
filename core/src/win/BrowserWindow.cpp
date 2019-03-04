@@ -170,7 +170,6 @@ namespace DeskGap {
             workAreaRect.top + (desktopHeight - windowHeight) / 2, 0, 0,
             SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE
         );
-
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
@@ -178,6 +177,9 @@ namespace DeskGap {
             DestroyMenu(existingMenu);
         }
         ::SetMenu(impl_->windowWnd, menu == nullptr ? nullptr : menu->impl_->hmenu);
+        if (menu != nullptr) {
+            menu->impl_->SetWindowWnd(impl_->windowWnd);
+        }
         DrawMenuBar(impl_->windowWnd);
     }
 

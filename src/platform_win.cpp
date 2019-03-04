@@ -4,6 +4,7 @@
 #include <utility>
 #include <filesystem>
 #include <functional>
+#include <vector>
 #include <cassert>
 
 #include "platform.h"
@@ -31,11 +32,20 @@ void* DeskGapPlatform::InitUIThread() {
 void DeskGapPlatform::InitNodeThread() {
     
 }
-
+static int i = 0;
 void DeskGapPlatform::Run() {
     MSG msg;
 	BOOL res;
 	while ((res = GetMessageW(&msg, nullptr, 0, 0)) != -1) {
+        if (msg.message == WM_MENUCOMMAND) {            
+            MENUINFO info { };
+            info.cbSize = sizeof(info);
+            info.fMask = MIM_MENUDATA;
+            GetMenuInfo((HMENU)msg.lParam, &info);
+
+            auto clickHandlers = reinterpret_cast<std::vector<std::function<void()>*>*>(info.dwMenuData);
+            (*((*clickHandlers)[msg.wParam]))();
+        }
 		if (msg.hwnd) {
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);

@@ -174,6 +174,9 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMenu(const Menu* menu) {
+        if (HMENU existingMenu = GetMenu(impl_->windowWnd); existingMenu != nullptr) {
+            DestroyMenu(existingMenu);
+        }
         ::SetMenu(impl_->windowWnd, menu == nullptr ? nullptr : menu->impl_->hmenu);
         DrawMenuBar(impl_->windowWnd);
     }
@@ -192,7 +195,30 @@ namespace DeskGap {
     }
 
     void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
-        
+        SetForegroundWindow(impl_->windowWnd);
+
+        UINT uFlags = TPM_RIGHTBUTTON;
+        if (GetSystemMetrics(SM_MENUDROPALIGNMENT) != 0)
+        {
+            uFlags |= TPM_RIGHTALIGN;
+        }
+        else
+        {
+            uFlags |= TPM_LEFTALIGN;
+        }
+
+        POINT pt;
+        if (location != nullptr) {
+            pt.x = std::get<0>(*location);
+            pt.y = std::get<1>(*location);
+            ClientToScreen(impl_->windowWnd, &pt);
+        }
+        else {
+            GetCursorPos(&pt);
+        }
+
+
+        TrackPopupMenuEx(menu.impl_->hmenu, uFlags, pt.x, pt.y, impl_->windowWnd, NULL);
     }
 
     BrowserWindow::~BrowserWindow() = default;

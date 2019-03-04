@@ -3,9 +3,9 @@ import shell from '../../shell';
 
 /** @internal */
 const template: Array<Partial<MenuItemConstructorOptions> | null> = [
-    process.platform !== 'win32' ? {
+    {
       role: 'editMenu'
-    }: null,
+    },
     {
       label: 'View',
       submenu: [

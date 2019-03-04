@@ -11,6 +11,9 @@
 
 namespace DeskGap {
     struct MenuItem::Impl {
+    	//Top-level MenuItems in a Window menu needs to know the hwnd of the window for DrawMenuBar
+    	HWND windowWnd;
+
     	std::string role;
     	Type type;
     	UINT_PTR identifier;
@@ -34,9 +37,10 @@ namespace DeskGap {
     };
     
     struct Menu::Impl {
-    	HMENU hmenu;
     	std::vector<std::function<void()>*> clickHandlers;
-
+    	std::vector<const MenuItem*> items;
+    	void SetWindowWnd(HWND windowWnd);
+    	HMENU hmenu;
     };
 }
 

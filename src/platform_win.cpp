@@ -20,43 +20,65 @@ namespace {
         assert(result > 0);
         return WStringToUTF8(path);
     }
+    const wchar_t* const DispatcherWndClassName = L"DeskGapDispatcherWindow";
 }
 
 
 
 void* DeskGapPlatform::InitUIThread() { 
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    return new DWORD(GetCurrentThreadId());
+
+    WNDCLASSEXW dispatcherWindowClass { };
+    dispatcherWindowClass.cbSize = sizeof(WNDCLASSEXW);
+    dispatcherWindowClass.hInstance = GetModuleHandleW(nullptr);
+    dispatcherWindowClass.lpszClassName = DispatcherWndClassName;
+    dispatcherWindowClass.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
+        if (msg == WM_APP + 1) {
+            auto action = reinterpret_cast<std::function<void()>*>(lp);
+            (*action)();
+            delete action;
+            return 0;
+        }
+        else {
+            return DefWindowProcW(hwnd, msg, wp, lp);
+        }
+    };
+    RegisterClassExW(&dispatcherWindowClass);
+
+    HWND dispatchWindowWnd = CreateWindowW(
+        DispatcherWndClassName,
+        L"",
+        0, 0, 0, 0, 0,
+        nullptr, nullptr,
+        GetModuleHandleW(nullptr),
+        nullptr
+    );
+
+    return new HWND(dispatchWindowWnd);
 }
 
 void DeskGapPlatform::InitNodeThread() {
     
 }
-static int i = 0;
+
 void DeskGapPlatform::Run() {
     MSG msg;
 	BOOL res;
 	while ((res = GetMessageW(&msg, nullptr, 0, 0)) != -1) {
-        if (msg.message == WM_MENUCOMMAND) {            
+        if (msg.message == WM_MENUCOMMAND) {
             MENUINFO info { };
             info.cbSize = sizeof(info);
             info.fMask = MIM_MENUDATA;
             GetMenuInfo((HMENU)msg.lParam, &info);
-
             auto clickHandlers = reinterpret_cast<std::vector<std::function<void()>*>*>(info.dwMenuData);
             (*((*clickHandlers)[msg.wParam]))();
         }
-		if (msg.hwnd) {
+        else if (msg.message == WM_QUIT) {
+            return;
+        }
+		else if (msg.hwnd) {
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
-		}
-		else if (msg.message == WM_APP) {
-			auto action = reinterpret_cast<std::function<void()>*>(msg.lParam);
-			(*action)();
-			delete action;
-		}
-		else if (msg.message == WM_QUIT) {
-			return;
 		}
 	}
 }

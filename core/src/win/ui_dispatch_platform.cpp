@@ -24,18 +24,18 @@ namespace {
 }
 
 std::optional<DeskGap::PlatformException> DeskGap::UISyncPlatform(std::function<void()>&& action) {
-   static DWORD mainThreadId = *static_cast<DWORD*>(PlatformData());
+   static HWND dispatcherWnd = *static_cast<HWND*>(PlatformData());
 
    std::optional<DeskGap::PlatformException> exception;
 
-   HANDLE actionCompleted = CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
+   HANDLE actionCompleted = CreateEventExW(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
    HANDLE events[1] = { actionCompleted };
    DWORD handleCount = ARRAYSIZE(events);
    DWORD handleIndex = 0;
 
-   PostThreadMessageW(
-      mainThreadId,
-      WM_APP, 0,
+   PostMessageW(
+      dispatcherWnd,
+      WM_APP + 1, 0,
       reinterpret_cast<LPARAM>(new std::function<void()>([&]() {
          exception = ExecuteAction(action);
          SetEvent(actionCompleted);
@@ -49,10 +49,10 @@ std::optional<DeskGap::PlatformException> DeskGap::UISyncPlatform(std::function<
 }
 
 void DeskGap::UIASyncPlatform(std::function<void()>&& action, std::function<void(std::optional<PlatformException>&&)> callback) {
-   static DWORD mainThreadId = *static_cast<DWORD*>(PlatformData());
-   PostThreadMessageW(
-      mainThreadId,
-      WM_APP, 0,
+   static HWND dispatcherWnd = *static_cast<HWND*>(PlatformData());
+   PostMessageW(
+      dispatcherWnd,
+      WM_APP + 1, 0,
       reinterpret_cast<LPARAM>(new std::function<void()>([
          action = std::move(action),
          callback = std::move(callback)

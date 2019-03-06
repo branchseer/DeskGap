@@ -17,6 +17,7 @@ namespace DeskGap {
         void SetEnabled(const Napi::CallbackInfo& info);
         void SetChecked(const Napi::CallbackInfo& info);
         void SetAccelerator(const Napi::CallbackInfo& info);
+        void Destroy(const Napi::CallbackInfo& info);
     public:
         MenuItemWrap(const Napi::CallbackInfo& info);
 
@@ -30,6 +31,7 @@ namespace DeskGap {
         friend class AppWrap;
         std::unique_ptr<Menu> menu_;
         void Append(const Napi::CallbackInfo& info);
+        void Destroy(const Napi::CallbackInfo& info);
     public:
         MenuWrap(const Napi::CallbackInfo& info);
         static Napi::Function Constructor(const Napi::Env& env);

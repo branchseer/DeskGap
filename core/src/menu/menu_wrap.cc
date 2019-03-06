@@ -13,6 +13,7 @@ namespace DeskGap {
             InstanceMethod("setEnabled", &MenuItemWrap::SetEnabled),
             InstanceMethod("setChecked", &MenuItemWrap::SetChecked),
             InstanceMethod("setAccelerator", &MenuItemWrap::SetAccelerator),
+            InstanceMethod("destroy", &MenuItemWrap::Destroy),
         });
     }
 
@@ -27,11 +28,9 @@ namespace DeskGap {
             wrappedSubmenu = MenuWrap::Unwrap(info[2].ToObject());
         }
 
-        Napi::Object jsCallbacks = info[3].ToObject();
-        Value().Set("callbacks_", jsCallbacks);
 
         MenuItem::EventCallbacks eventCallbacks {
-            [jsOnClick = JSFunctionForUI::Weak(jsCallbacks.Get("onClick").As<Napi::Function>())]() {
+            [jsOnClick = JSFunctionForUI::Persist(info[3].As<Napi::Function>(), true)]() {
                 jsOnClick->Call();
             }
         };
@@ -81,6 +80,12 @@ namespace DeskGap {
             this->menu_item_->SetAccelerator(tokens);
         });
     }
+
+    void MenuItemWrap::Destroy(const Napi::CallbackInfo& info) {
+        UISyncDelayable(info.Env(), [this]() {
+            this->menu_item_.reset();
+        });
+    }
     //MenuItemWrap Implementations End
 
 
@@ -88,7 +93,8 @@ namespace DeskGap {
 
     Napi::Function MenuWrap::Constructor(const Napi::Env& env) {
         return DefineClass(env, "MenuNative", {
-            InstanceMethod("append", &MenuWrap::Append)
+            InstanceMethod("append", &MenuWrap::Append),
+            InstanceMethod("destroy", &MenuWrap::Destroy)
         });
     }
 
@@ -106,6 +112,12 @@ namespace DeskGap {
         
         UISyncDelayable(info.Env(), [this, wrappedMenuItem] {
             this->menu_->AppendItem(*(wrappedMenuItem->menu_item_)); 
+        });
+    }
+
+    void MenuWrap::Destroy(const Napi::CallbackInfo& info) {
+        UISyncDelayable(info.Env(), [this]() {
+            this->menu_.reset();
         });
     }
     //MenuWrap Implementations End

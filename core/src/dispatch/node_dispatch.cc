@@ -4,52 +4,14 @@
 #include <cassert>
 #include "node_dispatch.h"
 
-// using action_t = std::function<void()>;
-
-//https://github.com/nodejs/node/issues/13512#issuecomment-306966848
-// void DeskGap::NodeAsync(const action_t& action) {
-//     struct async_data_t {
-//         action_t action;
-//     };
-//     static uv_loop_t* uv_loop = nullptr;
-//     if (uv_loop == nullptr) {
-//         napi_get_uv_event_loop(GetNodeEnv(), &uv_loop);
-//     }
-
-//     uv_async_t* async = new uv_async_t;
-    
-//     uv_async_init(uv_loop, async, [](uv_async_t* async) {
-//         auto async_data = (async_data_t*)uv_handle_get_data((uv_handle_t*)async);
-//         {
-//             Napi::HandleScope scope(GetNodeEnv());
-//             try {
-//                 (async_data->action)();
-//             } catch (const Napi::Error& e) {
-//                 napi_fatal_exception(e.Env(), e.Value());
-//             }
-//         }
-
-//         uv_close((uv_handle_t*)async, [](uv_handle_t* async) {
-//             auto async_data = (async_data_t*)uv_handle_get_data((uv_handle_t*)async);
-//             delete (uv_async_t*)async;
-//             delete async_data;
-//         });
-//     });
-
-//     uv_handle_set_data((uv_handle_t*)async, new async_data_t {
-//         action
-//     });
-
-//     uv_async_send(async);
-// }
-
-// void DeskGap::NodeAsync(const std::function<void(const Napi::Env&)>& action) {
-//     DeskGap::NodeAsync(static_cast<action_t>(std::bind(action, GetNodeEnv())));
-// }
-
-
 namespace DeskGap {
-    JSFunctionForUI::JSFunctionForUI(const Napi::Function& js_func) {
+    namespace {
+        struct ThreadSafeFunctionData {
+            std::optional<JSFunctionForUI::JSArgsGetter> jsArgsGetter;
+            napi_threadsafe_function holdedThreadSafeFunction;
+        };
+    }
+    JSFunctionForUI::JSFunctionForUI(const Napi::Function& js_func, bool holdWhileQueuing): holdWhileQueuing_(holdWhileQueuing) {
         napi_status status = napi_create_threadsafe_function(
             js_func.Env(), js_func,
             /*async_resource*/nullptr, /*async_resource_name*/Napi::String::New(js_func.Env(), "JSFunctionForUI"),
@@ -62,9 +24,17 @@ namespace DeskGap {
     }
 
     void JSFunctionForUI::Call_(std::optional<JSArgsGetter>&& getArgs) {
-        napi_status status = napi_call_threadsafe_function(
+        napi_status status;
+        auto data = new ThreadSafeFunctionData { std::move(getArgs), nullptr };
+        if (holdWhileQueuing_) {
+            status = napi_acquire_threadsafe_function(threadsafe_function_);
+            assert(status == napi_ok);
+
+            data->holdedThreadSafeFunction = threadsafe_function_;
+        }
+        status = napi_call_threadsafe_function(
             threadsafe_function_,
-            getArgs.has_value() ? new JSArgsGetter(std::move(*getArgs)): nullptr,
+            data,
             napi_tsfn_blocking
         );
         assert(status == napi_ok);
@@ -77,28 +47,31 @@ namespace DeskGap {
         Call_(std::make_optional<JSArgsGetter>(std::move(getter)));
     }
 
-    void JSFunctionForUI::call_js_cb(napi_env env, napi_value js_callback, void* context, void* data) {
-        auto jsArgsGetter = static_cast<JSArgsGetter*>(data);
+    void JSFunctionForUI::call_js_cb(napi_env env, napi_value js_callback, void* context, void* untypedData) {
+        auto data = static_cast<ThreadSafeFunctionData*>(untypedData);
         if (env != nullptr && js_callback != nullptr) {
             Napi::Function func = Napi::Function(env, js_callback);
             try {
-                func.Call(jsArgsGetter != nullptr ? (*jsArgsGetter)(env) : std::vector<napi_value>());
+                func.Call(data->jsArgsGetter.has_value() ? (*(data->jsArgsGetter))(env) : std::vector<napi_value>());
             }
             catch (const Napi::Error& e) {
                 napi_fatal_exception(e.Env(), e.Value());
             }
+            if (data->holdedThreadSafeFunction != nullptr) {
+                napi_status status = napi_release_threadsafe_function(data->holdedThreadSafeFunction, napi_tsfn_release);
+                assert(status == napi_ok);
+            }
         }
-        if (jsArgsGetter != nullptr) {
-            delete jsArgsGetter;
-        }
+
+        delete data;
     }
     JSFunctionForUI::~JSFunctionForUI() {
-        napi_status status = napi_release_threadsafe_function(threadsafe_function_, napi_tsfn_abort);
+        napi_status status = napi_release_threadsafe_function(threadsafe_function_, napi_tsfn_release);
         assert(status == napi_ok);
     }
 
-    std::shared_ptr<JSFunctionForUI> JSFunctionForUI::Persist(const Napi::Function& func) {
-        return std::make_shared<JSFunctionForUI>(func);
+    std::shared_ptr<JSFunctionForUI> JSFunctionForUI::Persist(const Napi::Function& func, bool holdWhileQueuing) {
+        return std::make_shared<JSFunctionForUI>(func, holdWhileQueuing);
     }
 
     std::shared_ptr<JSFunctionForUI> JSFunctionForUI::Weak(const Napi::Function& func) {

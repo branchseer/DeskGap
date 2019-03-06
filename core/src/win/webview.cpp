@@ -76,7 +76,7 @@ namespace DeskGap {
         webViewControl.AddInitializeScript(*preloadScript);
     }
 
-    void WebView::Impl::InitControl(HWND parentWnd) {
+    HWND WebView::Impl::InitControl(HWND parentWnd) {
         static bool isClassRegistered = false;
         if (!isClassRegistered) {
             isClassRegistered = true;
@@ -104,11 +104,13 @@ namespace DeskGap {
             wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
             RegisterClassExW(&wndClass);
         }
+
         controlWnd = CreateWindowW(
             WebViewHostWndClassName, L"",
             WS_CHILD,
             0, 0, 0, 0, parentWnd, nullptr, nullptr, 0
         );
+
         SetWindowLongPtrW(controlWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
         IAsyncOperation<WebViewControl> asyncOperation = process.CreateWebViewControlAsync(
@@ -116,7 +118,7 @@ namespace DeskGap {
             { }
         );
 
-        HANDLE actionCompleted = CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
+        HANDLE actionCompleted = CreateEventExW(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
         HANDLE events[1] = { actionCompleted };
         DWORD handleCount = ARRAYSIZE(events);
         DWORD handleIndex = 0;
@@ -124,7 +126,7 @@ namespace DeskGap {
         asyncOperation.Completed([&](const auto&, const auto&) {
             SetEvent(actionCompleted);
         });
-        
+
         CoWaitForMultipleHandles(0, INFINITE, handleCount, events, &handleIndex);
         CloseHandle(actionCompleted);
 
@@ -181,13 +183,14 @@ namespace DeskGap {
                 }
             }
         );
+
+        return controlWnd;
     }
 
-
     WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
+        impl_->callbacks = std::move(callbacks);
         WebViewControlProcessOptions options;
         options.PrivateNetworkClientServerCapability(WebViewControlProcessCapabilityState::Enabled);
-        impl_->callbacks = std::move(callbacks);
         impl_->process = WebViewControlProcess(options);
         //The real creation of WebViewControl happens in WebView::Impl::InitControl,
         //which is called by BrowserWindow, because it needs the handle of the window.

@@ -43,7 +43,7 @@ namespace DeskGap {
         parentHMenu_.emplace(parentHMenu);
         UINT flags = MF_ENABLED;
         if (type == Type::SUBMENU) {
-            flags |= MF_POPUP;
+            flags |= MF_POPUP | MF_STRING;
         }
         else if (type == Type::SEPARATOR) {
             flags |= MF_SEPARATOR;
@@ -173,6 +173,7 @@ namespace DeskGap {
     MenuItem::~MenuItem() = default;
 
     Menu::Menu(const Type& type): impl_(std::make_unique<Impl>()) {
+        impl_->type = type;
         if (type == Type::MAIN) {
             impl_->hmenu = CreateMenu();
         }
@@ -201,5 +202,9 @@ namespace DeskGap {
         menuItem.impl_->AppendTo(impl_->hmenu);
     }
 
-    Menu::~Menu() = default;
+    Menu::~Menu() {
+        if (impl_->type == Type::CONTEXT) {
+            DestroyMenu(impl_->hmenu);
+        }
+    }
 }

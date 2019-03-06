@@ -78,6 +78,7 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     /** @internal */ private minimumSize_: [number, number];
     /** @internal */ private maximumSize_: [number, number];
     /** @internal */ private menu_: Menu | null = null;
+    /** @internal */ private menuNativeId_: number | null = null;
 
     constructor(options: Partial<IBrowserWindowConstructorOptions> = {}) {
         super();
@@ -286,12 +287,21 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     /** @internal */ 
     private actuallySetTheMenu_() {
         bulkUISync(() => {
+            const oldMenuNativeId = this.menuNativeId_;
+            const oldMenu = this.menu_;
+
             if (this.menu_ == null) {
                 this.native_.setMenu(null);
+                this.menuNativeId_ = null;
             }
             else {
-                this.menu_['createNative_'](MenuTypeCode.main);
-                this.native_.setMenu(this.menu_['native_']);
+                const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main);
+                this.native_.setMenu(nativeMenu);
+                this.menuNativeId_ = menuNativeId;
+            }
+
+            if (oldMenuNativeId != null) {
+                oldMenu!['destroyNative_'](oldMenuNativeId);
             }
         });
     }
@@ -311,6 +321,11 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         bulkUISync(() => {
             this.webview_['native_'].destroy();
             this.native_.destroy();
+
+            if (this.menuNativeId_ != null) {
+                this.menu_!['destroyNative_'](this.menuNativeId_);
+                this.menu_ = null;
+            }
         });
         this.webview_['native_'] = null;
         this.native_ = null;

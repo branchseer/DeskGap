@@ -64,6 +64,7 @@ export class App extends EventEmitter<AppEvents> {
     /** @internal */ private whenReady_: Promise<void>;
     /** @internal */ private native_: any;
     /** @internal */ private menu_: Menu | null = Menu.buildFromTemplate(defaultMenuTemplate);
+    /** @internal */ private menuNativeId_: number | null = null;
 
     constructor() {
         super();
@@ -192,12 +193,21 @@ export class App extends EventEmitter<AppEvents> {
     /** @internal */
     private actuallySetTheMenu_() {
         bulkUISync(() => {
+            const oldMenuNativeId = this.menuNativeId_;
+            const oldMenu = this.menu_;
+
             if (this.menu_ == null) {
                 this.native_.setMenu(null);
+                this.menuNativeId_ = null;
             }
             else {
-                this.menu_['createNative_'](MenuTypeCode.main);
-                this.native_.setMenu(this.menu_['native_']);
+                const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main);
+                this.native_.setMenu(nativeMenu);
+                this.menuNativeId_ = menuNativeId;
+            }
+
+            if (oldMenuNativeId != null) {
+                oldMenu!['destroyNative_'](oldMenuNativeId);
             }
         });
     }

@@ -4,7 +4,23 @@ import globals from './globals';
 import { BrowserWindow } from './browser-window'
 import roleDefaults, { Role } from './internal/menu/roles';
 
-const { MenuItemNative, MenuNative } = require('./bindings');
+interface IMenuItemNative {
+    setEnabled(enabled: boolean): void;
+    setLabel(label: string): void;
+    setChecked(checked: boolean): void;
+    setAccelerator(acceleratorTokens: string[]): void;
+    destroy(): void;
+}
+
+interface IMenuNative {
+    append(item: IMenuItemNative): void;
+    destroy(): void;
+}
+
+const { MenuItemNative, MenuNative } = require('./bindings') as {
+    MenuItemNative: { new(role: string, typeCode: number, submenu: IMenuNative | null, onClick: () => void): IMenuItemNative };
+    MenuNative: { new(typeCode: number, callbacks: {}): IMenuNative }
+}
 
 export type MenuItemType = 'normal' | 'separator' | 'submenu' | 'checkbox';
 
@@ -34,10 +50,13 @@ export interface MenuItemConstructorOptions {
 export interface IMenuPopupOptions {
     window?: BrowserWindow; x?: number; y?: number; positioningItem?: number;
 }
+
+let lastNativeId: number = 0;
+
 export class Menu {
-    /** @internal */ private native_: any = null;
+    /** @internal */ private natives_ = new Map<number, IMenuNative>();
     public items: MenuItem[] = [];
-    /** @internal */ private createdNativeTypeCode_: number | null = null;
+
     /** @internal */ private nativeCallbacks_ = {};
     
     append(menuItem: MenuItem) {
@@ -60,12 +79,19 @@ export class Menu {
             return;
         }
 
+        let nativeId: number = 0;
         bulkUISync(() => {
             if (fullOptions.window == null) {
                 throw new Error('No window specified for Menu#popup, and there is no focused window');
             }
-            this.createNative_(MenuTypeCode.context);
-            fullOptions.window['native_'].popupMenu(this.native_, location, fullOptions.positioningItem);
+            const result = this.createNative_(MenuTypeCode.context);
+            nativeId = result[0];
+            const native = result[1];
+            fullOptions.window['native_'].popupMenu(native, location, fullOptions.positioningItem);    
+        });
+        //Wait for WM_MENUCOMMAND
+        bulkUISync(() => {
+            this.destroyNative_(nativeId);
         });
     }
     static setApplicationMenu(menu: Menu | null) {
@@ -85,18 +111,27 @@ export class Menu {
     }
 
     /** @internal */ 
-    private createNative_(type: number) {
-        if (type === this.createdNativeTypeCode_) {
-            return;
-        }
-        if (this.createdNativeTypeCode_ != null) {
-            throw new Error("A Menu can't be used as both a main menu and a context menu");
-        }
-        this.createdNativeTypeCode_ = type;
-        this.native_ = new MenuNative(type, this.nativeCallbacks_);
+    private createNative_(type: number, theNativeId?: number): [number, IMenuNative] {
+        const nativeId = theNativeId || ++lastNativeId;
+        //console.log(nativeId);
+
+        const native = new MenuNative(type, this.nativeCallbacks_);
+        this.natives_.set(nativeId, native);
+        
         for (const item of this.items) {
-            item['createNative_']();
-            this.native_.append(item['native_']);
+            const nativeMenuItem = item['createNative_'](nativeId);
+            native.append(nativeMenuItem);
+        }
+
+        return [nativeId, native];
+    }
+    /** @internal */
+    private destroyNative_(nativeId: number): void {
+        const native = this.natives_.get(nativeId)!;
+        native.destroy();
+        this.natives_.delete(nativeId);
+        for (const item of this.items) {
+            item['destroyNative_'](nativeId);
         }
     }
 
@@ -118,11 +153,19 @@ export class MenuItem {
     /** @internal */ private type_: number;
     public click: (item: MenuItem, window: BrowserWindow | null) => void;
     /** @internal */ private submenu_: Menu | null;
-    /** @internal */ private native_: any;
+    /** @internal */ private natives_ = new Map<number, IMenuItemNative>();
     /** @internal */ private checked_: boolean;
     /** @internal */ private accelerator_: string;
     /** @internal */ private role_: string; 
     /** @internal */ private window_: BrowserWindow | null; 
+    /** @internal */ private nativeOnClick_ = () => {
+        if (this.type_ === MenuItemTypeCode.checkbox) {
+            this.checked = !this.checked;
+        }
+        if (this.click != null) {
+            this.click(this, this.window_ || globals.focusedBrowserWindow);
+        }
+    };
 
     constructor(options: Partial<MenuItemConstructorOptions> = {}) {
         if (options.role != null) {
@@ -155,7 +198,6 @@ export class MenuItem {
         this.submenu_ = fullOptions.submenu as (Menu | null);
         this.type_ = MenuItemTypeCode[fullOptions.type];
         this.click = fullOptions.click;
-        this.native_ = null;
         this.checked_ = fullOptions.checked;
         this.accelerator_ = fullOptions.accelerator;
         this.role_ = fullOptions.role;   
@@ -171,48 +213,57 @@ export class MenuItem {
         return this.enabled_;
     }
     set enabled(value: boolean) {
-        if (this.native_ != null) {
-            this.native_.setEnabled(value);
-        }
+        bulkUISync(() => {
+            for (const native of this.natives_.values()) {
+                native.setEnabled(value);
+            };
+        });
         this.enabled_ = value;
     }
     get checked(): boolean {
         return this.checked_;
     }
     set checked(value: boolean) {
+        bulkUISync(() => {
+            for (const native of this.natives_.values()) {
+                native.setChecked(value);
+            }
+        });
         this.checked_ = value
-        if (this.native_ != null) {
-            this.native_.setChecked(value);
-        }
     }
     get accelerator(): string {
         return this.accelerator_;
     }
     
     /** @internal */ 
-    private createNative_() {
-        let nativeSubmenu = null;
+    private createNative_(nativeId: number): IMenuItemNative {
+
+        let nativeSubmenu: IMenuNative | null = null;
         if (this.submenu_ != null) {
-            this.submenu_['createNative_'](MenuItemTypeCode.submenu);
-            nativeSubmenu = this.submenu_['native_'];
+            [, nativeSubmenu] = this.submenu_['createNative_'](MenuItemTypeCode.submenu, nativeId);
         }
-        this.native_ = new MenuItemNative(this.role_, this.type_, nativeSubmenu, {
-            onClick: () => {
-                if (this.type_ === MenuItemTypeCode.checkbox) {
-                    this.checked = !this.checked;
-                }
-                if (this.click != null) {
-                    this.click(this, this.window_ || globals.focusedBrowserWindow);
-                }
-            }
-        });
-        this.native_.setEnabled(this.enabled_);
-        this.native_.setLabel(this.label_);
-        this.native_.setChecked(this.checked_);
+
+        const native = new MenuItemNative(this.role_, this.type_, nativeSubmenu, this.nativeOnClick_);
+
+        native.setEnabled(this.enabled_);
+        native.setLabel(this.label_);
+        native.setChecked(this.checked_);
 
         const acceleratorTokens = parseAcceleratorToTokens(this.accelerator_);
+        native.setAccelerator(acceleratorTokens);
 
-        this.native_.setAccelerator(acceleratorTokens);
+        this.natives_.set(nativeId, native);
+
+        return native;
+    }
+
+    /** @internal */
+    private destroyNative_(nativeId: number): void {
+        const native = this.natives_.get(nativeId)!;
+        native.destroy();
+        this.natives_.delete(nativeId);
+        if (this.submenu_ != null) {
+            this.submenu_['destroyNative_'](nativeId);
+        }
     }
 };
-

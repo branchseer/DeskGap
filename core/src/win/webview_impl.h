@@ -26,7 +26,7 @@ namespace DeskGap {
 		Impl();
 
         void PrepareScript();
-        void InitControl(HWND parentWnd);
+        HWND InitControl(HWND parentWnd);
     };
 }
 

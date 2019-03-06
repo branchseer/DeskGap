@@ -74,8 +74,7 @@ namespace DeskGap {
         );
         SetWindowLongPtrW(impl_->windowWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
         
-        webView.impl_->InitControl(impl_->windowWnd);
-        impl_->webViewControlWnd = webView.impl_->controlWnd;
+        impl_->webViewControlWnd = webView.impl_->InitControl(impl_->windowWnd);
     }
 
     void BrowserWindow::Show() {
@@ -218,7 +217,6 @@ namespace DeskGap {
         else {
             GetCursorPos(&pt);
         }
-
 
         TrackPopupMenuEx(menu.impl_->hmenu, uFlags, pt.x, pt.y, impl_->windowWnd, NULL);
     }

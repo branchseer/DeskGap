@@ -26,7 +26,7 @@ namespace {
 
 
 void* DeskGapPlatform::InitUIThread() { 
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
     WNDCLASSEXW dispatcherWindowClass { };
     dispatcherWindowClass.cbSize = sizeof(WNDCLASSEXW);

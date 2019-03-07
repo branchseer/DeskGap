@@ -73,19 +73,4 @@ namespace DeskGap {
     std::shared_ptr<JSFunctionForUI> JSFunctionForUI::Persist(const Napi::Function& func, bool holdWhileQueuing) {
         return std::make_shared<JSFunctionForUI>(func, holdWhileQueuing);
     }
-
-    std::shared_ptr<JSFunctionForUI> JSFunctionForUI::Weak(const Napi::Function& func) {
-        return Persist(Napi::Function::New(func.Env(), [
-            weakFunc = std::make_shared<Napi::FunctionReference>(Napi::Weak(func))
-        ](const Napi::CallbackInfo& info) {
-            if (weakFunc->IsEmpty()) return;
-            std::vector<napi_value> args;
-            size_t argsCount = info.Length();
-            args.reserve(argsCount);
-            for (size_t i = 0; i < argsCount; ++i) {
-                args.push_back(info[i]);
-            }
-            weakFunc->Call(args);
-        }));
-    }
 }

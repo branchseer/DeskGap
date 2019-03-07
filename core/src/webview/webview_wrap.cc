@@ -22,13 +22,12 @@ namespace DeskGap {
             Napi::ObjectWrap<WebViewWrap>(info)
     {
         Napi::Object jsCallbacks = info[0].ToObject();
-        Value().Set("callbacks_", jsCallbacks);
 
         WebView::EventCallbacks eventCallbacks {
-            [jsDidStartLoading = JSFunctionForUI::Weak(jsCallbacks.Get("didStartLoading").As<Napi::Function>())]() {
+            [jsDidStartLoading = JSFunctionForUI::Persist(jsCallbacks.Get("didStartLoading").As<Napi::Function>())]() {
                 jsDidStartLoading->Call();
             },
-            [jsDidStopLoading = JSFunctionForUI::Weak(jsCallbacks.Get("didStopLoading").As<Napi::Function>())](const std::optional<WebView::LoadingError>& error) {
+            [jsDidStopLoading = JSFunctionForUI::Persist(jsCallbacks.Get("didStopLoading").As<Napi::Function>())](const std::optional<WebView::LoadingError>& error) {
                 jsDidStopLoading->Call([error](auto env) -> std::vector<napi_value> {
                     std::vector<napi_value> args;
                     if (error.has_value()) {
@@ -40,12 +39,12 @@ namespace DeskGap {
                     return args;
                 });
             },
-            [jsOnStringMessage = JSFunctionForUI::Weak(jsCallbacks.Get("onStringMessage").As<Napi::Function>())](std::string&& stringMessage) {
+            [jsOnStringMessage = JSFunctionForUI::Persist(jsCallbacks.Get("onStringMessage").As<Napi::Function>())](std::string&& stringMessage) {
                 jsOnStringMessage->Call([stringMessage { std::move(stringMessage) }](auto env) -> std::vector<napi_value> {
                     return { Napi::String::New(env, stringMessage) };
                 });
             },
-            [jsOnPageTitleUpdated = JSFunctionForUI::Weak(jsCallbacks.Get("onPageTitleUpdated").As<Napi::Function>())](const std::string& title) {
+            [jsOnPageTitleUpdated = JSFunctionForUI::Persist(jsCallbacks.Get("onPageTitleUpdated").As<Napi::Function>())](const std::string& title) {
                 jsOnPageTitleUpdated->Call([title](auto env) -> std::vector<napi_value> {
                     return { Napi::String::New(env, title) };
                 });

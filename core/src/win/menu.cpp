@@ -30,15 +30,6 @@ namespace {
 }
 
 namespace DeskGap {
-    void MenuItem::Impl::AddAction(Action&& action) {
-        if (parentHMenu_.has_value()) {
-            action(*parentHMenu_);
-            if (windowWnd) DrawMenuBar(windowWnd);
-        }
-        else {
-            pendingActions_.emplace(std::move(action));
-        }
-    }
     void MenuItem::Impl::AppendTo(HMENU parentHMenu) {
         parentHMenu_.emplace(parentHMenu);
         UINT flags = MF_ENABLED;
@@ -53,10 +44,7 @@ namespace DeskGap {
         }
         AppendMenuW(parentHMenu, flags, identifier, L"");
 
-        while (!pendingActions_.empty()) {
-            pendingActions_.front()(parentHMenu);
-            pendingActions_.pop();
-        }
+        this->UpdateInfo();
     }
     MenuItem::MenuItem(const std::string& role, const Type& type, const Menu* submenu, EventCallbacks&& eventCallbacks): impl_(std::make_unique<Impl>()) {
         impl_->windowWnd = nullptr;
@@ -73,7 +61,7 @@ namespace DeskGap {
         }
 
         if (role == "toggledevtools") {
-            impl_->SetLabel("Install/Open Developer Tools...");
+            impl_->wlabel = L"Install/Open Developer Tools...";
             impl_->callbacks.onClick = []() {
                 bool success = ShellExecuteW(
                     nullptr, L"open",
@@ -113,50 +101,37 @@ namespace DeskGap {
         else if (role == "delete") {
             impl_->callbacks.onClick = []() { SendKey(VK_BACK); };
         }
-        impl_->UpdateState();
     }
 
     void MenuItem::SetLabel(const std::string& utf8label) {
         if (this->impl_->type == Type::SEPARATOR || this->impl_->role == "toggledevtools") return;
-        this->impl_->SetLabel(utf8label);
+        this->impl_->wlabel = UTF8ToWString(utf8label.c_str());
+        this->impl_->UpdateInfo();
     }
 
-    void MenuItem::Impl::SetLabel(const std::string& utf8label) {
-        AddAction([
-            this,
-            wlabel = UTF8ToWString(utf8label.c_str())
-        ](HMENU parentHMenu) {
-            MENUITEMINFOW info { };
-            info.cbSize = sizeof(info);
-            info.fMask = MIIM_STRING | MIIM_DATA;
-            info.dwTypeData = LPWSTR(wlabel.c_str());
-            SetMenuItemInfoW(parentHMenu, this->identifier, FALSE, &info);
-        });
-    }
-
-    
     void MenuItem::SetEnabled(bool enabled) {
         this->impl_->enabled = enabled;
-        this->impl_->UpdateState();
+        this->impl_->UpdateInfo();
     }
 
 
     void MenuItem::SetChecked(bool checked) {
         this->impl_->checked = checked;
-        this->impl_->UpdateState();
+        this->impl_->UpdateInfo();
     }
 
 
-    void MenuItem::Impl::UpdateState() {
-        AddAction([this](HMENU parentHMenu) {
+    void MenuItem::Impl::UpdateInfo() {
+        if (parentHMenu_.has_value()) {
             MENUITEMINFOW info { };
             info.cbSize = sizeof(info);
-            info.fMask = MIIM_STATE;
+            info.fMask = MIIM_STRING | MIIM_DATA | MIIM_STATE;
+            info.dwTypeData = LPWSTR(this->wlabel.c_str());
             info.fState =
                 (this->checked ? MFS_CHECKED : MFS_UNCHECKED) |
                 (this->enabled ? MFS_ENABLED : MFS_DISABLED);
-            SetMenuItemInfoW(parentHMenu, this->identifier, FALSE, &info);
-        });
+            SetMenuItemInfoW(*parentHMenu_, this->identifier, FALSE, &info);
+        }
     }
     
     std::string MenuItem::GetLabel() {

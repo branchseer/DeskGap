@@ -18,22 +18,16 @@ namespace DeskGap {
     	Type type;
     	UINT_PTR identifier;
 
-    	void SetLabel(const std::string& label);
-
+        std::wstring wlabel;
     	bool enabled;
     	bool checked;
-    	void UpdateState();
+    	void UpdateInfo();
 
     	MenuItem::EventCallbacks callbacks;
 
-    	using Action = std::function<void(HMENU)>;
-    	//pending changes before CreateMenu 
-        std::queue<Action> pendingActions_;
         std::optional<HMENU> parentHMenu_;
 
-        void AddAction(Action&& action);
         void AppendTo(HMENU parentHMenu);
-
     };
     
     struct Menu::Impl {

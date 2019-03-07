@@ -224,22 +224,21 @@ namespace DeskGap {
     {
         WebViewWrap* webViewWrap = WebViewWrap::Unwrap(info[0].As<Napi::Object>());
         Napi::Object jsCallbacks = info[1].As<Napi::Object>();
-        Value().Set("callbacks_", jsCallbacks);
 
         BrowserWindow::EventCallbacks callbacks {
-            [jsOnBlur = JSFunctionForUI::Weak(jsCallbacks.Get("onBlur").As<Napi::Function>())]() {
+            [jsOnBlur = JSFunctionForUI::Persist(jsCallbacks.Get("onBlur").As<Napi::Function>())]() {
                 jsOnBlur->Call();
             },
-            [jsOnFocus = JSFunctionForUI::Weak(jsCallbacks.Get("onFocus").As<Napi::Function>())]() {
+            [jsOnFocus = JSFunctionForUI::Persist(jsCallbacks.Get("onFocus").As<Napi::Function>())]() {
                 jsOnFocus->Call();
             },
-            [jsOnResize = JSFunctionForUI::Weak(jsCallbacks.Get("onResize").As<Napi::Function>())]() {
+            [jsOnResize = JSFunctionForUI::Persist(jsCallbacks.Get("onResize").As<Napi::Function>())]() {
                 jsOnResize->Call();
             },
-            [jsOnMove = JSFunctionForUI::Weak(jsCallbacks.Get("onMove").As<Napi::Function>())]() {
+            [jsOnMove = JSFunctionForUI::Persist(jsCallbacks.Get("onMove").As<Napi::Function>())]() {
                 jsOnMove->Call();
             },
-            [jsOnClose = JSFunctionForUI::Weak(jsCallbacks.Get("onClose").As<Napi::Function>())]() {
+            [jsOnClose = JSFunctionForUI::Persist(jsCallbacks.Get("onClose").As<Napi::Function>())]() {
                 jsOnClose->Call();
             },
         };

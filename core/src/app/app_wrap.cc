@@ -44,13 +44,12 @@ namespace DeskGap {
             Napi::ObjectWrap<AppWrap>(info)
         {
             Napi::Object jsCallbacks = info[0].ToObject();
-            Value().Set("callbacks_", jsCallbacks);
             
             App::EventCallbacks callbacks {
-                [jsOnReady = JSFunctionForUI::Weak(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
+                [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
                     jsOnReady->Call();
                 },
-                [jsBeforeQuit = JSFunctionForUI::Weak(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
+                [jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
                     jsBeforeQuit->Call();
                 }
             };

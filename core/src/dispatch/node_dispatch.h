@@ -17,7 +17,6 @@ namespace DeskGap {
         JSFunctionForUI& operator=(const JSFunctionForUI&) = delete;
 
         static std::shared_ptr<JSFunctionForUI> Persist(const Napi::Function&, bool holdWhileQueuing = false);
-        static std::shared_ptr<JSFunctionForUI> Weak(const Napi::Function&);
 
         ~JSFunctionForUI();
 

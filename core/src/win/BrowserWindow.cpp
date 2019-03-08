@@ -24,6 +24,15 @@ namespace DeskGap {
                 if (browserWindow != nullptr) {
                     switch (msg)
                     {
+                        case WM_ACTIVATE: {
+                            if (wp == WA_INACTIVE) {
+                                browserWindow->impl_->callbacks.onBlur();
+                            }
+                            else {
+                                browserWindow->impl_->callbacks.onFocus();
+                            }
+                            break;
+                        }
                         case WM_CLOSE: {
                             browserWindow->impl_->callbacks.onClose();
                             return 0;

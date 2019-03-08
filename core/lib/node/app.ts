@@ -185,13 +185,23 @@ export class App extends EventEmitter<AppEvents> {
 
     setMenu(menu: Menu | null) {
         this.menu_ = menu;
-        if (this.isReady_) {
-            this.actuallySetTheMenu_();
+        if (process.platform === 'darwin') {
+            if (this.isReady_) {
+                this.actuallySetTheMenu_();
+            }
+        }
+        else {
+            bulkUISync(() => {
+                for (const browserWindow of globals.browserWindowsById.values()) {
+                    browserWindow.setMenu(this.menu_);
+                }
+            });
         }
     }
 
     /** @internal */
     private actuallySetTheMenu_() {
+        if (this.menu_ == null) return;
         bulkUISync(() => {
             const oldMenuNativeId = this.menuNativeId_;
             const oldMenu = this.menu_;

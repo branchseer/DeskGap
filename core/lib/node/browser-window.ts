@@ -3,7 +3,6 @@ import app from './app';
 import { EventEmitter, IEventMap } from '../common/events';
 import globals from './globals';
 import { Menu, MenuTypeCode } from './menu';
-import defaultMenuTemplate from './internal/menu/default-template';
 import { WebView } from './webview';
 
 const { BrowserWindowNative } = require('./bindings');
@@ -85,7 +84,7 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
 
         let defaultMenu: Menu | null = null;
         if (process.platform !== 'darwin' && !options.hasOwnProperty('menu')) {
-            defaultMenu = Menu.buildFromTemplate(defaultMenuTemplate);
+            defaultMenu = app.getMenu()
         }
         
         const fullOptions: IBrowserWindowConstructorOptions = Object.assign({

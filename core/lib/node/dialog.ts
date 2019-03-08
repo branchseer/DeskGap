@@ -32,7 +32,7 @@ const FileOpenDialogPropertyEnum = {
     multiSelections: 1 << 2,
     showHiddenFiles: 1 << 3,
     createDirectory: 1 << 4,
-    // promptToCreate: 1 << 5,
+    promptToCreate: 1 << 5,
     noResolveAliases: 1 << 6,
     treatPackageAsDirectory: 1 << 7
 };

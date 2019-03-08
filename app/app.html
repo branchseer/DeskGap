@@ -62,17 +62,20 @@ dialog.showErrorBox('<input id="error-box-title" value="Title" />', '<input id="
 
             <h3>showOpenDialogAsync</h3>
             <pre><code>
-await dialog.showOpenDialogAsync(browserWindow, { properties: <select id="open-dialog-properties">
-        <option>[ ]</option>
-        <option>[ "multiSelections" ]</option>
-</select> })
+await dialog.showOpenDialogAsync(browserWindow, {
+    properties: [ <label><input type="checkbox" id="allows-multi-selections" />"multiSelections"</label> ]
+})
             </code></pre>
             <button onclick="showOpenDialogAsync()">Run</button><br />
             <span class="result" id="open-dialog-result"></span>
             <script type="text/javascript">
                 function showOpenDialogAsync() {
-                    var $select = document.getElementById('open-dialog-properties');
-                    var properties = JSON.parse($select.options[$select.selectedIndex].innerHTML);
+                    var $allowsMultiSelections = document.getElementById('allows-multi-selections');
+                    var allowsMultiSelections = $allowsMultiSelections.checked;
+                    var properties = [];
+                    if (allowsMultiSelections) {
+                        properties.push('multiSelections');
+                    }
                     asyncNode.require('deskgap').then(function(deskgap) {
                         return deskgap.prop('dialog').invoke('showOpenDialogAsync',
                             asyncNode.getCurrentWindow(), {

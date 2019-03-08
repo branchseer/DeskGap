@@ -4,6 +4,7 @@
 #include "webview_impl.h"
 #include "./BrowserWindow_impl.h"
 #include "./util/wstring_utf8.h"
+#include "./util/dpi.h"
 
 namespace {
 	const wchar_t* const BrowserWindowWndClassName = L"DeskGapBrowserWindow";
@@ -43,6 +44,12 @@ namespace DeskGap {
                         case WM_MOVE: {
                             browserWindow->impl_->callbacks.onMove();
                             break;
+                        }
+                        case WM_GETMINMAXINFO: {
+                            LPMINMAXINFO mmInfo = (LPMINMAXINFO)lp;
+                            mmInfo->ptMaxTrackSize = To96Dpi(browserWindow->impl_->windowWnd, browserWindow->impl_->maxTrackSize);
+                            mmInfo->ptMinTrackSize = To96Dpi(browserWindow->impl_->windowWnd, browserWindow->impl_->minTrackSize);
+                            return 0;
                         }
                         case WM_DPICHANGED: {
                             RECT* rect = reinterpret_cast<RECT*>(lp);
@@ -87,17 +94,30 @@ namespace DeskGap {
         SetFocus(impl_->windowWnd);
     }
 
+    namespace {
+        void SetWindowButtonEnabled(HWND hwnd, LONG button, bool enabled) {
+            LONG style = GetWindowLongW(hwnd, GWL_STYLE);
+            if (enabled) {
+                style |= button;
+            }
+            else {
+                style &= ~button;
+            }
+            SetWindowLongW(hwnd, GWL_STYLE, style);
+        }
+    }
+
     void BrowserWindow::SetMaximizable(bool maximizable) {
-        
+        SetWindowButtonEnabled(impl_->windowWnd, WS_MAXIMIZEBOX, maximizable);
     }
     void BrowserWindow::SetMinimizable(bool minimizable) {
-
+        SetWindowButtonEnabled(impl_->windowWnd, WS_MINIMIZEBOX, minimizable);
     }
     void BrowserWindow::SetResizable(bool resizable) {
-
+        SetWindowButtonEnabled(impl_->windowWnd, WS_SIZEBOX, resizable);
     }
     void BrowserWindow::SetHasFrame(bool hasFrame) {
-        
+        SetWindowButtonEnabled(impl_->windowWnd, WS_BORDER, hasFrame);
     }
 
     void BrowserWindow::SetTitle(const std::string& utf8title) {
@@ -106,25 +126,26 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetClosable(bool closable) {
-        
+        UINT uEnable = closable ? (MF_BYCOMMAND | MF_ENABLED) : (MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+        EnableMenuItem(GetSystemMenu(impl_->windowWnd, FALSE), SC_CLOSE, uEnable);
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
-        int dpi = GetDpiForWindow(impl_->windowWnd); 
-        int dpiScaledWidth = MulDiv(width, dpi, 96); 
-        int dpiScaledHeight = MulDiv(height, dpi, 96); 
+        POINT scaledSize = To96Dpi(impl_->windowWnd, { width, height });
         SetWindowPos(
             impl_->windowWnd, nullptr, 0, 0,
-            dpiScaledWidth, dpiScaledHeight,
+            scaledSize.x, scaledSize.y,
             SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE
         );
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
-        
+        impl_->maxTrackSize.x = (width == 0 ? LONG_MAX: width);
+        impl_->maxTrackSize.y = (height == 0 ? LONG_MAX: height);
     }
     void BrowserWindow::SetMinimumSize(int width, int height) {
-        
+        impl_->minTrackSize.x = width;
+        impl_->minTrackSize.y = height;
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
@@ -147,7 +168,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Minimize() {
-
+        ShowWindow(impl_->windowWnd, SW_MINIMIZE);
     }
 
     void BrowserWindow::Center() {
@@ -183,7 +204,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {
-        
+        // To be implemented...
     }
 
 

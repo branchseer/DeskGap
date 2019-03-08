@@ -11,6 +11,9 @@ namespace DeskGap {
         HWND windowWnd;
         HWND webViewControlWnd;
         BrowserWindow::EventCallbacks callbacks;
+
+        POINT maxTrackSize;
+        POINT minTrackSize;
     };
 }
 

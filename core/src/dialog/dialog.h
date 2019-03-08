@@ -33,7 +33,7 @@ namespace DeskGap {
             static const Properties PROPERTY_MULTI_SELECTIONS = 1 << 2;
             static const Properties PROPERTY_SHOW_HIDDEN_FILES = 1 << 3;
             static const Properties PROPERTY_CREATE_DIRECTORY = 1 << 4;
-            // static const Properties PROPERTY_PROMPT_TO_CREATE = 1 << 5;
+            static const Properties PROPERTY_PROMPT_TO_CREATE = 1 << 5;
             static const Properties PROPERTY_NO_RESOLVE_ALIASES = 1 << 6;
             static const Properties PROPERTY_TREAT_PACKAGE_AS_DIRECTORY = 1 << 7;
 

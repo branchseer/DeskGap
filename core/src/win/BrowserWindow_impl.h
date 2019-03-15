@@ -9,8 +9,10 @@
 namespace DeskGap {
     struct BrowserWindow::Impl {
         HWND windowWnd;
-        HWND webViewControlWnd;
+        const WebView& webView;
         BrowserWindow::EventCallbacks callbacks;
+
+        Impl(const WebView& webView, EventCallbacks& callbacks);
 
         POINT maxTrackSize;
         POINT minTrackSize;

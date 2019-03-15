@@ -4,6 +4,7 @@
 #include "webview_impl.h"
 #include "./BrowserWindow_impl.h"
 #include "./util/wstring_utf8.h"
+#include "./util/win32_check.h"
 #include "./util/dpi.h"
 
 namespace {
@@ -11,7 +12,11 @@ namespace {
 }
 
 namespace DeskGap {
-    BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
+    BrowserWindow::Impl::Impl(const WebView& webView, EventCallbacks& callbacks): webView(webView), callbacks(std::move(callbacks)) {
+
+    }
+
+    BrowserWindow::BrowserWindow(const WebView& webView, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>(webView, callbacks)) {
         static bool isClassRegistered = false;
         if (!isClassRegistered) {
             isClassRegistered = true;
@@ -42,11 +47,7 @@ namespace DeskGap {
                             GetClientRect(hwnd, &rect);
                             LONG width = rect.right - rect.left;
                             LONG height = rect.bottom - rect.top;
-                            SetWindowPos(
-                                browserWindow->impl_->webViewControlWnd, nullptr,
-                                0, 0, width, height,
-                                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER
-                            );
+                            browserWindow->impl_->webView.impl_->SetRect(0, 0, width, height);
                             browserWindow->impl_->callbacks.onResize();
                             break;
                         }
@@ -79,7 +80,6 @@ namespace DeskGap {
             RegisterClassExW(&wndClass);
         }
 
-        impl_->callbacks = std::move(callbacks);
         impl_->windowWnd = CreateWindowW(
             BrowserWindowWndClassName,
             L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
@@ -89,17 +89,14 @@ namespace DeskGap {
             nullptr
         );
         SetWindowLongPtrW(impl_->windowWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-        
-        impl_->webViewControlWnd = webView.impl_->InitControl(impl_->windowWnd);
+
+        webView.impl_->InitWithParent(impl_->windowWnd);
     }
 
     void BrowserWindow::Show() {
         ShowWindow(impl_->windowWnd, SW_SHOW);
         UpdateWindow(impl_->windowWnd);
-
-        ShowWindow(impl_->webViewControlWnd, SW_SHOW);
-        UpdateWindow(impl_->webViewControlWnd);
-
+        
         SetFocus(impl_->windowWnd);
     }
 
@@ -169,11 +166,16 @@ namespace DeskGap {
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {
-        return { 0, 0 };
-    }
+        RECT rect;
+        check(GetWindowRect(impl_->windowWnd, &rect));
+        POINT size = From96Dpi(impl_->windowWnd, { rect.right - rect.left, rect.bottom - rect.top });
+        return { size.x, size.y };    }
 
     std::array<int, 2> BrowserWindow::GetPosition() {
-        return { 0, 0 };
+        RECT rect;
+        check(GetWindowRect(impl_->windowWnd, &rect));
+        POINT position = From96Dpi(impl_->windowWnd, { rect.left, rect.top });
+        return { position.x, position.y };
     }
 
     void BrowserWindow::Minimize() {

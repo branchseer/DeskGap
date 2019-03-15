@@ -10,11 +10,11 @@ app.once('ready', () => {
 
     mainWindow = new BrowserWindow({
         show: false,
-        width: 1200, height: 840
+        width: 800, height: 600,
     }).once('ready-to-show', () => {
         mainWindow.show();
     });
-    
+
     if (process.platform !== 'win32') {
         mainWindow.webView.setDevToolsEnabled(true);
     }

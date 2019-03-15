@@ -272,7 +272,8 @@ namespace DeskGap {
     }
 
     void WebView::Reload() {
-        
+        impl_->PrepareScript();
+        impl_->webViewControl.Refresh();
     }
 
     WebView::~WebView() {

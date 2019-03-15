@@ -62,12 +62,12 @@ int main(int argc, char* argv[])
 
     std::string entry = DeskGapPlatform::PathOfResource({ "app" });
     
-    if (DeskGapPlatform::ResourceExists({ "app", "DESKGAP_DEFAULT_APP" })) {
-        if (const char* env_entry = getenv("DESKGAP_ENTRY"); env_entry != nullptr) {
+    if (const char* env_entry = getenv("DESKGAP_ENTRY"); env_entry != nullptr) {
+        if (DeskGapPlatform::ResourceExists({ "app", "DESKGAP_DEFAULT_APP" })) {
             entry = std::string(env_entry);
             SetEnv("NODE_PATH", DeskGapPlatform::PathOfResource({ "node_modules" }));
         }
-    };
+    }
 
     std::vector<std::string> insertingArgv = {
         DeskGapPlatform::PathOfResource({ "node_modules", "deskgap" }),

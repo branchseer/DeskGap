@@ -29,4 +29,5 @@ namespace DeskGap {
     // void WebView::Reload() = 0;
     // WebView::WebView(EventCallbacks&&) { };
     WebView::~WebView() = default;
+    WebView::Impl::~Impl() = default;
 }

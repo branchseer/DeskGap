@@ -12,4 +12,12 @@ namespace DeskGap {
 			pt.y / 96 >= LONG_MAX / dpi ? LONG_MAX: MulDiv(pt.y, dpi, 96)
 		};
 	}
+
+	inline POINT From96Dpi(HWND windowWnd, POINT pt) {
+		int dpi = GetDpiForWindow(windowWnd);
+		return {
+			MulDiv(pt.x, 96, dpi),
+			MulDiv(pt.y, 96, dpi)
+		};
+	}
 }

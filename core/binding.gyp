@@ -69,6 +69,7 @@
             "src/win/menu.cpp",
             "src/win/BrowserWindow.cpp",
             "src/win/webview.cpp",
+            "src/win/winrt_webview.cpp",
             "src/win/shell.cpp",
             "src/win/dialog.cpp",
             "src/win/system_preferences.cpp",

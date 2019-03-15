@@ -9,9 +9,15 @@
 #include <vector>
 #include <variant>
 
+#ifdef WIN32
+    #define VIRTUAL_IF_WIN32(decl) virtual decl=0
+#else
+    #define VIRTUAL_IF_WIN32(decl) decl
+#endif
+
 namespace DeskGap {
     class WebView {
-    private:
+    protected:
         friend class BrowserWindow;
         struct Impl;
         std::unique_ptr<Impl> impl_;
@@ -26,30 +32,75 @@ namespace DeskGap {
             std::function<void(std::string&&)> onStringMessage;
             std::function<void(const std::string&)> onPageTitleUpdated;
         };
+
+        #ifndef WIN32
         WebView(EventCallbacks&&);
+        #endif
 
         struct HTTPHeader {
             std::string field;
             std::string value;
         };
 
-        void LoadHTMLString(const std::string&);
-        void LoadLocalFile(const std::string& path);
-        void LoadRequest(
+        VIRTUAL_IF_WIN32(void LoadHTMLString(const std::string&));
+        VIRTUAL_IF_WIN32(void LoadLocalFile(const std::string& path));
+        VIRTUAL_IF_WIN32(void LoadRequest(
             const std::string& method,
             const std::string& urlString,
             const std::vector<HTTPHeader>& headers,
             const std::optional<std::string>& body
-        );
-        void Reload();
+        ));
+        VIRTUAL_IF_WIN32(void Reload());
         using JavaScriptEvaluationCallback = std::function<void(bool, std::string&&)>;
-        void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&);
+        VIRTUAL_IF_WIN32(void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&));
 
 
-        void SetDevToolsEnabled(bool enabled);
+        VIRTUAL_IF_WIN32(void SetDevToolsEnabled(bool enabled));
 
-        ~WebView();
+        VIRTUAL_IF_WIN32(~WebView());
     };
+
+    
+    #ifdef WIN32
+    class WinRTWebView: public WebView {
+    private:
+        struct Impl;
+        Impl* winrtImpl_;
+    public:
+        WinRTWebView(EventCallbacks&&);
+        virtual void LoadHTMLString(const std::string&) override;
+        virtual void LoadLocalFile(const std::string& path) override;
+        virtual void LoadRequest(
+            const std::string& method,
+            const std::string& urlString,
+            const std::vector<HTTPHeader>& headers,
+            const std::optional<std::string>& body
+        ) override;
+        virtual void Reload() override;
+        virtual void SetDevToolsEnabled(bool enabled) override;
+        virtual void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&) override;
+        virtual ~WinRTWebView();
+    };
+    class TridentWebView: public WebView {
+    private:
+        struct Impl;
+        Impl* tridentImpl_;
+    public:
+        TridentWebView(EventCallbacks&&);
+        virtual void LoadHTMLString(const std::string&) override;
+        virtual void LoadLocalFile(const std::string& path) override;
+        virtual void LoadRequest(
+            const std::string& method,
+            const std::string& urlString,
+            const std::vector<HTTPHeader>& headers,
+            const std::optional<std::string>& body
+        ) override;
+        virtual void Reload() override;
+        virtual void SetDevToolsEnabled(bool enabled) override;
+        virtual void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&) override;
+        virtual ~TridentWebView();
+    };
+    #endif
 }
 
 #endif

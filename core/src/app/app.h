@@ -13,6 +13,7 @@ namespace DeskGap {
         std::unique_ptr<Impl> impl_;
     public:
         struct EventCallbacks {
+            std::function<void()> onWillFinishLaunching;
             std::function<void()> onReady;
             std::function<void()> beforeQuit;
         };

@@ -21,6 +21,7 @@ namespace DeskGap {
     }
     
     void App::Run() {
+        impl_->callbacks.onWillFinishLaunching();
     	impl_->callbacks.onReady();
     }
     

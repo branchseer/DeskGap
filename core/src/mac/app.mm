@@ -28,6 +28,10 @@ using std::make_shared;
     return self;
 }
 
+- (void)applicationWillFinishLaunching:(NSNotification *)notification {
+    callbacks_.onWillFinishLaunching();
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     callbacks_.onReady();
 }

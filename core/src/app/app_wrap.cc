@@ -46,6 +46,9 @@ namespace DeskGap {
             Napi::Object jsCallbacks = info[0].ToObject();
             
             App::EventCallbacks callbacks {
+                [jsOnWillFinishLaunching = JSFunctionForUI::Persist(jsCallbacks.Get("onWillFinishLaunching").As<Napi::Function>())]() {
+                    jsOnWillFinishLaunching->Call();
+                },
                 [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
                     jsOnReady->Call();
                 },

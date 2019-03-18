@@ -15,6 +15,7 @@ namespace DeskGap {
         impl_->callbacks_ = std::move(callbacks);
     }
     void App::Run() {
+        impl_->callbacks_.onWillFinishLaunching();
         impl_->callbacks_.onReady();
     }
     

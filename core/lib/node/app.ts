@@ -27,6 +27,14 @@ export type PathName = keyof typeof pathNameValues;
 
 export interface AppEvents extends IEventMap {
     /**
+     * Emitted when DeskGap has finished basic startup.
+     * 
+     * On Windows and Linux, the will-finish-launching event is the same as the `ready` event; on macOS,
+     * this event represents the `applicationWillFinishLaunching` notification of `NSApplication`. 
+     */
+    'will-finish-launching': [],
+
+    /**
      * Emitted when DeskGap has finished initializing.
      */
     'ready': [],
@@ -71,6 +79,16 @@ export class App extends EventEmitter<AppEvents> {
 
         this.whenReady_ = new Promise((resolve) =>{
             this.native_ = new AppNative({
+                onWillFinishLaunching: () => {
+                    try {
+                        this.trigger_('will-finish-launching');
+                    }
+                    finally {
+                        this.removeAllListeners('will-finish-launching');
+                        resolve();
+                    }
+                },
+
                 onReady: () => {
                     this.isReady_ = true;
                     if (process.platform === 'darwin') {

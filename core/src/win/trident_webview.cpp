@@ -186,8 +186,11 @@ namespace DeskGap {
             else if (riid == IID_IDocHostUIHandler) {
                 *ppvObject = static_cast<IDocHostUIHandler*>(this);
             }
-            else if (riid == IID_IDispatch || riid == DIID_DWebBrowserEvents2) {
+            else if (riid == IID_IDispatch) {
                 *ppvObject = static_cast<IDispatch*>(this);
+            }
+            else if (riid == DIID_DWebBrowserEvents2) {
+                *ppvObject = static_cast<DWebBrowserEvents2*>(this);
             }
             else
             {
@@ -404,7 +407,9 @@ namespace DeskGap {
         const std::vector<HTTPHeader>& headers,
         const std::optional<std::string>& body
     ) {
-
+        std::wstring wURL = UTF8ToWString(urlString.c_str());
+        ATL::CComVariant flags(navNoHistory | navNoReadFromCache | navNoWriteToCache);
+        tridentImpl_->webBrowser2->Navigate(_bstr_t(wURL.c_str()), &flags, nullptr, nullptr, nullptr);
     }
 
     void TridentWebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
@@ -413,11 +418,15 @@ namespace DeskGap {
     }
 
     void TridentWebView::SetDevToolsEnabled(bool enabled) { 
-
+        
     }
 
     void TridentWebView::Reload() {
-        
+        //We don't use Refresh or Refresh2 here because they don't fire DISPID_NAVIGATECOMPLETE2 or DISPID_DOCUMENTCOMPLETE
+        CComBSTR url;
+        check(tridentImpl_->webBrowser2->get_LocationURL(&url));
+        ATL::CComVariant flags(navNoHistory | navNoReadFromCache | navNoWriteToCache);
+        tridentImpl_->webBrowser2->Navigate(url, &flags, nullptr, nullptr, nullptr);
     }
 
     TridentWebView::~TridentWebView() {

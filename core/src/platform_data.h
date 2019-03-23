@@ -2,7 +2,7 @@
 #define platform_data_h
 
 namespace DeskGap {
-    void* PlatformData();
+    void* GetPlatformData();
 }
 
 #endif /* platform_data_h */

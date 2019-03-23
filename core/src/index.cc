@@ -62,7 +62,7 @@ namespace {
 const std::string& DeskGap::LibPath() {
     return *libPath;
 }
-void* DeskGap::PlatformData() {
+void* DeskGap::GetPlatformData() {
     return platformData;
 }
 const Napi::FunctionReference& DeskGap::NativeExceptionConstructor() {

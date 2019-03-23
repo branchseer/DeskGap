@@ -9,6 +9,9 @@
 #include <vector>
 #include <variant>
 
+// On Windows the WebView class is a pure virtual interface,
+// because there are 2 implementations at runtime: WinRTWebView (using the WebViewControl in WinRT, Win10 1809+ only)
+// and TridentWebView (using IWebBrowser2, Win 7+ supported)
 #ifdef WIN32
     #define VIRTUAL_IF_WIN32(decl) virtual decl=0
 #else
@@ -60,7 +63,9 @@ namespace DeskGap {
         VIRTUAL_IF_WIN32(~WebView());
     };
 
-    
+    //WinRTWebView and TridentWebView have their own Impls which inherit WebView::Impl,
+    //the impl_ declared in parent WebView is essentially winrtImpl_ or tridentImpl_,
+    //these two are declared in the subclasses for the ease of subclass-specific method access
     #ifdef WIN32
     class WinRTWebView: public WebView {
     private:

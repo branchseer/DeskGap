@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <Ole2.h>
 #include <Combaseapi.h>
 #include <Shellscalingapi.h>
 #include <utility>
@@ -10,6 +11,7 @@
 #include "platform.h"
 
 #include "../core/src/win/util/wstring_utf8.h"
+#include "../core/src/win/platform_data.h"
 
 namespace fs = std::filesystem;
 
@@ -21,12 +23,14 @@ namespace {
         return WStringToUTF8(path);
     }
     const wchar_t* const DispatcherWndClassName = L"DeskGapDispatcherWindow";
+    DeskGap::PlatformData* platformData;
 }
 
 
 
 void* DeskGapPlatform::InitUIThread() { 
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    OleInitialize(nullptr);
+    //CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
     WNDCLASSEXW dispatcherWindowClass { };
     dispatcherWindowClass.cbSize = sizeof(WNDCLASSEXW);
@@ -54,7 +58,8 @@ void* DeskGapPlatform::InitUIThread() {
         nullptr
     );
 
-    return new HWND(dispatchWindowWnd);
+    platformData = new DeskGap::PlatformData { dispatchWindowWnd, nullptr };
+    return platformData;
 }
 
 void DeskGapPlatform::InitNodeThread() {
@@ -77,6 +82,9 @@ void DeskGapPlatform::Run() {
             return;
         }
 		else if (msg.hwnd) {
+            if (platformData->tridentWebViewTranslateMessage != nullptr) {
+                if (platformData->tridentWebViewTranslateMessage(&msg)) continue;
+            }
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}

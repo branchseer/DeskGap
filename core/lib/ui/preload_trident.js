@@ -9,33 +9,59 @@ window.deskgap = {
     postStringMessage: function (string) {
         window.external.post(string);
     }
-}
+};
 
-window.addEventListener('mousedown', function(e) {
-    if (e.button !== 0) return;
+(function () {
 
-    var currentElement = e.target;
-    while (currentElement != null) {
-        if (currentElement.hasAttribute('data-deskgap-no-drag')) {
-            break;
+    var ie8 = window.addEventListener == null;
+    var leftButtonCode = ie8 ? 1: 0;
+
+    function on(target, eventName, handlerReturningBool) {
+        var handler = function (e) {
+            if (handlerReturningBool(e) === false) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                else {
+                    e.returnValue = false;
+                }
+            }
         }
-        else if (currentElement.hasAttribute('data-deskgap-drag')) {
-            window.external.drag();
-            break;
+        if (!ie8) {
+            target.addEventListener(eventName, handler);
         }
-        currentElement = currentElement.parentElement;
+        else {
+            target.attachEvent('on' + eventName, handler);
+        }
     }
-});
-
-window.addEventListener('keydown', function(e) {
-    if ((e.keyCode === 187 || e.keyCode === 189) && e.ctrlKey === true) {
-        //Preventing ctrl+(+|-) zooming;
-        e.preventDefault();
-    }
-});
-window.addEventListener('wheel', function(e) {
-    if (e.ctrlKey === true) {
-        //Preventing ctrl-scroll zooming
-        e.preventDefault();
-    }
-});
+    
+    on(document, 'mousedown', function(e) {
+        if (e.button !== leftButtonCode) return;
+    
+        var currentElement = e.target || e.srcElement;
+        while (currentElement != null) {
+            if (currentElement.hasAttribute('data-deskgap-no-drag')) {
+                break;
+            }
+            else if (currentElement.hasAttribute('data-deskgap-drag')) {
+                window.external.drag();
+                break;
+            }
+            currentElement = currentElement.parentElement;
+        }
+    });
+    
+    on(document, 'keydown', function (e) {
+        if ((e.keyCode === 187 || e.keyCode === 189) && e.ctrlKey === true) {
+            //Preventing ctrl+(+|-) zooming;
+            return false;
+        }
+    });
+    
+    on(document, 'mousewheel', function (e) {
+        if (e.ctrlKey === true) {
+            //Preventing ctrl-scroll zooming
+           return false;
+        }
+    });
+})();

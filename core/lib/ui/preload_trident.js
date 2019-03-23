@@ -1,3 +1,9 @@
+// The whole script will be wrapped into (function() { ... })(), so it's ok to return here.
+// The reason of this check is that this preload script is executed whenever IWebBrowser's DISPID_NAVIGATECOMPLETE2 happened,
+// This DISPID_NAVIGATECOMPLETE2 event could happen when an html anchor link is clicked, this will cause the preload script 
+// being executed in the same page for multiple times.
+if (window.deskgap != null) return;
+
 window.deskgap = {
     platform: 'win32',
     postStringMessage: function (string) {

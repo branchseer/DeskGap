@@ -31,7 +31,7 @@ if(WIN32)
     target_link_libraries(DeskGapPlatform shcore)
     
     target_link_libraries(DeskGap ws2_32 dbghelp crypt32 winmm iphlpapi psapi userenv)
-    file(GLOB nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/Release/lib/*.lib)
+    file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/*.lib)
 endif()
 
 if (LINUX)
@@ -109,20 +109,28 @@ SET(DESKGAP_LIB_SRC_DIR ${CMAKE_SOURCE_DIR}/core)
 SET(DESKGAP_LIB_DST_DIR ${DESKGAP_RESOURCE_FOLDER}/node_modules/deskgap)
 
 if (WIN32)
-    SET(DESKGAP_PRELOAD_SCRIPT preload_win.js)
+    SET(DESKGAP_PRELOAD_SCRIPTS
+        ${DESKGAP_LIB_SRC_DIR}/lib/ui/preload_winrt.js
+        ${DESKGAP_LIB_SRC_DIR}/lib/ui/preload_trident.js
+        ${CMAKE_SOURCE_DIR}/core/node_modules/es6-promise/dist/es6-promise.auto.min.js
+    )
+    SET(COPY_POLYFILL_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/core/node_modules/es6-promise/dist/es6-promise.auto.min.js ${DESKGAP_LIB_DST_DIR}/dist/ui/)
 elseif(APPLE)
-    SET(DESKGAP_PRELOAD_SCRIPT preload_mac.js)
+    SET(DESKGAP_PRELOAD_SCRIPTS ${DESKGAP_LIB_SRC_DIR}/lib/ui/preload_mac.js)
 elseif (LINUX)
-    SET(DESKGAP_PRELOAD_SCRIPT preload_gtk.js)
+    SET(DESKGAP_PRELOAD_SCRIPTS ${DESKGAP_LIB_SRC_DIR}/lib/ui/preload_gtk.js)
 endif()
+
+
 
 add_custom_target(
     DeskGapLib ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DESKGAP_LIB_DST_DIR}/build/Release/
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_LIB_SRC_DIR}/build/Release/deskgap_native.node ${DESKGAP_LIB_DST_DIR}/build/Release/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${DESKGAP_LIB_SRC_DIR}/dist/ ${DESKGAP_LIB_DST_DIR}/dist/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_LIB_SRC_DIR}/lib/ui/${DESKGAP_PRELOAD_SCRIPT} ${DESKGAP_LIB_DST_DIR}/dist/ui/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_PRELOAD_SCRIPTS} ${DESKGAP_LIB_DST_DIR}/dist/ui/
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_LIB_SRC_DIR}/package_dist.json ${DESKGAP_LIB_DST_DIR}/package.json
+    COMMAND ${COPY_POLYFILL_COMMAND}
 )
 add_dependencies(DeskGapLib DeskGap)
 

@@ -278,9 +278,6 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         if (this.hasBeenShown_) {
             this.actuallySetTheMenu_();
         }
-        if (this.menu_ != null) {
-            this.menu_['setWindow_'](this);
-        }
     }
 
     /** @internal */ 
@@ -294,7 +291,7 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
                 this.menuNativeId_ = null;
             }
             else {
-                const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main);
+                const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main, this);
                 this.native_.setMenu(nativeMenu);
                 this.menuNativeId_ = menuNativeId;
             }

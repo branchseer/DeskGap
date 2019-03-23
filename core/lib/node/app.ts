@@ -211,7 +211,7 @@ export class App extends EventEmitter<AppEvents> {
                 this.menuNativeId_ = null;
             }
             else {
-                const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main);
+                const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main, null);
                 this.native_.setMenu(nativeMenu);
                 this.menuNativeId_ = menuNativeId;
             }

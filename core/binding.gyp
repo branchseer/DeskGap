@@ -54,7 +54,14 @@
             ],
             'GCC_ENABLE_CPP_EXCEPTIONS': 'true',
           }
-        }]
+        }],
+        # ['OS == "win"', {
+        #   'msvs_settings': {
+        #     'VCLinkerTool': {
+        #       'DelayLoadDLLs': [ 'windows.storage.dll' ]
+        #     }
+        #   }
+        # }]
       ],
     },
     {
@@ -70,6 +77,7 @@
             "src/win/BrowserWindow.cpp",
             "src/win/webview.cpp",
             "src/win/winrt_webview.cpp",
+            "src/win/trident_webview.cpp",
             "src/win/shell.cpp",
             "src/win/dialog.cpp",
             "src/win/system_preferences.cpp",

@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "../dispatch/ui_dispatch_platform.h"
+#include "./platform_data.h"
 #include "../platform_data.h"
 #include "util/wstring_utf8.h"
 
@@ -24,7 +25,7 @@ namespace {
 }
 
 std::optional<DeskGap::PlatformException> DeskGap::UISyncPlatform(std::function<void()>&& action) {
-   static HWND dispatcherWnd = *static_cast<HWND*>(PlatformData());
+   HWND dispatcherWnd = static_cast<PlatformData*>(GetPlatformData())->dispatchWindowWnd;
 
    std::optional<DeskGap::PlatformException> exception;
 
@@ -49,7 +50,8 @@ std::optional<DeskGap::PlatformException> DeskGap::UISyncPlatform(std::function<
 }
 
 void DeskGap::UIASyncPlatform(std::function<void()>&& action, std::function<void(std::optional<PlatformException>&&)> callback) {
-   static HWND dispatcherWnd = *static_cast<HWND*>(PlatformData());
+   HWND dispatcherWnd = static_cast<PlatformData*>(GetPlatformData())->dispatchWindowWnd;
+   
    PostMessageW(
       dispatcherWnd,
       WM_APP + 1, 0,

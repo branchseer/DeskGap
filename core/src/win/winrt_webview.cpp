@@ -89,7 +89,7 @@ namespace DeskGap {
                 std::ostringstream scriptStream;
                 fs::path scriptFolder = fs::path(LibPath()) / "dist" / "ui";
 
-                for (const std::string& scriptFilename: { "preload_win.js", "preload.js" }) {
+                for (const std::string& scriptFilename: { "preload_winrt.js", "preload.js" }) {
                     winrt::hstring scriptFullPath = winrt::to_hstring((scriptFolder / scriptFilename).string());
                     std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
                     scriptStream << scriptFile.rdbuf();
@@ -102,49 +102,16 @@ namespace DeskGap {
         }
 
         virtual void SetRect(int x, int y, int width, int height) override {
-            SetWindowPos(
-                controlWnd, nullptr,
-                x, y, width, height,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER
-            );
+            if (webViewControl == nullptr) return;
+            webViewControl.Bounds(Rect(
+                0, 0,
+                width,
+                height
+            ));
         }
 
         virtual void InitWithParent(HWND parentWnd) override {
-            static bool isClassRegistered = false;
-            if (!isClassRegistered) {
-                isClassRegistered = true;
-                WNDCLASSEXW wndClass { };
-                wndClass.cbSize = sizeof(WNDCLASSEXW);
-                wndClass.hInstance = GetModuleHandleW(nullptr);
-                wndClass.lpszClassName = WebViewHostWndClassName;
-                wndClass.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
-                    auto impl_ = reinterpret_cast<WinRTWebView::Impl*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
-                    if (impl_ != nullptr) {
-                        if (msg == WM_SIZE) {
-                            RECT rect { };
-                            GetWindowRect(impl_->controlWnd, &rect);
-                            impl_->webViewControl.Bounds(Rect(
-                                0, 0,
-                                static_cast<float>(rect.right-rect.left),
-                                static_cast<float>(rect.bottom-rect.top)
-                            ));
-                            return 0;
-                        }
-                    }
-                    return DefWindowProcW(hwnd, msg, wp, lp);
-                };
-                wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-                wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-                RegisterClassExW(&wndClass);
-            }
-
-            controlWnd = CreateWindowW(
-                WebViewHostWndClassName, L"",
-                WS_CHILD,
-                0, 0, 0, 0, parentWnd, nullptr, nullptr, 0
-            );
-
-            SetWindowLongPtrW(controlWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+            controlWnd = parentWnd;
 
             IAsyncOperation<WebViewControl> asyncOperation = process.CreateWebViewControlAsync(
                 reinterpret_cast<int64_t>(controlWnd),
@@ -217,13 +184,15 @@ namespace DeskGap {
                 }
             );
 
-            ShowWindow(controlWnd, SW_SHOW);
-            UpdateWindow(controlWnd);
+            //ShowWindow(controlWnd, SW_SHOW);
+            //UpdateWindow(controlWnd);
         }; 
     };
     
     WinRTWebView::WinRTWebView(EventCallbacks&& callbacks) {
         auto winrtImpl = std::make_unique<Impl>(callbacks);
+
+        //impl_ for reference owning, and winrtImpl_ for method calling
         winrtImpl_ = winrtImpl.get();
         impl_ = std::move(winrtImpl);
 

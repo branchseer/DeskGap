@@ -54,7 +54,7 @@ namespace DeskGap {
         #ifndef WIN32
             this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks));
         #else
-            this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks));
+            this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks));
         #endif
         });
     }

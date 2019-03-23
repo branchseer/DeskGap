@@ -84,7 +84,7 @@ export class Menu {
             if (fullOptions.window == null) {
                 throw new Error('No window specified for Menu#popup, and there is no focused window');
             }
-            const result = this.createNative_(MenuTypeCode.context);
+            const result = this.createNative_(MenuTypeCode.context, fullOptions.window);
             nativeId = result[0];
             const native = result[1];
             fullOptions.window['native_'].popupMenu(native, location, fullOptions.positioningItem);    
@@ -111,7 +111,7 @@ export class Menu {
     }
 
     /** @internal */ 
-    private createNative_(type: number, theNativeId?: number): [number, IMenuNative] {
+    private createNative_(type: number, window: BrowserWindow | null, theNativeId?: number): [number, IMenuNative] {
         const nativeId = theNativeId || ++lastNativeId;
         //console.log(nativeId);
 
@@ -119,7 +119,7 @@ export class Menu {
         this.natives_.set(nativeId, native);
         
         for (const item of this.items) {
-            const nativeMenuItem = item['createNative_'](nativeId);
+            const nativeMenuItem = item['createNative_'](nativeId, window);
             native.append(nativeMenuItem);
         }
 
@@ -135,16 +135,6 @@ export class Menu {
         }
     }
 
-    
-    /** @internal */ 
-    private setWindow_(window: BrowserWindow | null) {
-        for (const item of this.items) {
-            item['window_'] = window;
-            if (item.submenu != null) {
-                item.submenu.setWindow_(window);
-            }
-        }
-    }
 };
 
 export class MenuItem {
@@ -156,16 +146,7 @@ export class MenuItem {
     /** @internal */ private natives_ = new Map<number, IMenuItemNative>();
     /** @internal */ private checked_: boolean;
     /** @internal */ private accelerator_: string;
-    /** @internal */ private role_: string; 
-    /** @internal */ private window_: BrowserWindow | null; 
-    /** @internal */ private nativeOnClick_ = () => {
-        if (this.type_ === MenuItemTypeCode.checkbox) {
-            this.checked = !this.checked;
-        }
-        if (this.click != null) {
-            this.click(this, this.window_ || globals.focusedBrowserWindow);
-        }
-    };
+    /** @internal */ private role_: string;
 
     constructor(options: Partial<MenuItemConstructorOptions> = {}) {
         if (options.role != null) {
@@ -236,14 +217,21 @@ export class MenuItem {
     }
     
     /** @internal */ 
-    private createNative_(nativeId: number): IMenuItemNative {
+    private createNative_(nativeId: number, window: BrowserWindow | null): IMenuItemNative {
 
         let nativeSubmenu: IMenuNative | null = null;
         if (this.submenu_ != null) {
-            [, nativeSubmenu] = this.submenu_['createNative_'](MenuItemTypeCode.submenu, nativeId);
+            [, nativeSubmenu] = this.submenu_['createNative_'](MenuItemTypeCode.submenu, window, nativeId);
         }
 
-        const native = new MenuItemNative(this.role_, this.type_, nativeSubmenu, this.nativeOnClick_);
+        const native = new MenuItemNative(this.role_, this.type_, nativeSubmenu, () => {
+            if (this.type_ === MenuItemTypeCode.checkbox) {
+                this.checked = !this.checked;
+            }
+            if (this.click != null) {
+                this.click(this, window || globals.focusedBrowserWindow);
+            }
+        });
 
         native.setEnabled(this.enabled_);
         native.setLabel(this.label_);

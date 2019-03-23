@@ -316,6 +316,7 @@ namespace DeskGap {
             WORD wFlags, DISPPARAMS *pDispParams,
             VARIANT *pVarResult, EXCEPINFO *pExcepInfo,
             UINT *puArgErr) {
+
             if (dispIdMember == DISPID_NAVIGATECOMPLETE2) {
                 {
                     IDispatch* dispatch = pDispParams->rgvarg[1].pdispVal;
@@ -323,12 +324,14 @@ namespace DeskGap {
                     check(dispatch->QueryInterface(IID_IWebBrowser2, (void**)&paramWebBrowser2));
                     if (paramWebBrowser2 != webBrowser2) return S_OK;
                 }
-                    
+
                 static std::unique_ptr<std::wstring> preloadScript = nullptr;
                 
                 if (preloadScript == nullptr) {
                     std::ostringstream scriptStream;
                     fs::path scriptFolder = fs::path(LibPath()) / "dist" / "ui";
+                    // Wrap the preload script into (function() { ... })(), because there is a `return` in it (preload_trident.js).
+                    scriptStream << "(function(){\n";
 
                     for (const std::string& scriptFilename: { "es6-promise.auto.min.js", "preload_trident.js", "preload.js" }) {
                         std::wstring scriptFullPath = UTF8ToWString((scriptFolder / scriptFilename).string().c_str());
@@ -336,10 +339,11 @@ namespace DeskGap {
                         scriptStream << scriptFile.rdbuf();
                     }
 
+                    scriptStream << "\n})();\n";
+
                     preloadScript = std::make_unique<std::wstring>(UTF8ToWString(scriptStream.str().c_str()));
                 }
-                check(ExecuteJavaScript(*preloadScript));
-                
+                ExecuteJavaScript(*preloadScript);
             }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE) {
                 IDispatch* dispatch = pDispParams->rgvarg[1].pdispVal;

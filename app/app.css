@@ -86,5 +86,6 @@ code {
 main {
     margin-left: 200px;
     padding: 0 24px;
+    display: block;
 }
 

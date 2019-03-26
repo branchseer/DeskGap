@@ -5,6 +5,7 @@
 #include "../menu/menu.h"
 #include "menu_impl.h"
 #include "util/wstring_utf8.h"
+#include <shellapi.h>
 
 namespace {
     UINT_PTR lastMenuItemId = 0;

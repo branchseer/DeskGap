@@ -1,5 +1,3 @@
-#define UNICODE
-
 #include <functional>
 #include <memory>
 #include <string>
@@ -336,7 +334,7 @@ namespace DeskGap {
                     // Wrap the preload script into (function() { ... })(), because there is a `return` in it (preload_trident.js).
                     scriptStream << "(function(){\n";
 
-                    for (const std::string& scriptFilename: { "es6-promise.auto.min.js", "preload_trident.js", "preload.js" }) {
+                    for (const std::string& scriptFilename: { "preload_trident.js", "es6-promise.auto.min.js", "preload.js" }) {
                         std::wstring scriptFullPath = UTF8ToWString((scriptFolder / scriptFilename).string().c_str());
                         std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
                         scriptStream << scriptFile.rdbuf();
@@ -346,6 +344,7 @@ namespace DeskGap {
 
                     preloadScript = std::make_unique<std::wstring>(UTF8ToWString(scriptStream.str().c_str()));
                 }
+
                 ExecuteJavaScript(*preloadScript);
             }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE) {

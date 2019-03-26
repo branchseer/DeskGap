@@ -2,6 +2,7 @@
   'target_defaults': {
     'target_conditions': [
       ['OS == "win"', {
+          'defines': [ 'WIN32_LEAN_AND_MEAN', 'UNICODE', '_UNICODE' ],
           'msvs_settings': {
             'VCCLCompilerTool': {
               'AdditionalOptions': [
@@ -29,6 +30,7 @@
   'targets': [
     {
       'target_name': 'deskgap_native',
+      'win_delay_load_hook': 'false',
       'include_dirs': ['<!@(node -p "require(\'node-addon-api\').include")'],
       'dependencies': ['<!(node -p "require(\'node-addon-api\').gyp")'],
       'defines': [ 'NAPI_CPP_EXCEPTIONS', 'NAPI_EXPERIMENTAL' ],
@@ -55,18 +57,23 @@
             'GCC_ENABLE_CPP_EXCEPTIONS': 'true',
           }
         }],
-        # ['OS == "win"', {
-        #   'msvs_settings': {
-        #     'VCLinkerTool': {
-        #       'DelayLoadDLLs': [ 'windows.storage.dll' ]
-        #     }
-        #   }
-        # }]
+        ['OS == "win"', {
+          "sources": [ 'src/win/delay_load_hook.cpp' ],
+          'msvs_settings': {
+            'VCLinkerTool': {
+              'DelayLoadDLLs': [
+                'node.exe',
+                'deskgap_winrt.dll'
+              ]
+            }
+          }
+        }]
       ],
     },
     {
       'target_name': 'deskgap_native_platform',
       'type': 'static_library',
+      'win_delay_load_hook': 'false',
       
       'conditions': [
         ['OS == "win"', {
@@ -76,12 +83,12 @@
             "src/win/menu.cpp",
             "src/win/BrowserWindow.cpp",
             "src/win/webview.cpp",
-            "src/win/winrt_webview.cpp",
             "src/win/trident_webview.cpp",
             "src/win/shell.cpp",
             "src/win/dialog.cpp",
             "src/win/system_preferences.cpp",
-          ]
+          ],
+          'dependencies': [ 'deskgap_winrt' ]
         }],
 
         ['OS == "mac"', {
@@ -137,6 +144,20 @@
           }
         }]
       ] # conditions
+    },
+    {
+      
+      'target_name': 'deskgap_winrt',
+      'win_delay_load_hook': 'false',
+      'conditions': [
+        ['OS == "win"', {
+          'type': 'shared_library',
+          "defines": [ "_EXPORTING" ],
+          'sources': [
+            'src/win/winrt_webview.cpp'
+          ]
+        }]
+      ]
     }
   ]
 }

@@ -8,7 +8,7 @@ namespace DeskGap {
     struct WebView::Impl {
         virtual void SetRect(int x, int y, int width, int height) = 0;
         virtual void InitWithParent(HWND parentWnd) = 0;
-        virtual ~Impl();
+        inline virtual ~Impl() = default;
     };
 }
 

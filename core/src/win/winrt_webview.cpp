@@ -17,9 +17,8 @@
 #include <winrt/Windows.Web.Http.h>
 #include <winrt/Windows.Web.Http.Headers.h>
 
-#include "../webview/webview.h"
+#include "../webview/winrt_webview.h"
 #include "webview_impl.h"
-#include "../lib_path.h"
 
 #pragma comment(lib, "WindowsApp")
 
@@ -38,6 +37,8 @@ namespace {
     const wchar_t MessageNotifyStringPrefix = L'm';
     const wchar_t WindowDragNotifyStringPrefix = L'd';
     const wchar_t TitleUpdatedNotifyStringPrefix = L't';
+
+    std::unique_ptr<winrt::hstring> preloadScript;
 }
 
 namespace DeskGap {
@@ -83,21 +84,6 @@ namespace DeskGap {
         }
 
         void PrepareScript() {
-            static std::unique_ptr<winrt::hstring> preloadScript = nullptr;
-            
-            if (preloadScript == nullptr) {
-                std::ostringstream scriptStream;
-                fs::path scriptFolder = fs::path(LibPath()) / "dist" / "ui";
-
-                for (const std::string& scriptFilename: { "preload_winrt.js", "preload.js" }) {
-                    winrt::hstring scriptFullPath = winrt::to_hstring((scriptFolder / scriptFilename).string());
-                    std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
-                    scriptStream << scriptFile.rdbuf();
-                }
-
-                preloadScript = std::make_unique<winrt::hstring>(winrt::to_hstring(scriptStream.str()));
-            }
-
             webViewControl.AddInitializeScript(*preloadScript);
         }
 
@@ -189,7 +175,20 @@ namespace DeskGap {
         }; 
     };
     
-    WinRTWebView::WinRTWebView(EventCallbacks&& callbacks) {
+    WinRTWebView::WinRTWebView(EventCallbacks&& callbacks, const std::string& libPath) {
+        if (preloadScript == nullptr) {
+            std::ostringstream scriptStream;
+            fs::path scriptFolder = fs::path(libPath) / "dist" / "ui";
+
+            for (const std::string& scriptFilename: { "preload_winrt.js", "preload.js" }) {
+                winrt::hstring scriptFullPath = winrt::to_hstring((scriptFolder / scriptFilename).string());
+                std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
+                scriptStream << scriptFile.rdbuf();
+            }
+
+            preloadScript = std::make_unique<winrt::hstring>(winrt::to_hstring(scriptStream.str()));
+        }
+
         auto winrtImpl = std::make_unique<Impl>(callbacks);
 
         //impl_ for reference owning, and winrtImpl_ for method calling

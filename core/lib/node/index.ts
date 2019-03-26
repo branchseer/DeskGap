@@ -24,7 +24,7 @@ if (process.platform === 'win32') {
         return true;
     }
 
-    const minSupportedRelease = [10, 0, 17763];
+    const minSupportedRelease = [6, 1, 7601];//Win7 SP1
     const releaseString = os.release();
     const release = releaseString.split('.').map(n => parseInt(n, 10));
     

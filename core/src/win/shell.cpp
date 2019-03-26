@@ -1,5 +1,7 @@
 #include "../shell/shell.h"
 #include "./util/wstring_utf8.h"
+#include <Windows.h>
+#include <shellapi.h>
 
 bool DeskGap::Shell::OpenExternal(const std::string& urlString) {
 	std::wstring wUrlString = UTF8ToWString(urlString.c_str());

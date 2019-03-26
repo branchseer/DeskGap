@@ -155,12 +155,13 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetPosition(int x, int y, bool animate) {
-        UINT dpi = GetDpiForWindow(impl_->windowWnd);
-        LONG dpiScaledX = MulDiv(x, dpi, 96);
-        LONG dpiScaledY = MulDiv(y, dpi, 96);
+        POINT scaledPosition = To96Dpi(impl_->windowWnd, POINT { x, y });
+        // UINT dpi = GetDpiForWindow(impl_->windowWnd);
+        // LONG dpiScaledX = MulDiv(x, dpi, 96);
+        // LONG dpiScaledY = MulDiv(y, dpi, 96);
         SetWindowPos(
             impl_->windowWnd, nullptr,
-            dpiScaledX, dpiScaledY, 0, 0,
+            scaledPosition.x, scaledPosition.y, 0, 0,
             SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE
         );
     }

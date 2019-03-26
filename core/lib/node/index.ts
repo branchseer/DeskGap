@@ -9,35 +9,6 @@ import './async-node';
 import systemPreferences from './system-preferences';
 import os = require('os');
 
-if (process.platform === 'win32') {
-    const gte = (release1: number[], release2: number[]): boolean => {
-        for (let i = 0; i < release2.length; ++i) {
-            const r1 = release1[i];
-            const r2 = release2[i];
-            if (r1 == null || isNaN(r1) || r1 < r2) {
-                return false;
-            }
-            if (r1 > r2) {
-                return true;
-            }
-        }
-        return true;
-    }
-
-    const minSupportedRelease = [6, 1, 7601];//Win7 SP1
-    const releaseString = os.release();
-    const release = releaseString.split('.').map(n => parseInt(n, 10));
-    
-
-    if (!gte(release, minSupportedRelease)) {
-        Dialog.showErrorBox(
-            'Unsupported OS Version: ' + releaseString,
-            "The minimum supported OS version is " + minSupportedRelease.join('.')
-        );
-        process.exit();
-    }
-}
-
 export = {
     app,
     BrowserWindow,

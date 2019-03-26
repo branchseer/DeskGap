@@ -121,12 +121,21 @@ elseif (LINUX)
     SET(DESKGAP_PRELOAD_SCRIPTS ${DESKGAP_LIB_SRC_DIR}/lib/ui/preload_gtk.js)
 endif()
 
-
+if (WIN32)
+    SET(DESKGAP_CORE_NATIVE_FILES
+        ${DESKGAP_LIB_SRC_DIR}/build/Release/deskgap_native.node
+        ${DESKGAP_LIB_SRC_DIR}/build/Release/deskgap_winrt.dll
+    )
+else()
+    SET(DESKGAP_CORE_NATIVE_FILES
+        ${DESKGAP_LIB_SRC_DIR}/build/Release/deskgap_native.node
+    )
+endif()
 
 add_custom_target(
     DeskGapLib ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DESKGAP_LIB_DST_DIR}/build/Release/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_LIB_SRC_DIR}/build/Release/deskgap_native.node ${DESKGAP_LIB_DST_DIR}/build/Release/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_CORE_NATIVE_FILES} ${DESKGAP_LIB_DST_DIR}/build/Release/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${DESKGAP_LIB_SRC_DIR}/dist/ ${DESKGAP_LIB_DST_DIR}/dist/
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_PRELOAD_SCRIPTS} ${DESKGAP_LIB_DST_DIR}/dist/ui/
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DESKGAP_LIB_SRC_DIR}/package_dist.json ${DESKGAP_LIB_DST_DIR}/package.json

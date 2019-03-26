@@ -4,6 +4,7 @@
 #include "webview_wrap.h"
 #include "webview.h"
 #include "../dispatch/dispatch.h"
+#include "../lib_path.h"
 
 namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {
@@ -54,6 +55,7 @@ namespace DeskGap {
         #ifndef WIN32
             this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks));
         #else
+            // this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), LibPath());
             this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks));
         #endif
         });

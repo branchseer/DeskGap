@@ -1,25 +1,26 @@
 #include <Windows.h>
+#include <combaseapi.h>
 #include "../dispatch/ui_dispatch_platform.h"
 #include "./platform_data.h"
 #include "../platform_data.h"
 #include "util/wstring_utf8.h"
 
-#include <winrt/base.h>
+//#include <winrt/base.h>
 
-#pragma comment(lib, "WindowsApp")
+//#pragma comment(lib, "WindowsApp")
 
 namespace {
    std::optional<DeskGap::PlatformException> ExecuteAction(const std::function<void()>& action) {
-      try {
+      //try {
          action();
-      }
-      catch (const winrt::hresult_error& winrtError) {
-         DeskGap::PlatformException platformException {
-            "HRESULT " + std::to_string(winrtError.code()),
-            winrt::to_string(winrtError.message())
-         };
-         return platformException;
-      }
+      //}
+      //catch (const winrt::hresult_error& winrtError) {
+      //   DeskGap::PlatformException platformException {
+      //      "HRESULT " + std::to_string(winrtError.code()),
+      //      winrt::to_string(winrtError.message())
+      //   };
+      //   return platformException;
+      //}
       return std::nullopt;
    }
 }

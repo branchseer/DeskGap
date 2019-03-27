@@ -34,6 +34,10 @@ window.deskgap = {
             target.attachEvent('on' + eventName, handler);
         }
     }
+
+    on(window, 'error', function(e) {
+        window.external.error(e.message);
+    });
     
     on(document, 'mousedown', function(e) {
         if (e.button !== leftButtonCode) return;

@@ -93,13 +93,12 @@ export class WebView extends EventEmitter<WebViewEvents> {
     }
     send(channelName: string, ...args: any[]): void {
         if (this.isDestroyed()) return;
-        this.native_.evaluateJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(channelName)}, ${JSON.stringify(args)})`, null);
+        this.native_.executeJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(channelName)}, ${JSON.stringify(args)})`, null);
     }
 
     executeJavaScript(code: string): void {
-        this.native_.evaluateJavaScript(code, null);
+        this.native_.executeJavaScript(code, null);
     }
-
 
     setDevToolsEnabled(enabled: boolean): void {
         this.native_.setDevToolsEnabled(enabled);

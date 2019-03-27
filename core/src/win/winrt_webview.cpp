@@ -255,7 +255,7 @@ namespace DeskGap {
         winrtImpl_->webViewControl.NavigateWithHttpRequestMessage(httpMessage);
     }
 
-    void WinRTWebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
+    void WinRTWebView::ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&& optionalCallback) {
         IAsyncOperation<winrt::hstring> resultPromise = winrtImpl_->webViewControl.InvokeScriptAsync(
             L"eval", { winrt::to_hstring(scriptString) }
         );
@@ -264,11 +264,13 @@ namespace DeskGap {
                 callback = std::move(*optionalCallback)
             ](const auto& resultPromise, AsyncStatus status) {
                 if (status == AsyncStatus::Completed) {
-                    callback(false, winrt::to_string(resultPromise.GetResults()));
+                    callback(std::nullopt);
                 }
                 else {
                     winrt::hresult_error error(resultPromise.ErrorCode());
-                    callback(true, "HRESULT " + std::to_string(error.code()) + ": " + winrt::to_string(error.message()));
+                    callback(std::make_optional<std::string>(
+                        "HRESULT " + std::to_string(error.code()) + ": " + winrt::to_string(error.message())
+                    ));
                 }
             });
         }

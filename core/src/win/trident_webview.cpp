@@ -31,6 +31,28 @@ namespace {
     const wchar_t* const kExternalPostName = L"post";
     const DISPID kExternalDragDispid = 0x1001;
     const wchar_t* const kExternalDragName = L"drag";
+    const DISPID kExternalErrorDispid = 0x1002;
+    const wchar_t* const kExternalErrorName = L"error";
+
+    class Connection {
+    private:
+        ATL::CComPtr<IConnectionPointContainer> connPointContainer_;
+        REFIID connPoint_;
+        DWORD cookie_;
+    public:
+        Connection(IDispatch* disp, REFIID connPoint, IDispatch* sink): connPoint_(connPoint) {            
+            check(disp->QueryInterface(IID_IConnectionPointContainer, (void **)&connPointContainer_));
+
+            ATL::CComPtr<IConnectionPoint> cp;
+            check(connPointContainer_->FindConnectionPoint(connPoint, &cp));
+            check(cp->Advise(sink, &cookie_));
+        }
+        ~Connection() {
+            ATL::CComPtr<IConnectionPoint> cp;
+            check(connPointContainer_->FindConnectionPoint(connPoint_, &cp));
+            check(cp->Unadvise(cookie_));
+        }
+    };
 }
 
 namespace DeskGap {
@@ -42,17 +64,33 @@ namespace DeskGap {
         public DWebBrowserEvents2 {
     private:
         static std::forward_list<Impl*> impls_;
+        std::unique_ptr<Connection> dWebBrowserEvents2Connection_;
+        ATL::CComPtr<IHTMLDocument2> GetCurrentHtmlDoc2(HRESULT* hrPtr) {
+            HRESULT hr;
+
+            ATL::CComPtr<IDispatch> disp;
+            hr = webBrowser2->get_Document(&disp);
+            if (SUCCEEDED(hr)) {
+                ATL::CComPtr<IHTMLDocument2> htmlDoc2;
+                hr = disp->QueryInterface(IID_IHTMLDocument2, (void**)&htmlDoc2);
+                if (SUCCEEDED(hr)) {
+                    return htmlDoc2;
+                }
+            }
+
+            if (hrPtr != nullptr) {
+                *hrPtr = hr;
+            }
+            return nullptr;
+        }
     public:
+        std::wstring lastErrorMessage;
         HRESULT ExecuteJavaScript(const std::wstring& code)
         {
             HRESULT hr;
             if (webBrowser2 == nullptr) return E_FAIL;
-            ATL::CComPtr<IDispatch> disp;
-            hr = webBrowser2->get_Document(&disp);
-            if (FAILED(hr)) return hr;
 
-            ATL::CComPtr<IHTMLDocument2> htmlDoc2;
-            hr = disp->QueryInterface(IID_IHTMLDocument2, (void**)&htmlDoc2);
+            ATL::CComPtr<IHTMLDocument2> htmlDoc2 = GetCurrentHtmlDoc2(&hr);
             if (FAILED(hr)) return hr;
 
             ATL::CComPtr<IDispatch> script;
@@ -77,6 +115,7 @@ namespace DeskGap {
             UINT uArgError = (UINT)-1;
 
             hr = script->Invoke(evalFuncionId, IID_NULL, 0, DISPATCH_METHOD, &dispParams, &vResult, &execInfo, &uArgError);
+
             if (FAILED(hr)) return hr;
 
             return S_OK;
@@ -86,7 +125,6 @@ namespace DeskGap {
         ATL::CComPtr<IWebBrowser2> webBrowser2;
         ATL::CComPtr<IOleInPlaceActiveObject> inPlaceActiveObject;
 
-        DWORD dWebBrowserEvents2Token;
 
 
         WebView::EventCallbacks callbacks;
@@ -138,14 +176,12 @@ namespace DeskGap {
 
             check(webBrowser2->QueryInterface(IID_IOleInPlaceActiveObject, (void**)&inPlaceActiveObject));
 
-            
-            ATL::CComPtr<IConnectionPointContainer> cpc;
-            ATL::CComPtr<IConnectionPoint> cp;
-            check(webBrowser2->QueryInterface(IID_IConnectionPointContainer, (void **)&cpc));
-            check(cpc->FindConnectionPoint(DIID_DWebBrowserEvents2, &cp));
-            check(cp->Advise(static_cast<IOleClientSite*>(this), &dWebBrowserEvents2Token));
+            dWebBrowserEvents2Connection_ = std::make_unique<Connection>(webBrowser2, DIID_DWebBrowserEvents2, this);
 
             impls_.push_front(this);
+
+            webBrowser2->put_Silent(VARIANT_TRUE);
+
         };
 
         ~Impl() {
@@ -154,11 +190,7 @@ namespace DeskGap {
                 return;
             }
 
-            ATL::CComPtr<IConnectionPointContainer> cpc;
-            ATL::CComPtr<IConnectionPoint> cp;
-            check(webBrowser2->QueryInterface(IID_IConnectionPointContainer, (void **)&cpc));
-            check(cpc->FindConnectionPoint(DIID_DWebBrowserEvents2, &cp));
-            check(cp->Unadvise(dWebBrowserEvents2Token));
+            dWebBrowserEvents2Connection_ = nullptr;
 
             webBrowser2->Stop();
             webBrowser2->ExecWB(OLECMDID_CLOSE, OLECMDEXECOPT_DONTPROMPTUSER, nullptr, nullptr);
@@ -190,8 +222,7 @@ namespace DeskGap {
             else if (riid == DIID_DWebBrowserEvents2) {
                 *ppvObject = static_cast<DWebBrowserEvents2*>(this);
             }
-            else
-            {
+            else {
                 return E_NOINTERFACE;
             }
             return S_OK;
@@ -309,6 +340,9 @@ namespace DeskGap {
             else if (wcscmp(rgszNames[0], kExternalDragName) == 0) {
                 *rgDispId = kExternalDragDispid;
             }
+            else if (wcscmp(rgszNames[0], kExternalErrorName) == 0) {
+                *rgDispId = kExternalErrorDispid;
+            }
 	        return S_OK;
         }
         
@@ -373,6 +407,10 @@ namespace DeskGap {
                     }
                 }
             }
+            else if (dispIdMember == kExternalErrorDispid) {
+                BSTR bstrMessage = pDispParams->rgvarg[0].bstrVal;
+                lastErrorMessage = std::wstring(bstrMessage, SysStringLen(bstrMessage));
+            }
             return S_OK;
         }
 
@@ -411,9 +449,21 @@ namespace DeskGap {
         tridentImpl_->webBrowser2->Navigate(_bstr_t(wURL.c_str()), &flags, nullptr, nullptr, nullptr);
     }
 
-    void TridentWebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
+    void TridentWebView::ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&& optionalCallback) {
         std::wstring wScriptString = UTF8ToWString(scriptString.c_str());
-        tridentImpl_->ExecuteJavaScript(wScriptString);
+        HRESULT hr = tridentImpl_->ExecuteJavaScript(wScriptString);
+        if (optionalCallback.has_value()) {
+            std::optional<std::string> errorMessage;
+            if (FAILED(hr)) {
+                if (tridentImpl_->lastErrorMessage.empty()) {
+                    errorMessage.emplace("Unknown Error");
+                }
+                else {
+                    errorMessage.emplace(WStringToUTF8(tridentImpl_->lastErrorMessage.c_str()));
+                }
+            }
+            (*optionalCallback)(std::move(errorMessage));
+        }
     }
 
     void TridentWebView::SetDevToolsEnabled(bool enabled) { 

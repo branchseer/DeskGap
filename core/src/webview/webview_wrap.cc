@@ -12,7 +12,7 @@ namespace DeskGap {
             InstanceMethod("loadHTMLString", &WebViewWrap::LoadHTMLString),
             InstanceMethod("loadLocalFile", &WebViewWrap::LoadLocalFile),
             InstanceMethod("loadRequest", &WebViewWrap::LoadRequest),
-            InstanceMethod("evaluateJavaScript", &WebViewWrap::EvaluateJavaScript),
+            InstanceMethod("executeJavaScript", &WebViewWrap::ExecuteJavaScript),
             InstanceMethod("reload", &WebViewWrap::Reload),
             InstanceMethod("setDevToolsEnabled", &WebViewWrap::SetDevToolsEnabled),
             InstanceMethod("destroy", &WebViewWrap::Destroy),
@@ -114,14 +114,19 @@ namespace DeskGap {
         });
     }
 
-    void WebViewWrap::EvaluateJavaScript(const Napi::CallbackInfo& info) {
-        std::optional<WebView::JavaScriptEvaluationCallback> optionalCallback;
+    void WebViewWrap::ExecuteJavaScript(const Napi::CallbackInfo& info) {
+        std::optional<WebView::JavaScriptExecutionCallback> optionalCallback;
         if (Napi::Value secondArg = info[1]; !secondArg.IsNull()) {
             optionalCallback.emplace([
                 jsCallback { JSFunctionForUI::Persist(secondArg.As<Napi::Function>()) }
-            ](bool hasError, std::string&& result) {
-                jsCallback->Call([hasError, result { std::move(result) }](auto env) -> std::vector<napi_value>  {
-                    return { Napi::Boolean::New(env, hasError), Napi::String::New(env, result) };
+            ](std::optional<std::string>&& errorMessage) {
+                jsCallback->Call([errorMessage { std::move(errorMessage) }](auto env) -> std::vector<napi_value>  {
+                    if (errorMessage.has_value()) {
+                        return { Napi::String::New(env, *errorMessage) };
+                    }
+                    else {
+                        return { Napi::Env(env).Null() };
+                    }
                 });
             });
         }
@@ -130,7 +135,7 @@ namespace DeskGap {
             script { info[0].As<Napi::String>().Utf8Value() },
             optionalCallback { std::move(optionalCallback) }
         ]() mutable {
-            this->webview_->EvaluateJavaScript(script, std::move(optionalCallback));
+            this->webview_->ExecuteJavaScript(script, std::move(optionalCallback));
         });
     }
 

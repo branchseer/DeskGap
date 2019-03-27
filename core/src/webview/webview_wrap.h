@@ -14,7 +14,7 @@ namespace DeskGap {
         void LoadHTMLString(const Napi::CallbackInfo& info);
         void LoadLocalFile(const Napi::CallbackInfo& info);
         void LoadRequest(const Napi::CallbackInfo& info);
-        void EvaluateJavaScript(const Napi::CallbackInfo& info);
+        void ExecuteJavaScript(const Napi::CallbackInfo& info);
         void Reload(const Napi::CallbackInfo&);
         void SetDevToolsEnabled(const Napi::CallbackInfo& info);
         void Destroy(const Napi::CallbackInfo& info);

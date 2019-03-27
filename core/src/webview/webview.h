@@ -57,8 +57,8 @@ namespace DeskGap {
             const std::optional<std::string>& body
         ));
         PURE_VIRTUAL_IF_WIN32(void Reload());
-        using JavaScriptEvaluationCallback = std::function<void(bool, std::string&&)>;
-        PURE_VIRTUAL_IF_WIN32(void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&));
+        using JavaScriptExecutionCallback = std::function<void(std::optional<std::string>&&)>; // std::optional<std::string>: error message
+        PURE_VIRTUAL_IF_WIN32(void ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&&));
 
         PURE_VIRTUAL_IF_WIN32(void SetDevToolsEnabled(bool enabled));
 
@@ -85,7 +85,7 @@ namespace DeskGap {
         ) override;
         virtual void Reload() override;
         virtual void SetDevToolsEnabled(bool enabled) override;
-        virtual void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&) override;
+        virtual void ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&&) override;
         virtual ~TridentWebView();
     };
 }

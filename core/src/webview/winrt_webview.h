@@ -27,7 +27,7 @@ namespace DeskGap {
         ) override;
         virtual void Reload() override;
         virtual void SetDevToolsEnabled(bool enabled) override;
-        virtual void EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&&) override;
+        virtual void ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&&) override;
         virtual ~WinRTWebView();
     };
 }

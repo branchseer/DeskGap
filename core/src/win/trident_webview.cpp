@@ -70,10 +70,21 @@ namespace DeskGap {
 
             ATL::CComPtr<IDispatch> disp;
             hr = webBrowser2->get_Document(&disp);
+
             if (SUCCEEDED(hr)) {
+                if (disp == nullptr) {
+                    *hrPtr = E_FAIL;
+                    return nullptr;
+                }
                 ATL::CComPtr<IHTMLDocument2> htmlDoc2;
+
                 hr = disp->QueryInterface(IID_IHTMLDocument2, (void**)&htmlDoc2);
+
                 if (SUCCEEDED(hr)) {
+                    if (htmlDoc2 == nullptr) {
+                        *hrPtr = E_FAIL;
+                        return nullptr;
+                    }
                     return htmlDoc2;
                 }
             }
@@ -85,12 +96,12 @@ namespace DeskGap {
         }
     public:
         std::wstring lastErrorMessage;
-        HRESULT ExecuteJavaScript(const std::wstring& code)
-        {
+        HRESULT ExecuteJavaScript(const std::wstring& code) {
             HRESULT hr;
             if (webBrowser2 == nullptr) return E_FAIL;
 
             ATL::CComPtr<IHTMLDocument2> htmlDoc2 = GetCurrentHtmlDoc2(&hr);
+
             if (FAILED(hr)) return hr;
 
             ATL::CComPtr<IDispatch> script;

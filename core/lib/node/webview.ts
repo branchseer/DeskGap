@@ -1,13 +1,11 @@
-import { bulkUISync } from './internal/dispatch';
 import { EventEmitter, IEventMap } from '../common/events';
-
+import messageNode from './message-node';
+import { evaluateJavaScript } from './internal/js-evaluation';
 import { entryPath } from './internal/bootstrap';
 import path = require('path');
-import globals from './globals';
+import globals from './internal/globals';
 
 const { WebViewNative } = require('./bindings');
-
-export const messageNode = new EventEmitter<any, WebView>();
 
 let currentId = 0;
 
@@ -95,9 +93,8 @@ export class WebView extends EventEmitter<WebViewEvents> {
         if (this.isDestroyed()) return;
         this.native_.executeJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(channelName)}, ${JSON.stringify(args)})`, null);
     }
-
-    executeJavaScript(code: string): void {
-        this.native_.executeJavaScript(code, null);
+    executeJavaScript(code: string): Promise<any> {
+        return evaluateJavaScript(this.native_, code);
     }
 
     setDevToolsEnabled(enabled: boolean): void {

@@ -2,12 +2,12 @@ import { entryPath, NativeException } from './internal/bootstrap';
 import app from './app';
 import { BrowserWindow } from './browser-window';
 import { Menu, MenuItem } from './menu';
-import { WebViews, messageNode } from './webview';
+import { WebViews } from './webview';
+import messageNode from './message-node';
 import Dialog from './dialog';
 import shell from './shell';
-import './async-node';
+import './internal/async-node';
 import systemPreferences from './system-preferences';
-import os = require('os');
 
 export = {
     app,
@@ -23,7 +23,6 @@ export = {
     NativeException,
     shell,
 };
-
 
 process.on('uncaughtException', (error) => {
     if (process.listeners('uncaughtException').length > 1) {

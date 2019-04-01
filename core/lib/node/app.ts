@@ -2,7 +2,7 @@ import { Menu, MenuTypeCode } from './menu';
 import defaultMenuTemplate from './internal/menu/default-template';
 import appInfo from './internal/app-info'
 
-import globals from './globals';
+import globals from './internal/globals';
 import { EventEmitter, IEventMap } from '../common/events';
 import { bulkUISync } from './internal/dispatch';
 

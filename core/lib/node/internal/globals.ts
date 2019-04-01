@@ -1,5 +1,5 @@
-import { BrowserWindow } from './browser-window';
-import { WebView } from './webview';
+import { BrowserWindow } from '../browser-window';
+import { WebView } from '../webview';
 
 export default {
     browserWindowsById: new Map<number, BrowserWindow>(),

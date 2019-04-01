@@ -1,7 +1,7 @@
 import { bulkUISync } from './internal/dispatch';
 import app from './app';
 import { EventEmitter, IEventMap } from '../common/events';
-import globals from './globals';
+import globals from './internal/globals';
 import { Menu, MenuTypeCode } from './menu';
 import { WebView } from './webview';
 

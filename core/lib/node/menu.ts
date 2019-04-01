@@ -1,6 +1,6 @@
 import { bulkUISync } from './internal/dispatch';
 import { parseAcceleratorToTokens } from './accelerator';
-import globals from './globals';
+import globals from './internal/globals';
 import { BrowserWindow } from './browser-window'
 import roleDefaults, { Role } from './internal/menu/roles';
 

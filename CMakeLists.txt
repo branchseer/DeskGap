@@ -16,12 +16,11 @@ if (NOT APPLE)
     )
 endif()
 
-if(APPLE)
-    add_library(DeskGapPlatform STATIC src/platform_mac.mm)
-    file(GLOB nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/*.a)
-endif()
+file(GLOB nodeStaticLib ${PROJECT_SOURCE_DIR}/deps/node/release/*)
 
-if(WIN32)
+if (APPLE)
+    add_library(DeskGapPlatform STATIC src/platform_mac.mm)
+elseif (WIN32)
     add_library(DeskGapPlatform STATIC src/platform_win.cpp)
     set_target_properties(
         DeskGapPlatform PROPERTIES
@@ -29,12 +28,8 @@ if(WIN32)
         COMPILE_DEFINITIONS WIN32_LEAN_AND_MEAN=1
     )
     target_link_libraries(DeskGapPlatform shcore)
-    
     target_link_libraries(DeskGap ws2_32 dbghelp crypt32 winmm iphlpapi psapi userenv)
-    file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/*.lib)
-endif()
-
-if (LINUX)
+elseif (LINUX)
     FIND_PACKAGE(PkgConfig REQUIRED)
     PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
 
@@ -42,22 +37,11 @@ if (LINUX)
     target_include_directories(DeskGapPlatform PRIVATE ${GTK_INCLUDE_DIRS})
     target_link_libraries(DeskGapPlatform stdc++fs ${GTK_LIBRARIES} ${GTK_CFLAGS_OTHER})
 
-    # Find All Node.js static dependencies
-    file(GLOB_RECURSE nodeStaticLibFiles ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/*/*.a)
-
-    # Node.js itself libnode.a must appear first
-    list(INSERT nodeStaticLibFiles 0 ${PROJECT_SOURCE_DIR}/deps/node/out/Release/obj.target/libnode.a)
-
-    list(APPEND nodeStaticLibFiles "-pthread" "-ldl" "-lrt" "-lm" "-rdynamic")
+    list(APPEND nodeStaticLib "-pthread" "-ldl" "-lrt" "-lm" "-rdynamic")
 endif()
 
 target_link_libraries(DeskGap DeskGapPlatform)
-
-list(FILTER nodeStaticLibFiles EXCLUDE REGEX "gtest")
-list(FILTER nodeStaticLibFiles EXCLUDE REGEX "v8_nosnapshot")
-
-
-target_link_libraries(DeskGap ${nodeStaticLibFiles})
+target_link_libraries(DeskGap ${nodeStaticLib})
 
 if(APPLE)
     set_target_properties(

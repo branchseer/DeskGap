@@ -43,15 +43,6 @@ describe('BrowserWindow#webView', () => {
         });
     });
 
-    describe('webView.loadHTMLString(html)', () => {
-        it('loads the page content with html', (done) => {
-            win.webView.loadHTMLString(`<script type='text/javascript'>
-                window.deskgap.messageUI.send('hello-web-view-html-string');
-            </script>`);
-            messageNode.once('hello-web-view-html-string', () => done());
-        })
-    });
-
     describe('webView.loadFile(path)', () => {
         it('loads the give file', (done) => {
             win.webView.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'web-view-load-file.html'));

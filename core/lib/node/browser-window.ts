@@ -363,9 +363,6 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         return this.webView;
     }
 
-    loadHTMLString(html: string): void {
-        this.webview_.loadHTMLString(html);
-    }
     loadFile(filePath: string): void {
         this.webview_.loadFile(filePath);
     }

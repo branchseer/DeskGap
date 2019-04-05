@@ -439,10 +439,6 @@ namespace DeskGap {
         
     }
 
-    void TridentWebView::LoadHTMLString(const std::string& html) {
-        
-    }
-
     void TridentWebView::LoadLocalFile(const std::string& path) {
         std::wstring wpath = UTF8ToWString(path.c_str());
         ATL::CComVariant flags(navNoHistory | navNoReadFromCache | navNoWriteToCache);

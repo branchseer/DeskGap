@@ -77,9 +77,7 @@ export class WebView extends EventEmitter<WebViewEvents> {
     isDestroyed(): boolean {
         return this.native_ == null;
     }
-    loadHTMLString(html: string): void {
-        this.native_.loadHTMLString(html);
-    }
+    
     loadFile(filePath: string): void {
         this.native_.loadLocalFile(path.resolve(entryPath, filePath));
     }

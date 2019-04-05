@@ -9,7 +9,6 @@
 namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {
         return DefineClass(env, "WebViewNative", {
-            InstanceMethod("loadHTMLString", &WebViewWrap::LoadHTMLString),
             InstanceMethod("loadLocalFile", &WebViewWrap::LoadLocalFile),
             InstanceMethod("loadRequest", &WebViewWrap::LoadRequest),
             InstanceMethod("executeJavaScript", &WebViewWrap::ExecuteJavaScript),
@@ -61,11 +60,6 @@ namespace DeskGap {
         });
     }
 
-    void WebViewWrap::LoadHTMLString(const Napi::CallbackInfo& info) {
-        UISyncDelayable(info.Env(), [this, html = info[0].As<Napi::String>().Utf8Value()]() {
-            this->webview_->LoadHTMLString(html);
-        });
-    }
     void WebViewWrap::LoadLocalFile(const Napi::CallbackInfo& info) {
         UISyncDelayable(info.Env(), [this, path = info[0].As<Napi::String>().Utf8Value()]() {
             this->webview_->LoadLocalFile(path);

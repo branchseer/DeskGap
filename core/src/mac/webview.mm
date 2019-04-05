@@ -338,11 +338,11 @@ namespace DeskGap {
     void WebView::SetDevToolsEnabled(bool enabled) {
         [impl_->wkWebView.configuration.preferences setValue: [NSNumber numberWithBool: enabled] forKey: @"developerExtrasEnabled"];
     }
+    WebView::~WebView() = default;
 
-
-    WebView::~WebView() {
+    WebView::Impl::~Impl() {
         for (NSString* keyPath in ObservedWKWebViewKeyPaths) {
-            [impl_->wkWebView removeObserver: impl_->webViewDelegate forKeyPath: keyPath];
+            [wkWebView removeObserver: webViewDelegate forKeyPath: keyPath];
         }
     }
 }

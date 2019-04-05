@@ -4,6 +4,5 @@
 
 
 namespace DeskGap {
-    // WebView::~WebView() = default;
-    // WebView::Impl::~Impl() = default;
+    
 }

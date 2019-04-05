@@ -10,6 +10,7 @@ namespace DeskGap {
         NSObject* webViewDelegate;
         NSObject* localURLSchemeHandler;
         void ServePath(NSString* path);
+        ~Impl();
     };
 }
 

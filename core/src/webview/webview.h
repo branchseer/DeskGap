@@ -62,7 +62,11 @@ namespace DeskGap {
 
         PURE_VIRTUAL_IF_WIN32(void SetDevToolsEnabled(bool enabled));
 
-        inline VIRTUAL_IF_WIN32 ~WebView() = default;
+        #ifdef WIN32
+        inline virtual ~WebView() = default;
+        #else
+        ~WebView();
+        #endif
     };
 }
 

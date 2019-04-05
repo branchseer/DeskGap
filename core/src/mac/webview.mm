@@ -294,10 +294,10 @@ namespace DeskGap {
         [impl_->wkWebView reloadFromOrigin];
     }
 
-    void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
+    void WebView::ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&& optionalCallback) {
         void (^scriptCompletionHandler)(id, NSError *error) = nil;
         if (optionalCallback.has_value()) {
-            JavaScriptEvaluationCallback callback = std::move(*optionalCallback);
+            JavaScriptExecutionCallback callback = std::move(*optionalCallback);
             scriptCompletionHandler = ^(id result, NSError *error) {
                 if (error) {
                     NSString* errorString = nil;
@@ -319,14 +319,10 @@ namespace DeskGap {
                         errorString = [error localizedDescription];
                     }
                     
-                    callback(true, [errorString UTF8String]);
+                    callback(std::make_optional<std::string>([errorString UTF8String]));
                 }
                 else {
-                    std::string stringResult;
-                    if ([result isKindOfClass:[NSString class]]) {
-                        stringResult = [(NSString*)result UTF8String];
-                    }
-                    callback(false, std::move(stringResult));
+                    callback(std::nullopt);
                 }
             };
         }

@@ -48,7 +48,6 @@ namespace DeskGap {
             std::string value;
         };
 
-        PURE_VIRTUAL_IF_WIN32(void LoadHTMLString(const std::string&));
         PURE_VIRTUAL_IF_WIN32(void LoadLocalFile(const std::string& path));
         PURE_VIRTUAL_IF_WIN32(void LoadRequest(
             const std::string& method,
@@ -79,7 +78,6 @@ namespace DeskGap {
         Impl* tridentImpl_;
     public:
         TridentWebView(EventCallbacks&&);
-        virtual void LoadHTMLString(const std::string&) override;
         virtual void LoadLocalFile(const std::string& path) override;
         virtual void LoadRequest(
             const std::string& method,

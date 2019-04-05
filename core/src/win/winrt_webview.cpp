@@ -202,13 +202,6 @@ namespace DeskGap {
         //which is called by BrowserWindow, because it needs the handle of the window.
     }
 
-    void WinRTWebView::LoadHTMLString(const std::string& html) {
-        winrtImpl_->PrepareScript();
-        winrtImpl_->streamResolver.setFolder(std::nullopt);
-
-        winrtImpl_->webViewControl.NavigateToString(winrt::to_hstring(html));
-    }
-
     void WinRTWebView::LoadLocalFile(const std::string& path) {
         winrtImpl_->PrepareScript();
         fs::path fsPath(path);

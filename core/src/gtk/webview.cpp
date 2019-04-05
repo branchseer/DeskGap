@@ -272,11 +272,6 @@ namespace DeskGap {
         g_object_unref(impl_->gtkWebView);
     }
 
-    void WebView::LoadHTMLString(const std::string& html) {
-        impl_->servedPath.reset();
-        webkit_web_view_load_html(impl_->gtkWebView, html.c_str(), nullptr);
-    }
-
     void WebView::LoadLocalFile(const std::string& path) {
         const char* cpath = path.c_str();
         gchar* folderPath = g_path_get_dirname(cpath);

@@ -228,11 +228,6 @@ namespace DeskGap {
         impl_->webViewDelegate = webviewDelegate;
     }
 
-    void WebView::LoadHTMLString(const std::string& html) {
-        impl_->ServePath(nil);
-        [impl_->wkWebView loadHTMLString: NSStr(html) baseURL: nil];
-    }
-
     void WebView::LoadLocalFile(const std::string& path) {
         impl_->ServePath(nil);
         if (@available(macOS 10.13, *)) {

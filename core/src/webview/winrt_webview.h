@@ -17,7 +17,6 @@ namespace DeskGap {
         Impl* winrtImpl_;
     public:
         WinRTWebView(EventCallbacks&&, const std::string& libPath);
-        virtual void LoadHTMLString(const std::string&) override;
         virtual void LoadLocalFile(const std::string& path) override;
         virtual void LoadRequest(
             const std::string& method,

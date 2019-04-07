@@ -124,23 +124,10 @@ namespace DeskGap {
             navigationCompletedRevoker = webViewControl.NavigationCompleted(
                 winrt::auto_revoke, 
                 [this](const auto&, const WebViewControlNavigationCompletedEventArgs& e) {
-                    if (e.IsSuccess()) {
-                        this->callbacks.didStopLoading(std::nullopt);
-                    }
-                    else {
-                        this->callbacks.didStopLoading(DeskGap::WebView::LoadingError {
-                            static_cast<long>(e.WebErrorStatus()), "WebErrorStatus"
-                        });
-                    }
+                    this->callbacks.didFinishLoad();
                 }
             );
 
-            navigationStartingRevoker = webViewControl.NavigationStarting(
-                winrt::auto_revoke,
-                [this](const auto&, const auto&) {
-                    this->callbacks.didStartLoading();
-                }
-            );
 
             scriptNotifyRevoker = webViewControl.ScriptNotify(
                 winrt::auto_revoke,
@@ -163,15 +150,13 @@ namespace DeskGap {
                     }
                     case TitleUpdatedNotifyStringPrefix: {
                         callbacks.onPageTitleUpdated(std::move(notifyContent));
+                        break;
                     }
                     default:
                         break;
                     }
                 }
             );
-
-            //ShowWindow(controlWnd, SW_SHOW);
-            //UpdateWindow(controlWnd);
         }; 
     };
     

@@ -88,21 +88,16 @@ namespace {
     return self;
 }
 
-- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation {
-    callbacks_.didStartLoading();
-}
-
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    callbacks_.didStopLoading(DeskGap::WebView::LoadingError { [error code], [[error description] UTF8String] });
+    callbacks.didFinishLoad();
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
-    callbacks_.didStopLoading(std::nullopt);
+    callbacks.didFinishLoad();
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    callbacks_.didStartLoading(); // didFailProvisionalNavigation is called without calling didCommitNavigation first
-    callbacks_.didStopLoading(DeskGap::WebView::LoadingError { [error code], [[error description] UTF8String] });
+    callbacks.didFinishLoad();
 }
 
 - (void)userContentController:(WKUserContentController *) userContentController didReceiveScriptMessage:(WKScriptMessage *)message {

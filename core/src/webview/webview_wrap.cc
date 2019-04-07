@@ -24,20 +24,8 @@ namespace DeskGap {
         Napi::Object jsCallbacks = info[0].ToObject();
 
         WebView::EventCallbacks eventCallbacks {
-            [jsDidStartLoading = JSFunctionForUI::Persist(jsCallbacks.Get("didStartLoading").As<Napi::Function>())]() {
-                jsDidStartLoading->Call();
-            },
-            [jsDidStopLoading = JSFunctionForUI::Persist(jsCallbacks.Get("didStopLoading").As<Napi::Function>())](const std::optional<WebView::LoadingError>& error) {
-                jsDidStopLoading->Call([error](auto env) -> std::vector<napi_value> {
-                    std::vector<napi_value> args;
-                    if (error.has_value()) {
-                        args = {
-                            Napi::Number::New(env, error->code),
-                            Napi::String::New(env, error->description),
-                        };
-                    }
-                    return args;
-                });
+            [jsDidFinishLoad = JSFunctionForUI::Persist(jsCallbacks.Get("didFinishLoad").As<Napi::Function>())]() {
+                jsDidFinishLoad->Call();
             },
             [jsOnStringMessage = JSFunctionForUI::Persist(jsCallbacks.Get("onStringMessage").As<Napi::Function>())](std::string&& stringMessage) {
                 jsOnStringMessage->Call([stringMessage { std::move(stringMessage) }](auto env) -> std::vector<napi_value> {

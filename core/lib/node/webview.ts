@@ -31,27 +31,13 @@ export class WebView extends EventEmitter<WebViewEvents> {
         currentId++;
 
         this.native_ = new WebViewNative({
-            didStartLoading: () => {
-                if (this.isDestroyed()) return;
-                this.trigger_('did-start-loading');
-            },
-            didStopLoading: (...args: [] | [number, string]) => {
+            didFinishLoad: () => {
                 if (this.isDestroyed()) return;
                 try {
-                    if (args.length === 0) {
-                        this.trigger_('did-finish-load');
-                    }
-                    else {
-                        this.trigger_('did-fail-load', null, ...args);
-                    }
+                    this.trigger_('did-finish-load');
                 }
                 finally {
-                    try {
-                        this.trigger_('did-stop-loading');
-                    }
-                    finally {
-                        callbacks.onReadyToShow();
-                    }
+                    callbacks.onReadyToShow();
                 }
             },
             onStringMessage: (stringMessage: string) => {

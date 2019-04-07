@@ -103,11 +103,8 @@ namespace DeskGap {
 
     void WebView::Impl::HandleLoadChanged(GtkWidget*, WebKitLoadEvent loadEvent, WebView* webView) {
         switch (loadEvent) {
-        case WEBKIT_LOAD_STARTED:
-            webView->impl_->callbacks.didStartLoading();
-            break;
         case WEBKIT_LOAD_FINISHED:
-            webView->impl_->callbacks.didStopLoading(std::nullopt);
+            webView->impl_->callbacks.didFinishLoad();
             break;
         default:
             break;

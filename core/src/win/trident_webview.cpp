@@ -398,7 +398,7 @@ namespace DeskGap {
                 check(dispatch->QueryInterface(IID_IWebBrowser2, (void**)&paramWebBrowser2));
 
                 if (paramWebBrowser2 == webBrowser2) {
-                    callbacks.didStopLoading(std::nullopt);
+                    callbacks.didFinishLoad();
                 }
             }
             else if (dispIdMember == DISPID_TITLECHANGE) {

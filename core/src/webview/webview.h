@@ -28,13 +28,8 @@ namespace DeskGap {
         struct Impl;
         std::unique_ptr<Impl> impl_;
     public:
-        struct LoadingError {
-            long code;
-            std::string description;
-        };
         struct EventCallbacks {
-            std::function<void()> didStartLoading;
-            std::function<void(const std::optional<LoadingError>&)> didStopLoading;
+            std::function<void()> didFinishLoad;
             std::function<void(std::string&&)> onStringMessage;
             std::function<void(const std::string&)> onPageTitleUpdated;
         };

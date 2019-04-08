@@ -193,7 +193,19 @@ namespace DeskGap {
         gtk_window_close(impl_->gtkWindow);
     }
 
-    void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
+    namespace {
+        struct PopupMenuDeactivateSignalData {
+            std::function<void()> onClose;
+            gulong connection;
+        };
+        void HandlePopupMenuDeactivate(GtkMenuShell* menuShell, PopupMenuDeactivateSignalData* data) {
+            g_signal_handler_disconnect(menuShell, data->connection);
+            data->onClose();
+            delete data;
+        }
+    }
+
+    void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem, std::function<void()>&& onClose) {
         GtkMenuPositionFunc positionFunc = nullptr;
         gpointer positionFuncData = nullptr;
 
@@ -214,6 +226,8 @@ namespace DeskGap {
                 delete rootLocation;
             };
         }
+        auto signalData = new PopupMenuDeactivateSignalData { std::move(onClose), 0 };
+        signalData->connection = g_signal_connect(menu.impl_->gtkMenuShell, "deactivate", G_CALLBACK(HandlePopupMenuDeactivate), signalData);
         gtk_menu_popup(
             GTK_MENU(menu.impl_->gtkMenuShell), nullptr, nullptr, 
             positionFunc, positionFuncData,

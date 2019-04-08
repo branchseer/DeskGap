@@ -57,8 +57,9 @@ int main(int argc, char* argv[])
 #endif
 
     void* platformData = DeskGapPlatform::InitUIThread();
-    std::string serializedPlatformData = (std::ostringstream() << platformData).str();
-    
+    std::ostringstream strStream;
+    strStream << platformData;
+    std::string serializedPlatformData = strStream.str();    
 
     std::string entry = DeskGapPlatform::PathOfResource({ "app" });
     

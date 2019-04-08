@@ -314,7 +314,7 @@ namespace DeskGap {
         webkit_web_view_reload_bypass_cache(impl_->gtkWebView);
     }
 
-    void WebView::EvaluateJavaScript(const std::string& scriptString, std::optional<JavaScriptEvaluationCallback>&& optionalCallback) {
+    void WebView::ExecuteJavaScript(const std::string& scriptString, std::optional<JavaScriptExecutionCallback>&& optionalCallback) {
         if (!optionalCallback.has_value()) {
             webkit_web_view_run_javascript(impl_->gtkWebView, scriptString.c_str(), nullptr, nullptr, nullptr);
         }
@@ -322,8 +322,8 @@ namespace DeskGap {
             webkit_web_view_run_javascript(
                 impl_->gtkWebView, scriptString.c_str(), nullptr,
                 [](GObject* object, GAsyncResult* asyncResult, gpointer user_data) {
-                    JavaScriptEvaluationCallback* callbackPtr = static_cast<JavaScriptEvaluationCallback*>(user_data);
-                    JavaScriptEvaluationCallback callback(std::move(*callbackPtr));
+                    JavaScriptExecutionCallback* callbackPtr = static_cast<JavaScriptExecutionCallback*>(user_data);
+                    JavaScriptExecutionCallback callback(std::move(*callbackPtr));
                     delete callbackPtr;
 
                     WebKitJavascriptResult *jsResult;
@@ -331,16 +331,16 @@ namespace DeskGap {
 
                     jsResult = webkit_web_view_run_javascript_finish(WEBKIT_WEB_VIEW(object), asyncResult, &error);
                     if (jsResult == nullptr) {
-                        callback(true, error->message);
+                        callback(std::make_optional<std::string>(error->message));
                         g_error_free (error);
                         return;
                     }
 
-                    callback(false, jsResultToString(jsResult).value_or(""));
+                    callback(std::nullopt);
 
                     webkit_javascript_result_unref(jsResult);
                 },
-                new JavaScriptEvaluationCallback(std::move(*optionalCallback))
+                new JavaScriptExecutionCallback(std::move(*optionalCallback))
             );
         };
     }

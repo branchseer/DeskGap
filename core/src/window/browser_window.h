@@ -80,7 +80,7 @@ namespace DeskGap {
         void SetVibrancies(const std::vector<Vibrancy>&);
     #endif
 
-        void PopupMenu(const Menu&, const std::array<int, 2>* location, int positioningItem);
+        void PopupMenu(const Menu&, const std::array<int, 2>* location, int positioningItem, std::function<void()>&& onClose);
         ~BrowserWindow();
     };
 }

@@ -87,12 +87,12 @@ export class Menu {
             const result = this.createNative_(MenuTypeCode.context, fullOptions.window);
             nativeId = result[0];
             const native = result[1];
-            fullOptions.window['native_'].popupMenu(native, location, fullOptions.positioningItem);    
-        });
-        //Wait for WM_MENUCOMMAND
-        bulkUISync(() => {
-            this.destroyNative_(nativeId);
-        });
+            fullOptions.window['native_'].popupMenu(native, location, fullOptions.positioningItem, () => {
+                bulkUISync(() => {
+                    this.destroyNative_(nativeId);
+                });
+            });    
+        });        
     }
     static setApplicationMenu(menu: Menu | null) {
         throw new Error('This method should have been overridden in the "app" module');

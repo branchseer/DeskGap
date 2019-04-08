@@ -112,8 +112,11 @@ namespace DeskGap {
             };
         }
         int positioningItem = info[2].As<Napi::Number>();
-        UISyncDelayable(info.Env(), [this, menuWrap, hasLocation, location, positioningItem] {
-            this->browser_window_->PopupMenu(*(menuWrap->menu_), hasLocation ? &location: nullptr, positioningItem);
+        std::function<void()> onClose = [jsOnClose = JSFunctionForUI::Persist(info[3].As<Napi::Function>())]() {
+            jsOnClose->Call();
+        };
+        UISyncDelayable(info.Env(), [this, menuWrap, hasLocation, location, positioningItem, onClose = std::move(onClose)]() mutable {
+            this->browser_window_->PopupMenu(*(menuWrap->menu_), hasLocation ? &location: nullptr, positioningItem, std::move(onClose));
         });
     }
 

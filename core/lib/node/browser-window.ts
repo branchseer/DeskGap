@@ -315,13 +315,12 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     }
     destroy(): void {
         bulkUISync(() => {
-            this.webview_['native_'].destroy();
-            this.native_.destroy();
-
             if (this.menuNativeId_ != null) {
                 this.menu_!['destroyNative_'](this.menuNativeId_);
                 this.menu_ = null;
             }
+            this.webview_['native_'].destroy();
+            this.native_.destroy();
         });
         this.webview_['native_'] = null;
         this.native_ = null;

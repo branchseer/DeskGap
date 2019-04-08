@@ -127,12 +127,12 @@ export class Menu {
     }
     /** @internal */
     private destroyNative_(nativeId: number): void {
-        const native = this.natives_.get(nativeId)!;
-        native.destroy();
-        this.natives_.delete(nativeId);
         for (const item of this.items) {
             item['destroyNative_'](nativeId);
         }
+        const native = this.natives_.get(nativeId)!;
+        native.destroy();
+        this.natives_.delete(nativeId);
     }
 
 };

@@ -37,7 +37,8 @@ elseif (LINUX)
     target_include_directories(DeskGapPlatform PRIVATE ${GTK_INCLUDE_DIRS})
     target_link_libraries(DeskGapPlatform stdc++fs ${GTK_LIBRARIES} ${GTK_CFLAGS_OTHER})
 
-    list(APPEND nodeStaticLib "-pthread" "-ldl" "-lrt" "-lm" "-rdynamic")
+    list(INSERT nodeStaticLib 0 "-Wl,--start-group")
+    list(APPEND nodeStaticLib "-Wl,--end-group" "-pthread" "-ldl" "-lrt" "-lm" "-rdynamic")
 endif()
 
 target_link_libraries(DeskGap DeskGapPlatform)

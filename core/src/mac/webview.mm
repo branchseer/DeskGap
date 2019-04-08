@@ -89,15 +89,15 @@ namespace {
 }
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    callbacks.didFinishLoad();
+    callbacks_.didFinishLoad();
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
-    callbacks.didFinishLoad();
+    callbacks_.didFinishLoad();
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    callbacks.didFinishLoad();
+    callbacks_.didFinishLoad();
 }
 
 - (void)userContentController:(WKUserContentController *) userContentController didReceiveScriptMessage:(WKScriptMessage *)message {

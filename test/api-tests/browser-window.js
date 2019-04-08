@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('deskgap');
 const chai = require('chai');
+const path = require('path');
 
 const { expect } = chai;
 
@@ -40,9 +41,7 @@ describe('BrowserWindow module', () => {
         });
         it('should not crash when destroying windows with pending events', () => {
             const win = new BrowserWindow({ show: false });
-            win.loadHTMLString(`<script type="text/javascript">
-                window.deskgap.messageUI.send('a-channel');
-            </script>`);
+            win.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
             win.destroy();
             expect(win.isDestroyed()).to.equal(true);
         })

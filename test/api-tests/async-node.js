@@ -1,4 +1,6 @@
 const { app, BrowserWindow, messageNode } = require('deskgap');
+const path = require('path');
+const { once } = require('events');
 const { expect } = require('chai');
 
 describe('asyncNode', () => {
@@ -22,32 +24,33 @@ describe('asyncNode', () => {
     });
 
     describe('asyncNode.require(moduleName)', () => {
-        it('can require built-in modules', (done) => {
-            win.loadHTMLString(`<script type='text/javascript'>
-                deskgap.asyncNode.require('os').then(function (os) {
-                    return os.invoke('platform').value()
-                }).then(function (result) {
-                    deskgap.messageUI.send('async-node-result', result);
-                });
-            </script>`);
-            messageNode.once('async-node-result', (e, result) => {
-                expect(result).to.equal(require('os').platform());
-                done();
-            });
+        beforeEach(async () => {
+            win.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
+            await once(win.webView, 'did-finish-load');
         });
 
-        it('should resolve relative paths to the entry of the app', (done) => {
-            win.loadHTMLString(`<script type='text/javascript'>
+        it('can require built-in modules', async () => {
+            win.webView.executeJavaScript(`
+                deskgap.asyncNode.require('os').then(function (os) {
+                    return os.invoke('platform').value();
+                }).then(function (result) {
+                    deskgap.messageUI.send('async-node-result', result);
+                })
+            `);
+            const [, result] = await once(messageNode, 'async-node-result');
+            expect(result).to.equal(require('os').platform());
+        });
+
+        it('should resolve relative paths to the entry of the app', async () => {
+            win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('./fixtures/modules/async-node-simple-module').then(function(m) {
                     return m.value();
                 }).then(function (result) {
                     deskgap.messageUI.send('async-node-result', result);
-                });
-            </script>`);
-            messageNode.once('async-node-result', (e, result) => {
-                expect(result).to.equal('hello asyncNode');
-                done();
-            });
+                })
+            `);
+            const [, result] = await once(messageNode, 'async-node-result');
+            expect(result).to.equal('hello asyncNode');
         });
     });
 });

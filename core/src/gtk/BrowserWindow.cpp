@@ -72,16 +72,6 @@ namespace DeskGap {
     }
 
     BrowserWindow::~BrowserWindow() {
-        if (gtk_widget_in_destruction(GTK_WIDGET(impl_->gtkWindow))) {
-            for (gulong connection: { 
-                impl_->deleteEventConnection,
-                impl_->focusInEventConnection,
-                impl_->focusOutEventConnection,
-                impl_->configureEventConnection
-            }) {
-                g_signal_handler_disconnect(impl_->gtkWindow, connection);
-            }
-        }
         g_object_unref(impl_->gtkBox);
         g_object_unref(impl_->gtkWindow);
     }
@@ -189,6 +179,14 @@ namespace DeskGap {
     }
 
     void BrowserWindow::Destroy() {
+        for (gulong connection: { 
+            impl_->deleteEventConnection,
+            impl_->focusInEventConnection,
+            impl_->focusOutEventConnection,
+            impl_->configureEventConnection
+        }) {
+            g_signal_handler_disconnect(impl_->gtkWindow, connection);
+        }
         gtk_widget_destroy(GTK_WIDGET(impl_->gtkWindow));
     }
     void BrowserWindow::Close() {

@@ -228,7 +228,7 @@ namespace DeskGap {
 
     }
 
-    void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
+    void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem,  std::function<void()>&& onClose) {
         SetForegroundWindow(impl_->windowWnd);
 
         UINT uFlags = TPM_RIGHTBUTTON;
@@ -252,6 +252,7 @@ namespace DeskGap {
         }
 
         TrackPopupMenuEx(menu.impl_->hmenu, uFlags, pt.x, pt.y, impl_->windowWnd, NULL);
+        onClose();
     }
 
     BrowserWindow::~BrowserWindow() = default;

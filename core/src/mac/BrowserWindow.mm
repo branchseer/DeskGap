@@ -388,7 +388,7 @@ namespace DeskGap {
         [impl_->nsWindow performClose: nil];
     }
 
-    void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem) {
+    void BrowserWindow::PopupMenu(const Menu& menu, const std::array<int, 2>* location, int positioningItem, std::function<void()>&& onClose) {
         NSView* view = [impl_->nsWindow contentView];
         NSMenu* ns_menu = menu.impl_->ns_menu;
 
@@ -409,7 +409,9 @@ namespace DeskGap {
             popUpMenuPositioningItem: positioningMenuItem
             atLocation: popupLocation
             inView: view
-        ];   
+        ];
+
+        onClose();
     }
 
     void BrowserWindow::SetTitleBarStyle(TitleBarStyle titleBarStyle) {

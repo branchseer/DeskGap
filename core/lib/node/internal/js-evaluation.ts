@@ -16,11 +16,18 @@ const evaluations = new Map<number, { resolve: (result: any) => void, reject: (e
 
 export function RegisterJSEvaluationHandlers(messageNode: EventEmitter<ChannelsSentByUI>) {
     messageNode.on(ChannelNames.RESOLVED, (e, evaluationId, result) => {
-        evaluations.get(evaluationId)!.resolve(result);
+        const evaluation = evaluations.get(evaluationId);
+        if (evaluation != null) {
+            evaluation.resolve(result);
+            evaluations.delete(evaluationId);
+        }
     });
     messageNode.on(ChannelNames.REJECTED, (e, evaluationId: number, errorMessage: string) => {
-        evaluations.get(evaluationId)!.reject(new JavascriptEvaluationError(errorMessage));
-        evaluations.delete(evaluationId);
+        const evaluation = evaluations.get(evaluationId);
+        if (evaluation != null) {
+            evaluation.reject(new JavascriptEvaluationError(errorMessage));
+            evaluations.delete(evaluationId);
+        }
     });
 }
 
@@ -29,7 +36,7 @@ export function evaluateJavaScript(webViewNative: any, code: string): Promise<an
     const wrappedCode = `Promise.resolve(${code}).then(
         function (result) { window.deskgap.messageUI.send('${ChannelNames.RESOLVED}', ${evaluationId}, result); },
         function (error) { window.deskgap.messageUI.send('${ChannelNames.REJECTED}', ${evaluationId}, error.message || error.toString()); }
-    )`;
+    ); void 0;`;
 
     return new Promise<any>((resolve, reject) => {
         evaluations.set(evaluationId, { resolve, reject });

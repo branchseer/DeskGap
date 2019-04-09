@@ -1,7 +1,7 @@
 {
   "name": "deskgap-core",
   "scripts": {
-    "configure-native": "node-gyp configure",
+    "configure-native": "node gyp-configure.js",
     "build-native": "node-gyp build deskgap_native",
     "build-lib-node": "webpack-cli --config ./lib/node/webpack.config.js",
     "build-lib-ui": "webpack-cli --config ./lib/ui/webpack.config.js",

@@ -1,24 +1,50 @@
 # Build Instructions
 
 ## Prerequisites
-* [Node.js building prerequisites](https://github.com/nodejs/node/blob/master/BUILDING.md)
-* The Node.js that shares the same version and architecture with DeskGap‘s Node.js
-    * Version: See `npm/node-version.js`
-    * Architecture: `x64` on macOS and `ia32` on Windows
-* Visual Studio 2017 Installation with the following components checked:
-    * [x] Desktop development with C++
-        * [x] C++/CLI support
-    * [x] .NET desktop development
+
+* A recent version of [Node.js](http://nodejs.org)
+* [node-gyp](https://github.com/nodejs/node-gyp#installation)
+
+### macOS
+* Xcode 10.2 or later
+* [CMake](https://cmake.org) 3.10 or later
+
+### Windows
+* Windows 10 October 2018 Update (version 1809) or later
+* The "Desktop development with C++" workload from [Visual Studio 2017](https://docs.microsoft.com/en-us/visualstudio/releasenotes/vs2017-relnotes) (the free “Community” version is OK)
+
+### Linux
+* `gcc-8` and `g++-8`
+* [CMake](https://cmake.org) 3.10 or later
 
 
 ## Steps
 
-1. Run `npm ci --ignore-scripts` in `core`, `scripts`, `npm`, and `test`.
-2. Download Node.js and the other dependencies: `node scripts/download-deps.js`
-3. Build Node.js as a static library (this may take a while): `node scripts/build-node.js`
-4. Build the native addon of DeskGap: run `npm run configure-native && npm run build-native` in `core`
-5. Compile the TypeScript library: run `npm run build-lib-node && npm run build-lib-ui` in `core`
-6. Configure the CMake for building the executable
+### Download the Dependencies
+1. Download the npm dependencies: execute `npm ci --ignore-scripts` in the following locations:
+    * `core/`
+    * `scripts/`
+    * `npm/`
+    * `test/`
+2. Download the prebuilt Node.js static library: `node scripts/download-deps.js`. (Alternatively, [build Node.js from source](http://github.com/patr0nus/libnode). Note that it may take a while)
+
+### Configure
+1. Configure node-gyp: `cd core && npm run configure-native`
+2. Configure cmake:
     1. `mkdir build && cd build`
-    2. `cmake -G Xcode ..` on macOS, `cmake -G "Visual Studio 15 2017" ..` on Windows, `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..` on Linux.
-7. Build the executable and copy the resources: `cmake --build . --target ALL_BUILD --config Release`
+    2. Generate the project:
+        * macOS: `cmake -G Xcode ..`  
+        * Windows: `cmake -G "Visual Studio 15 2017" ..`  
+        * Linux: `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..`
+   
+### Compile
+1. Compile TypeScript:
+    1. `cd core/`
+    2. `npm run build-lib-node`
+    3. `npm run build-lib-ui`
+2. Build the native bindings: `cd core && npm run build-native`
+3. Build the executable and copy the resources:
+    1. `cd build/`
+    2. Build all the CMake targets:
+        * macOS or Windows: `cmake --build . --target ALL_BUILD --config Release`
+        * Linux: `make`

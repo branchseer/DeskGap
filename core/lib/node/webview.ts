@@ -137,11 +137,11 @@ export const WebViews = {
         return globals.webViewsById.get(id) || null;
     },
 
-    SetDefaultEngine(engine: Engine): void {
+    setDefaultEngine(engine: Engine): void {
         defaultEngine = engine;
     },
 
-    GetDefaultEngine(): Engine | null {
+    getDefaultEngine(): Engine | null {
         return defaultEngine;
     }
 }

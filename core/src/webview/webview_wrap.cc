@@ -9,6 +9,7 @@
 namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {
         return DefineClass(env, "WebViewNative", {
+            StaticMethod("isWinRTEngineAvaliable", &WebViewWrap::IsWinRTEngineAvaliable),
             InstanceMethod("loadLocalFile", &WebViewWrap::LoadLocalFile),
             InstanceMethod("loadRequest", &WebViewWrap::LoadRequest),
             InstanceMethod("executeJavaScript", &WebViewWrap::ExecuteJavaScript),
@@ -21,7 +22,7 @@ namespace DeskGap {
     WebViewWrap::WebViewWrap(const Napi::CallbackInfo& info):
             Napi::ObjectWrap<WebViewWrap>(info)
     {
-        Napi::Object jsCallbacks = info[0].ToObject();
+        Napi::Object jsCallbacks = info[0].As<Napi::Object>();
 
         WebView::EventCallbacks eventCallbacks {
             [jsDidFinishLoad = JSFunctionForUI::Persist(jsCallbacks.Get("didFinishLoad").As<Napi::Function>())]() {
@@ -38,15 +39,39 @@ namespace DeskGap {
                 });
             },
         };
-        UISyncDelayable(info.Env(), [this, eventCallbacks = std::move(eventCallbacks)]() mutable {
-        #ifndef WIN32
-            this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks));
-        #else
-            // this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), LibPath());
-            this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks));
+
+    #ifdef WIN32
+        Napi::Number engineValue = info[1].As<Napi::Number>();
+        Engine engine = static_cast<Engine>(engineValue.Uint32Value());
+    #endif
+
+        UISyncDelayable(info.Env(), [
+            this,
+            eventCallbacks = std::move(eventCallbacks)
+        #ifdef WIN32
+            , engine
         #endif
+        ]() mutable {
+
+        #ifdef WIN32
+            if (engine == Engine::WINRT) {
+                this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), LibPath());
+            }
+            else {
+                this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks));
+            }
+        #else
+            this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks));
+        #endif
+
         });
     }
+    
+    #ifdef WIN32
+    Napi::Value WebViewWrap::IsWinRTEngineAvaliable(const Napi::CallbackInfo& info) {
+        return Napi::Boolean::New(info.Env(), WebView::IsWinRTWebViewAvaliable());
+    }
+    #endif
 
     void WebViewWrap::LoadLocalFile(const Napi::CallbackInfo& info) {
         UISyncDelayable(info.Env(), [this, path = info[0].As<Napi::String>().Utf8Value()]() {

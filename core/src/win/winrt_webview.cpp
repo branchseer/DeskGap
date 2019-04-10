@@ -16,6 +16,7 @@
 #include <winrt/Windows.Storage.Streams.h>
 #include <winrt/Windows.Web.Http.h>
 #include <winrt/Windows.Web.Http.Headers.h>
+#include <winrt/Windows.Foundation.Metadata.h>
 
 #include "../webview/winrt_webview.h"
 #include "webview_impl.h"
@@ -62,6 +63,10 @@ namespace DeskGap {
                 return stream;
             }
         };
+    }
+    bool WinRTWebView::IsAvaliable() {
+        // WinRTWebView needs WebViewControl#AddInitializeScript, which is a method of IWebViewControl2, which is in UniversalApiContract 7.
+        return winrt::Windows::Foundation::Metadata::ApiInformation::IsApiContractPresent(L"Windows.Foundation.UniversalApiContract", 7);
     }
 
     struct WinRTWebView::Impl: public WebView::Impl {

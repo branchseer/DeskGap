@@ -7,6 +7,18 @@ import globals from './internal/globals';
 
 const { WebViewNative } = require('./bindings');
 
+type Engine = 'winrt' | 'trident';
+
+let defaultEngine: Engine | null = null;
+if (process.platform === 'win32') {
+    defaultEngine = WebViewNative.isWinRTEngineAvaliable() ? 'winrt': 'trident';
+}
+
+const engineCodeByName: Record<Engine, number> = {
+    'trident': 0,
+    'winrt': 1
+};
+
 let currentId = 0;
 
 export interface WebViewEvents extends IEventMap {
@@ -54,7 +66,7 @@ export class WebView extends EventEmitter<WebViewEvents> {
                     callbacks.onPageTitleUpdated(title);
                 }
             }
-        });
+        }, defaultEngine == null ? null: engineCodeByName[defaultEngine]);
     }
 
     get id(): number {
@@ -123,5 +135,13 @@ export const WebViews = {
     },
     fromId(id: number): WebView | null {
         return globals.webViewsById.get(id) || null;
+    },
+
+    SetDefaultEngine(engine: Engine): void {
+        defaultEngine = engine;
+    },
+
+    GetDefaultEngine(): Engine | null {
+        return defaultEngine;
     }
 }

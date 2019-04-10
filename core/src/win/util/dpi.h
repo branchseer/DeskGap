@@ -1,31 +1,11 @@
+#ifndef win_util_dpi_h
+#define win_util_dpi_h
+
 #include <Windows.h>
+#include <limits>
 
 namespace DeskGap {
-	
-	int GetWindowDpi(HWND windowWnd) {
-		typedef UINT (WINAPI *GetDpiForWindowProc)(HWND);
-		static GetDpiForWindowProc getDpiForWindow = (GetDpiForWindowProc)GetProcAddress(LoadLibraryW(L"user32.dll"), "GetDpiForWindow");
-
-		if (getDpiForWindow != nullptr) { // Not avaliable in win7
-			if (int dpi = getDpiForWindow(windowWnd); dpi != 0) {
-				return dpi;
-			}
-		}
-		
-		HDC screen = GetDC(windowWnd);
-		if (screen == nullptr) {
-			screen = GetDC(nullptr);
-			if (screen == nullptr) {
-				return 96;
-			}
-		}
-		
-		int xDpi = GetDeviceCaps(screen, LOGPIXELSX);
-		int yDpi = GetDeviceCaps(screen, LOGPIXELSY);
-		ReleaseDC(NULL, screen);
-		return (xDpi + yDpi) / 2;
-	}
-	
+	int GetWindowDpi(HWND windowWnd);
 
 	inline LONG To96Dpi(HWND windowWnd, LONG val) {
 		int dpi = GetWindowDpi(windowWnd);
@@ -47,3 +27,5 @@ namespace DeskGap {
 		};
 	}
 }
+
+#endif

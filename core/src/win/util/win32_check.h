@@ -1,3 +1,6 @@
+#ifndef win_util_win32_check_h
+#define win_util_win32_check_h
+
 #include <Windows.h>
 #include <cassert>
 
@@ -12,3 +15,5 @@ namespace {
 		assert(dwordResult != 0);
 	}
 }
+
+#endif

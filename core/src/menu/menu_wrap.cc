@@ -107,7 +107,7 @@ namespace DeskGap {
         });
     }
     void MenuWrap::Append(const Napi::CallbackInfo& info) {
-        Napi::Object jsMenuItem = info[0].ToObject();
+        Napi::Object jsMenuItem = info[0].As<Napi::Object>();
         MenuItemWrap* wrappedMenuItem = MenuItemWrap::Unwrap(jsMenuItem);
         
         UISyncDelayable(info.Env(), [this, wrappedMenuItem] {

@@ -28,6 +28,9 @@ namespace DeskGap {
         struct Impl;
         std::unique_ptr<Impl> impl_;
     public:
+        #ifdef WIN32
+        static bool IsWinRTWebViewAvaliable();
+        #endif
         struct EventCallbacks {
             std::function<void()> didFinishLoad;
             std::function<void(std::string&&)> onStringMessage;

@@ -87,6 +87,8 @@
             "src/win/shell.cpp",
             "src/win/dialog.cpp",
             "src/win/system_preferences.cpp",
+            "src/win/util/dpi.cpp",
+            "src/win/util/winrt.cpp",
           ],
           'dependencies': [ 'deskgap_winrt' ]
         }],

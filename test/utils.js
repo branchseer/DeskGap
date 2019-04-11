@@ -80,7 +80,7 @@ exports.createLocalServer = (handlers) => {
     });
 }
 
-const engines = webViews.isEngineAvaliable('winrt') ? ['trident', 'winrt']: [ null ];
+const engines = webViews.isEngineAvailable('winrt') ? ['trident', 'winrt']: [ null ];
 exports.withWebView = (it, description, func, loadsBlankPage = false) => {
     for (const engine of engines) {
         it(description + (engine == null ? "": `@${engine}`), async function() {

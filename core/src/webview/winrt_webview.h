@@ -16,7 +16,7 @@ namespace DeskGap {
         struct Impl;
         Impl* winrtImpl_;
     public:
-        static bool IsAvaliable();
+        static bool IsAvailable();
         WinRTWebView(EventCallbacks&&, const std::string& libPath);
         virtual void LoadLocalFile(const std::string& path) override;
         virtual void LoadRequest(

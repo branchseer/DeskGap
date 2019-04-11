@@ -7,12 +7,12 @@ import globals from './internal/globals';
 import { platform } from 'os';
 
 const { WebViewNative } = require('./bindings');
-const isWinRTEngineAvaliable = process.platform === 'win32' && WebViewNative.isWinRTEngineAvaliable();
+const isWinRTEngineAvailable = process.platform === 'win32' && WebViewNative.isWinRTEngineAvailable();
 type Engine = 'winrt' | 'trident';
 
 let defaultEngine: Engine | null = null;
 if (process.platform === 'win32') {
-    defaultEngine = isWinRTEngineAvaliable ? 'winrt': 'trident';
+    defaultEngine = isWinRTEngineAvailable ? 'winrt': 'trident';
 }
 
 const engineCodeByName: Record<Engine, number> = {
@@ -157,7 +157,7 @@ export const WebViews = {
         return defaultEngine;
     },
     
-    isEngineAvaliable(engine: Engine): boolean {
+    isEngineAvailable(engine: Engine): boolean {
         if (process.platform !== 'win32') {
             return false;
         }
@@ -165,7 +165,7 @@ export const WebViews = {
             return true;
         }
         if (engine === 'winrt') {
-            return WebViewNative.isWinRTEngineAvaliable();
+            return WebViewNative.isWinRTEngineAvailable();
         }
         return false;
     }

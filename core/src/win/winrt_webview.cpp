@@ -64,7 +64,7 @@ namespace DeskGap {
             }
         };
     }
-    bool WinRTWebView::IsAvaliable() {
+    bool WinRTWebView::IsAvailable() {
         // WinRTWebView needs WebViewControl#AddInitializeScript, which is a method of IWebViewControl2, which is in UniversalApiContract 7.
         return winrt::Windows::Foundation::Metadata::ApiInformation::IsApiContractPresent(L"Windows.Foundation.UniversalApiContract", 7);
     }

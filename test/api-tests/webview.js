@@ -4,7 +4,7 @@ const { createLocalServer, withWebView } = require('../utils');
 const { once } = require('events');
 const path = require('path');
 
-describe.only('BrowserWindow#webView', () => {
+describe('BrowserWindow#webView', () => {
     const windowAllClosedHandler = () => {};
 
     before(async () => {

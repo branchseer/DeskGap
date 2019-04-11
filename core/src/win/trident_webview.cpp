@@ -76,6 +76,7 @@ namespace DeskGap {
                     *hrPtr = E_FAIL;
                     return nullptr;
                 }
+
                 ATL::CComPtr<IHTMLDocument2> htmlDoc2;
 
                 hr = disp->QueryInterface(IID_IHTMLDocument2, (void**)&htmlDoc2);
@@ -88,7 +89,6 @@ namespace DeskGap {
                     return htmlDoc2;
                 }
             }
-
             if (hrPtr != nullptr) {
                 *hrPtr = hr;
             }
@@ -98,20 +98,28 @@ namespace DeskGap {
         std::wstring lastErrorMessage;
         HRESULT ExecuteJavaScript(const std::wstring& code) {
             HRESULT hr;
-            if (webBrowser2 == nullptr) return E_FAIL;
+            if (webBrowser2 == nullptr) {
+                return E_FAIL;
+            }
 
             ATL::CComPtr<IHTMLDocument2> htmlDoc2 = GetCurrentHtmlDoc2(&hr);
 
-            if (FAILED(hr)) return hr;
+            if (FAILED(hr)) {
+                return hr;
+            }
 
             ATL::CComPtr<IDispatch> script;
             hr = htmlDoc2->get_Script(&script);
-            if (FAILED(hr)) return hr;
+            if (FAILED(hr)) {
+                return hr;
+            }
 
             DISPID evalFuncionId;
             static ATL::CComBSTR evalFunctionName(L"eval");
             hr = script->GetIDsOfNames(IID_NULL, &evalFunctionName, 1, LOCALE_SYSTEM_DEFAULT, &evalFuncionId);
-            if (FAILED(hr)) return hr;
+            if (FAILED(hr)) {
+                return hr;
+            }
 
             DISPPARAMS dispParams;
             memset(&dispParams, 0, sizeof(DISPPARAMS));
@@ -127,7 +135,9 @@ namespace DeskGap {
 
             hr = script->Invoke(evalFuncionId, IID_NULL, 0, DISPATCH_METHOD, &dispParams, &vResult, &execInfo, &uArgError);
 
-            if (FAILED(hr)) return hr;
+            if (FAILED(hr)) {
+                return hr;
+            }
 
             return S_OK;
         }

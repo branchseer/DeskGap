@@ -17,3 +17,8 @@
   from = "/dl/linux"
   to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.0.9-linux-x64.zip"
   status = 302
+
+[[redirects]]
+  from = "/go/win_f12"
+  to = "/devtools/"
+  status = 302

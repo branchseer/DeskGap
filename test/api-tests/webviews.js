@@ -83,7 +83,7 @@ describe('webViews', () => {
             }
         });
 
-        it('should change the engine of webviews created afterwards to Trident if "trident" is passed', async () => {
+        it('should change the engine of webviews created afterwards to Trident if "trident" is passed', async function() {
             if (!webViews.isEngineAvailable('trident')) return this.skip();
             webViews.setDefaultEngine('trident');
             const window = new BrowserWindow({ show: false });
@@ -93,7 +93,7 @@ describe('webViews', () => {
             expect(userAgent).to.include('Trident');
         });
 
-        it('should change the engine of webviews created afterwards to a WebKit-like one if "winrt" is passed', async () => {
+        it('should change the engine of webviews created afterwards to a WebKit-like one if "winrt" is passed', async function() {
             if (!webViews.isEngineAvailable('winrt')) return this.skip();
 
             webViews.setDefaultEngine('winrt');

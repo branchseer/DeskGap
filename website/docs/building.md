@@ -6,11 +6,11 @@
 * [node-gyp](https://github.com/nodejs/node-gyp#installation)
 
 ### macOS
-* Xcode 10.2 or later
+* Xcode 10 or later
 * [CMake](https://cmake.org) 3.10 or later
 
 ### Windows
-* Windows 10 October 2018 Update (version 1809) or later
+* Windows 10 April 2018 Update (version 1803) or later
 * The "Desktop development with C++" workload from [Visual Studio 2017](https://docs.microsoft.com/en-us/visualstudio/releasenotes/vs2017-relnotes) (the free “Community” version is OK)
 
 ### Linux

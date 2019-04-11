@@ -97,7 +97,7 @@ namespace DeskGap {
     public:
         std::wstring lastErrorMessage;
         HRESULT ExecuteJavaScript(const std::wstring& code) {
-            HRESULT hr;
+            HRESULT hr = S_OK;
             if (webBrowser2 == nullptr) {
                 return E_FAIL;
             }

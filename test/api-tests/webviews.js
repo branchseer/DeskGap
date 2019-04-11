@@ -24,7 +24,7 @@ const win1809 = win && (() => {
     return gte(release, [10, 0, 17763]);
 });
 
-describe.only('webViews', () => {
+describe('webViews', () => {
     describe('webViews.isEngineAvaliable(engine)', () => {
         it('should return false if the os is not Windows', function () {
             if (win) return this.skip();

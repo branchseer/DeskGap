@@ -28,19 +28,26 @@ export interface WebViewEvents extends IEventMap {
     'page-title-updated': [string];
 }
 
+export interface WebPreferences {
+    engine: Engine | null;
+}
+
 let currentId = 0;
 export class WebView extends EventEmitter<WebViewEvents> {
     /** @internal */ private id_: number;
     /** @internal */ private native_: any;
+    /** @internal */ private engine_: Engine | null;
 
     /** @internal */ private asyncNodeObjectsById_ = new Map<number, any>();
     /** @internal */ private asyncNodeValuesByName_ = new Map<string, any>();
     /** @internal */ private isDevToolsEnabled_: boolean = false;
 
-    constructor(callbacks: { onPageTitleUpdated: (title: string) => void, onReadyToShow: () => void }) {
+    constructor(callbacks: { onPageTitleUpdated: (title: string) => void, onReadyToShow: () => void }, preferences: WebPreferences) {
         super();
         this.id_ = currentId;
         currentId++;
+
+        this.engine_ = preferences.engine || defaultEngine;
 
         this.native_ = new WebViewNative({
             didFinishLoad: () => {
@@ -66,12 +73,17 @@ export class WebView extends EventEmitter<WebViewEvents> {
                     callbacks.onPageTitleUpdated(title);
                 }
             }
-        }, defaultEngine == null ? null: engineCodeByName[defaultEngine]);
+        }, this.engine_ == null ? null : engineCodeByName[this.engine_]);
     }
 
     get id(): number {
         return this.id_;
     }
+
+    get engine(): Engine | null {
+        return this.engine_;
+    }
+
     isDestroyed(): boolean {
         return this.native_ == null;
     }

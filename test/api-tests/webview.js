@@ -29,7 +29,8 @@ describe('BrowserWindow#webView', () => {
     });
 
     describe('webView.loadURL(url)', () => {
-        it('loads the page by requesting the url', async () => {
+        it('loads the page by requesting the url', async function() {
+            if (win.webView.engine === 'winrt') return this.skip();
             let resolve;
             let requested = false;
             const server = await createLocalServer({

@@ -62,7 +62,7 @@ describe('webViews', () => {
         });
 
         it('should initially return "trident" on Windows if the WinRT engine is not supported', function () {
-            if (webViews.isEngineAvailable('winrt')) return this.skip();
+            if (!win || webViews.isEngineAvailable('winrt')) return this.skip();
             expect(webViews.getDefaultEngine()).to.equal("trident");
         });
     });

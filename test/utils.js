@@ -1,6 +1,9 @@
 const path = require('path');
 const Koa = require('koa');
+const { webViews, BrowserWindow } = require('deskgap');
 const { spawn } = require('child_process');
+const { once } = require('events');
+
 
 class DeskGapProcessError extends Error {
     constructor(result) {
@@ -76,3 +79,25 @@ exports.createLocalServer = (handlers) => {
         });
     });
 }
+
+const engines = webViews.isEngineAvaliable('winrt') ? ['trident', 'winrt']: [ null ];
+exports.withWebView = (it, description, func, loadsBlankPage = false) => {
+    for (const engine of engines) {
+        it(description + (engine == null ? "": `@${engine}`), async function() {
+            const win = new BrowserWindow({
+                show: false,
+                webPreferences: { engine }
+            });
+            if (loadsBlankPage) {
+                win.loadFile(path.resolve(__dirname, 'fixtures', 'files', 'blank.html'));
+                await once(win.webView, 'did-finish-load');
+            }
+            try {
+                return await func.call(this, win);
+            }
+            finally {
+                win.destroy();
+            }
+        });
+    }
+};

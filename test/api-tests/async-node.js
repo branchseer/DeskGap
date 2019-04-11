@@ -1,19 +1,10 @@
-const { app, BrowserWindow, messageNode } = require('deskgap');
-const path = require('path');
+const { app, messageNode } = require('deskgap');
 const { once } = require('events');
 const { expect } = require('chai');
+const { withWebView } = require('../utils');
 
 describe('asyncNode', () => {
     const windowAllClosedHandler = () => {};
-    
-    let win;
-    beforeEach(() => {
-        win = new BrowserWindow({ show: false });
-    });
-    afterEach(() => {
-        win.destroy();
-        win = null;
-    });
 
     before(async () => {
         app.on('window-all-closed', windowAllClosedHandler);
@@ -24,13 +15,8 @@ describe('asyncNode', () => {
     });
 
     describe('asyncNode.require(moduleName)', () => {
-        beforeEach(async () => {
-            win.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
-            await once(win.webView, 'did-finish-load');
-        });
-
-        it('can require built-in modules', async () => {
-            win.webView.executeJavaScript(`
+        withWebView(it, 'can require built-in modules', async (win) => {
+            const execution = win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('os').then(function (os) {
                     return os.invoke('platform').value();
                 }).then(function (result) {
@@ -39,10 +25,11 @@ describe('asyncNode', () => {
             `);
             const [, result] = await once(messageNode, 'async-node-result');
             expect(result).to.equal(require('os').platform());
-        });
+            await execution;
+        }, true);
 
-        it('should resolve relative paths to the entry of the app', async () => {
-            win.webView.executeJavaScript(`
+        withWebView(it, 'should resolve relative paths to the entry of the app', async (win) => {
+            const execution = win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('./fixtures/modules/async-node-simple-module').then(function(m) {
                     return m.value();
                 }).then(function (result) {
@@ -51,6 +38,7 @@ describe('asyncNode', () => {
             `);
             const [, result] = await once(messageNode, 'async-node-result');
             expect(result).to.equal('hello asyncNode');
-        });
+            await execution;
+        }, true);
     });
 });

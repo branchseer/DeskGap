@@ -3,7 +3,7 @@ import app from './app';
 import { EventEmitter, IEventMap } from '../common/events';
 import globals from './internal/globals';
 import { Menu, MenuTypeCode } from './menu';
-import { WebView } from './webview';
+import { WebView, WebPreferences } from './webview';
 
 const { BrowserWindowNative } = require('./bindings');
 
@@ -53,7 +53,8 @@ export interface IBrowserWindowConstructorOptions {
     vibrancy: VibrancyMaterial,
     maxHeight: number, maxWidth: number,
     minHeight: number, minWidth: number,
-    menu: Menu | null
+    menu: Menu | null,
+    webPreferences: Partial<WebPreferences>
 };
 
 export interface BrowserWindowEvents extends IEventMap {
@@ -106,7 +107,8 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
             maxWidth: 0,
             minHeight: 0,
             minWidth: 0,
-            menu: defaultMenu
+            menu: defaultMenu,
+            webPreferences: { }
         }, options);
 
         bulkUISync(() => {
@@ -123,7 +125,7 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
                         this.trigger_('ready-to-show');
                     }
                 }
-            });
+            }, Object.assign({ engine: null }, fullOptions.webPreferences));
 
             this.native_ = new BrowserWindowNative(this.webview_['native_'],  {
                 onBlur: () => {

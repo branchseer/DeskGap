@@ -62,23 +62,14 @@ namespace DeskGap {
         }
 
         if (role == "toggledevtools") {
-            impl_->wlabel = L"Install/Open Developer Tools...";
+            impl_->wlabel = L"Open the Developer Tools...";
             impl_->callbacks.onClick = []() {
-                bool success = ShellExecuteW(
+                ShellExecuteW(
                     nullptr, L"open",
-                    L"microsoft-f12://",
+                    L"https://deskgap.com/go/win_f12",
                     nullptr, nullptr,
                     SW_SHOWNORMAL
-                ) > (HINSTANCE)32;
-
-                if (!success) {
-                    ShellExecuteW(
-                        nullptr, L"open",
-                        L"ms-windows-store://pdp/?ProductId=9MZBFRMZ0MNJ",
-                        nullptr, nullptr,
-                        SW_SHOWNORMAL
-                    );
-                }
+                );
             };
         }
         else if (role == "copy") {

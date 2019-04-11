@@ -6,12 +6,37 @@ To enable native capabilities while keeping the size down, DeskGap bundles a [No
 
 ## Supported Platforms
 
-- Mac OS X Yosemite (version 10.10) or later
-- Windows 10 October 2018 Update (version 1809) or later
-- Linux x86_64 with webkit2gtk installed, tested on:
-  * Ubuntu 18.04.2 with `libwebkit2gtk-4.0-37 2.22.6`
-  * openSUSE Leap 15.0 with `libwebkit2gtk-4_0-37 2.20.2`
-  
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>macOS</th>
+      <th colspan="2">Windows</th>
+      <th>Linux</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Version</td>
+      <td>10.10+</td>
+      <td>7 SP1<sup>1</sup> - 10 version 1803</td>
+      <td>10 version 1809+</td>
+      <td>Tested on Ubuntu 16.04 LTS</td>
+    </tr>
+    <tr>
+      <td>Rendering Engine</td>
+      <td>WebKit</td>
+      <td>Trident</td>
+      <td>EdgeHTML<sup>2</sup></td>
+      <td>WebKit</td>
+    </tr>
+  </tbody>
+</table>
+
+1. Internet Explorer 11 is required for Node.js interop to work
+2. Trident is also available if specified explicitly.
+
+
 ## Downloads
 
 ### Prebuilt Binaries
@@ -102,26 +127,6 @@ DeskGap is at its early stage. __The API is still quite limited__ compared to El
 
 With a Node.js runtime bundled, DeskGap comes with support for npm packages and all the battle-tested __native capabilities__ in Node.js such as [`fs`](https://nodejs.org/api/fs.html), [`net`](https://nodejs.org/api/net.html), [`http`](https://nodejs.org/api/http.html). The price is a __larger executable size__ (about 8 MB zipped and 20 MB unzipped).
 
-### Why is the supported version of Windows so high? Any plan of supporting Windows 7?
-
-Older Windows’ __do not have a modern browser engine__, only the one that powers Internet Explorer. Windows 10 1809 is the first version that provides a modern webview with [enough functionalities](https://docs.microsoft.com/en-us/microsoft-edge/dev-guide#win32-webview-updates) for DeskGap to be possible.
-
-To support Windows 7, app developers would have to face compatibility issues coming from as low as IE 8. I personally don’t have enough motivation and interest to do this, but pull requests are always welcome.
-
-If you want to try DeskGap but dropping Windows 7 support is a no-go for your app, consider packaging the app with Electron for the unsupported platform. The DeskGap API is intentionally designed to be like Electron’s. The following code is a good start:
-
-```js
-let appEngine;
-try {
-  appEngine = require('deskgap');
-}
-catch (e) {
-  appEngine = require('electron');
-}
-const { app, BrowserWindow } = appEngine;
-```
-
-### So I can port my Electron app to DeskGap?
+### Can I port my Electron app to DeskGap without much modification?
 
 Probably no. The DeskGap API is still quite limited. If you start building an app with DeskGap, getting it running on Electron may be easy, but not the other way around.
-

@@ -1,19 +1,11 @@
-const { app, BrowserWindow, messageNode } = require('deskgap');
+const { app, messageNode } = require('deskgap');
 const { expect } = require('chai');
-const path = require('path');
 const { once } = require('events');
+const { withWebView } = require('../utils');
+
 
 describe('messageUI and messageNode', () => {
     const windowAllClosedHandler = () => {};
-    
-    let win;
-    beforeEach(() => {
-        win = new BrowserWindow({show: false});
-    });
-    afterEach(() => {
-        win.destroy();
-        win = null;
-    });
 
     before(async () => {
         app.on('window-all-closed', windowAllClosedHandler);
@@ -24,37 +16,31 @@ describe('messageUI and messageNode', () => {
     });
 
     describe('messageUI.send', () => {
-        beforeEach(async () => {
-            win.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
-            await once(win.webView, 'did-finish-load');
-        });
 
-        it('should send messages from ui to node with e.sender being the webview', async () => {
+        withWebView(it, 'should send messages from ui to node with e.sender being the webview', async (win) => {
             const execution = win.webView.executeJavaScript(`window.deskgap.messageUI.send('messageui-send')`);
             const [e, ] = await once(messageNode, 'messageui-send');
             expect(e.sender).to.equal(win.webView);
             await execution;
-        });
+        }, true);
 
-        it('can send messages with primitive args', async () => {
+        withWebView(it, 'can send messages with primitive args', async (win) => {
             const execution = win.webView.executeJavaScript(`window.deskgap.messageUI.send('messageui-send-primitive-args', 3, 'str', null, false)`);
             const [, ...args] = await once(messageNode, 'messageui-send-primitive-args');
             expect(args).to.deep.equal([3, 'str', null, false]);
             await execution;
-        });
+        }, true);
 
-        it('can send messages with json object args', async () => {
+        withWebView(it, 'can send messages with json object args', async (win) => {
             const execution = win.webView.executeJavaScript(`window.deskgap.messageUI.send('messageui-send-json-args', { a: 1 })`);
             const [, jsonObject] = await once(messageNode, 'messageui-send-json-args');
             expect(jsonObject).to.deep.equal({a: 1});
             await execution;
-        });
+        }, true);
     });
 
     describe('messageUI.once', () => {
-        beforeEach(async () => {
-            win.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
-            await once(win.webView, 'did-finish-load');
+        const registerEchoHandler = async (win) => {
             await win.webView.executeJavaScript(`
                 window.deskgap.messageUI.once('webview-echo', function() {
                     var args = Array.prototype.slice.call(arguments, 1);
@@ -64,34 +50,27 @@ describe('messageUI and messageNode', () => {
                     );
                 })
             `);
-        });
+        }
 
-        it('should receives messages sent from node', (done) => {
+        withWebView(it, 'should receives messages sent from node', async (win) => {
+            await registerEchoHandler(win);
             win.webView.send('webview-echo');
+            const [e, ] = await once(messageNode, 'webview-echo-reply');
+            expect(e.sender).to.equal(win.webView);
+        }, true);
 
-            messageNode.once('webview-echo-reply', (e) => {
-                expect(e.sender).to.equal(win.webView);
-                done();
-            });
-        });
-
-        it('can receives messages with primitive args', (done) => {
+        withWebView(it, 'can receives messages with primitive args', async (win) => {
+            await registerEchoHandler(win);
             win.webView.send('webview-echo', 1, null, 'str', false);
+            const [, ...args] = await once(messageNode, 'webview-echo-reply');
+            expect(args).to.deep.equal([1, null, 'str', false]);
+        }, true);
 
-            messageNode.once('webview-echo-reply', (e, ...args) => {
-                expect(args).to.deep.equal([1, null, 'str', false]);
-                done();
-            });
-        });
-
-        it('should send messages with json object args', (done) => {
+        withWebView(it, 'should send messages with json object args', async (win) => {
+            await registerEchoHandler(win);
             win.webView.send('webview-echo', { a: 1 });
-
-            messageNode.once('webview-echo-reply', (e, jsonObject) => {
-                expect(jsonObject).to.deep.equal({ a: 1 });
-                done();
-            });
-        });
+            const [, jsonObject] = await once(messageNode, 'webview-echo-reply');
+            expect(jsonObject).to.deep.equal({ a: 1 });
+        }, true);
     });
-
 });

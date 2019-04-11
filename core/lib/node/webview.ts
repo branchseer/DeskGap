@@ -7,7 +7,7 @@ import globals from './internal/globals';
 import { platform } from 'os';
 
 const { WebViewNative } = require('./bindings');
-const isWinRTEngineAvaliable = WebViewNative.isWinRTEngineAvaliable();
+const isWinRTEngineAvaliable = process.platform === 'win32' && WebViewNative.isWinRTEngineAvaliable();
 type Engine = 'winrt' | 'trident';
 
 let defaultEngine: Engine | null = null;

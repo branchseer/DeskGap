@@ -25,28 +25,28 @@ const win1809 = win && (() => {
 });
 
 describe('webViews', () => {
-    describe('webViews.isEngineAvaliable(engine)', () => {
+    describe('webViews.isEngineAvailable(engine)', () => {
         it('should return false if the os is not Windows', function () {
             if (win) return this.skip();
             for (const engine of ["winrt", "trident"]) {
-                expect(webViews.isEngineAvaliable(engine)).to.be.false;
+                expect(webViews.isEngineAvailable(engine)).to.be.false;
             }
         });
 
         it('should return true for "trident" on Windows', function() {
             if (!win) return this.skip();
-            expect(webViews.isEngineAvaliable('trident')).to.be.true;
+            expect(webViews.isEngineAvailable('trident')).to.be.true;
         });
 
         it('should return true for "winrt" if the Windows version is 10.0.17763 or higher', function() {
             if (!win1809) return this.skip();
-            expect(webViews.isEngineAvaliable('winrt')).to.be.true;
+            expect(webViews.isEngineAvailable('winrt')).to.be.true;
         });
             
             
         it('should return false for "winrt" if the Windows version is lower that 10.0.17763', function() {
             if (!win || win1809) return this.skip();
-            expect(webViews.isEngineAvaliable('winrt')).to.be.false;
+            expect(webViews.isEngineAvailable('winrt')).to.be.false;
         });
     });
 
@@ -57,12 +57,12 @@ describe('webViews', () => {
         });
 
         it('should initially return "winrt" on Windows if the WinRT engine is supported', function () {
-            if (!webViews.isEngineAvaliable('winrt')) return this.skip();
+            if (!webViews.isEngineAvailable('winrt')) return this.skip();
             expect(webViews.getDefaultEngine()).to.equal('winrt');
         });
 
         it('should initially return "trident" on Windows if the WinRT engine is not supported', function () {
-            if (webViews.isEngineAvaliable('winrt')) return this.skip();
+            if (webViews.isEngineAvailable('winrt')) return this.skip();
             expect(webViews.getDefaultEngine()).to.equal("trident");
         });
     });
@@ -84,7 +84,7 @@ describe('webViews', () => {
         });
 
         it('should change the engine of webviews created afterwards to Trident if "trident" is passed', async () => {
-            if (!webViews.isEngineAvaliable('trident')) return this.skip();
+            if (!webViews.isEngineAvailable('trident')) return this.skip();
             webViews.setDefaultEngine('trident');
             const window = new BrowserWindow({ show: false });
             window.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
@@ -94,7 +94,7 @@ describe('webViews', () => {
         });
 
         it('should change the engine of webviews created afterwards to a WebKit-like one if "winrt" is passed', async () => {
-            if (!webViews.isEngineAvaliable('winrt')) return this.skip();
+            if (!webViews.isEngineAvailable('winrt')) return this.skip();
 
             webViews.setDefaultEngine('winrt');
             const window = new BrowserWindow({ show: false });

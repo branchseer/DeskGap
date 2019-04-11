@@ -12,6 +12,6 @@ Use [Microsoft Edge DevTools](https://www.microsoft.com/en-us/p/microsoft-edge-d
 
 3. Click **Select...** and choose **Debug there code types:** -> **Script**
 
-4. Find and select the process of your DeskGap application in **Avaliable Pocesses**;
+4. Find and select the process of your DeskGap application in **Available Pocesses**;
 
 5. Click **Attach**. The **DOM Explorer** and **JavaSript Console** should now show up. If not, open them in **Debug** -> **Windows**.

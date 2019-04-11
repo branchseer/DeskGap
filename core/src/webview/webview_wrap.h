@@ -21,7 +21,7 @@ namespace DeskGap {
         enum class Engine: uint32_t {
             TRIDENT = 0, WINRT = 1
         };
-        static Napi::Value IsWinRTEngineAvaliable(const Napi::CallbackInfo& info);
+        static Napi::Value IsWinRTEngineAvailable(const Napi::CallbackInfo& info);
         #endif
     public:
         WebViewWrap(const Napi::CallbackInfo& info);

@@ -3,10 +3,10 @@
 #include "./util/winrt.h"
 
 namespace DeskGap {
-    bool WebView::IsWinRTWebViewAvaliable() {
+    bool WebView::IsWinRTWebViewAvailable() {
         if (GetWinRTDLLModule() == nullptr) {
             return false;
         }
-        return WinRTWebView::IsAvaliable();
+        return WinRTWebView::IsAvailable();
     }
 }

@@ -5,7 +5,7 @@ namespace DeskGap {
 		typedef UINT (WINAPI *GetDpiForWindowProc)(HWND);
 		static GetDpiForWindowProc getDpiForWindow = (GetDpiForWindowProc)GetProcAddress(LoadLibraryW(L"user32.dll"), "GetDpiForWindow");
 
-		if (getDpiForWindow != nullptr) { // Not avaliable in win7
+		if (getDpiForWindow != nullptr) { // Not Available in win7
 			if (int dpi = getDpiForWindow(windowWnd); dpi != 0) {
 				return dpi;
 			}

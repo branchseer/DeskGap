@@ -10,7 +10,7 @@ namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {
         return DefineClass(env, "WebViewNative", {
         #ifdef WIN32
-            StaticMethod("isWinRTEngineAvaliable", &WebViewWrap::IsWinRTEngineAvaliable),
+            StaticMethod("isWinRTEngineAvailable", &WebViewWrap::IsWinRTEngineAvailable),
         #endif
             InstanceMethod("loadLocalFile", &WebViewWrap::LoadLocalFile),
             InstanceMethod("loadRequest", &WebViewWrap::LoadRequest),
@@ -70,8 +70,8 @@ namespace DeskGap {
     }
     
     #ifdef WIN32
-    Napi::Value WebViewWrap::IsWinRTEngineAvaliable(const Napi::CallbackInfo& info) {
-        return Napi::Boolean::New(info.Env(), WebView::IsWinRTWebViewAvaliable());
+    Napi::Value WebViewWrap::IsWinRTEngineAvailable(const Napi::CallbackInfo& info) {
+        return Napi::Boolean::New(info.Env(), WebView::IsWinRTWebViewAvailable());
     }
     #endif
 

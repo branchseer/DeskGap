@@ -4,22 +4,21 @@ import { evaluateJavaScript } from './internal/js-evaluation';
 import { entryPath } from './internal/bootstrap';
 import path = require('path');
 import globals from './internal/globals';
+import { platform } from 'os';
 
 const { WebViewNative } = require('./bindings');
-
+const isWinRTEngineAvaliable = WebViewNative.isWinRTEngineAvaliable();
 type Engine = 'winrt' | 'trident';
 
 let defaultEngine: Engine | null = null;
 if (process.platform === 'win32') {
-    defaultEngine = WebViewNative.isWinRTEngineAvaliable() ? 'winrt': 'trident';
+    defaultEngine = isWinRTEngineAvaliable ? 'winrt': 'trident';
 }
 
 const engineCodeByName: Record<Engine, number> = {
     'trident': 0,
     'winrt': 1
 };
-
-let currentId = 0;
 
 export interface WebViewEvents extends IEventMap {
     'did-start-loading': [];
@@ -29,6 +28,7 @@ export interface WebViewEvents extends IEventMap {
     'page-title-updated': [string];
 }
 
+let currentId = 0;
 export class WebView extends EventEmitter<WebViewEvents> {
     /** @internal */ private id_: number;
     /** @internal */ private native_: any;
@@ -143,5 +143,18 @@ export const WebViews = {
 
     getDefaultEngine(): Engine | null {
         return defaultEngine;
+    },
+    
+    isEngineAvaliable(engine: Engine): boolean {
+        if (process.platform !== 'win32') {
+            return false;
+        }
+        if (engine === 'trident') {
+            return true;
+        }
+        if (engine === 'winrt') {
+            return WebViewNative.isWinRTEngineAvaliable();
+        }
+        return false;
     }
 }

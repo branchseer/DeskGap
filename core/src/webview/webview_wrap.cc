@@ -9,7 +9,9 @@
 namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {
         return DefineClass(env, "WebViewNative", {
+        #ifdef WIN32
             StaticMethod("isWinRTEngineAvaliable", &WebViewWrap::IsWinRTEngineAvaliable),
+        #endif
             InstanceMethod("loadLocalFile", &WebViewWrap::LoadLocalFile),
             InstanceMethod("loadRequest", &WebViewWrap::LoadRequest),
             InstanceMethod("executeJavaScript", &WebViewWrap::ExecuteJavaScript),

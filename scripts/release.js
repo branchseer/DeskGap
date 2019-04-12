@@ -82,12 +82,6 @@ function archive() {
             cwd: buildReleaseFolder,
             ignore: ['.DS_Store']
         });
-        if (process.platform === 'win32') {
-            const vcRedisDllFolder = 'SysWOW64';
-            for (const vcRedisDll of ['vcruntime140.dll', 'msvcp140.dll']) {
-                archive.file(path.join(process.env.SYSTEMROOT, vcRedisDllFolder, vcRedisDll), { name: 'DeskGap/' + vcRedisDll });
-            }
-        }
     }
     
     archive.pipe(crypto.createHash('sha256')).on('readable', function () {

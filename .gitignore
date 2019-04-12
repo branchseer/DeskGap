@@ -1,6 +1,7 @@
 /cmake-build-*
 /build
 /.vs
+/.vscode
 /.idea
 /deps
 /node_modules

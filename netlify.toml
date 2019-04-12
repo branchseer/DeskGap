@@ -5,17 +5,17 @@
 
 [[redirects]]
   from = "/dl/macos"
-  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.0.9-darwin-x64.zip"
+  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.1.0-darwin-x64.zip"
   status = 302
 
 [[redirects]]
   from = "/dl/win32"
-  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.0.9-win32-ia32.zip"
+  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.1.0-win32-ia32.zip"
   status = 302
 
 [[redirects]]
   from = "/dl/linux"
-  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.0.9-linux-x64.zip"
+  to = "https://dl.bintray.com/patr0nus/DeskGap/deskgap-v0.1.0-linux-x64.zip"
   status = 302
 
 [[redirects]]

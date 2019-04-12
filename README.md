@@ -119,7 +119,7 @@ npm start
 
 ### What’s the difference between DeskGap and [Electron](https://electronjs.org)? 
 
-DeskGap is designed to be a more lightweight alternative to Electron. It does not bundle [Chromium](https://www.chromium.org/) or any other web engines. Instead, the ability of rendering HTML pages comes from __the webview provided by the operating system__, specifically, [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview) on macOS and [Microsoft.Toolkit.Forms.UI.Controls.WebView](https://docs.microsoft.com/en-us/windows/communitytoolkit/controls/wpf-winforms/webview) on Windows.
+DeskGap is designed to be a more lightweight alternative to Electron. It does not bundle [Chromium](https://www.chromium.org/) or any other web engines. Instead, the ability of rendering HTML pages comes from __the webview provided by the operating system__, specifically, [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview) on macOS, [IWebBrowser2](https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa752127(v%3Dvs.85)) or [WebViewControl](https://docs.microsoft.com/en-us/uwp/api/windows.web.ui.interop.webviewcontrol) (if available) on Windows, and [WebKitWebView](https://webkitgtk.org/reference/webkitgtk/stable/webkitgtk-webkitwebview.html) on Linux.
 
 DeskGap is at its early stage. __The API is still quite limited__ compared to Electron. Many functionalities are under development and some of them will probably never be possible. See [this](https://deskgap.com/api/) and [this](https://deskgap.com/architecture/#synchronous-and-asynchronous-dispatching) for more information.
 

@@ -59,7 +59,11 @@ describe('BrowserWindow module', () => {
             win.destroy();
         });
     });
-    if (process.platform === 'darwin') describe('win.setTitleBarStyle(style)', () => {
+    describe('win.setTitleBarStyle(style)', () => {
+        before(function() {
+            if (process.platform !== 'darwin') this.skip();
+        });
+
         it('should not change the frame of the window', () => {
             const win = new BrowserWindow({ show: false });
             const size = win.getSize();

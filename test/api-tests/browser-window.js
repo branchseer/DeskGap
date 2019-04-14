@@ -46,6 +46,19 @@ describe('BrowserWindow module', () => {
             expect(win.isDestroyed()).to.equal(true);
         })
     });
+    describe('win.setMenu(menu)', () => {
+        it('should not throw when it is called after the window has been shown', () => {
+            const win = new BrowserWindow();
+            win.setMenu(null);
+            win.destroy();
+        });
+        it('should not throw when it is called before the window has been shown', () => {
+            const win = new BrowserWindow({ show: false });
+            win.setMenu(null);
+            win.show();
+            win.destroy();
+        });
+    });
     if (process.platform === 'darwin') describe('win.setTitleBarStyle(style)', () => {
         it('should not change the frame of the window', () => {
             const win = new BrowserWindow({ show: false });

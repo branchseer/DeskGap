@@ -276,7 +276,13 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
         this.native_.center();
     }
     setMenu(menu: Menu | null) {
+        if (this.menuNativeId_ != null) {
+            bulkUISync(() => {
+                this.menu_!['destroyNative_'](this.menuNativeId_!);
+            })
+        }
         this.menu_ = menu;
+
         if (this.hasBeenShown_) {
             this.actuallySetTheMenu_();
         }
@@ -285,9 +291,6 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
     /** @internal */ 
     private actuallySetTheMenu_() {
         bulkUISync(() => {
-            const oldMenuNativeId = this.menuNativeId_;
-            const oldMenu = this.menu_;
-
             if (this.menu_ == null) {
                 this.native_.setMenu(null);
                 this.menuNativeId_ = null;
@@ -296,10 +299,6 @@ export class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
                 const [menuNativeId, nativeMenu] = this.menu_['createNative_'](MenuTypeCode.main, this);
                 this.native_.setMenu(nativeMenu);
                 this.menuNativeId_ = menuNativeId;
-            }
-
-            if (oldMenuNativeId != null) {
-                oldMenu!['destroyNative_'](oldMenuNativeId);
             }
         });
     }

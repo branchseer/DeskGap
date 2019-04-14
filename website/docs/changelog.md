@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.1] - 2019-4-12
+
+### Added
+- 🎉Windows 7 support🎉 [Learn more about web engines on Windows]().
+- Per-monitor DPI scaling support on Windows.
+- Event `'did-finish-load'` to [`WebView`](https://deskgap.com/api/#webview-alias-webcontents).
+- Method `ExecuteJavaScript` to [`WebView`](https://deskgap.com/api/#webview-alias-webcontents).
+
+### Changed
+- Rewrite the Windows implementation with the native C/C++ (was C++/CLI).
+- Upgrade Node.js to v11.14.0.
+
+### Removed
+- Method `LoadHTMLString` of [`WebView`](https://deskgap.com/api/#webview-alias-webcontents).
+
 ## [0.0.9] - 2019-02-25
 
 ### Added

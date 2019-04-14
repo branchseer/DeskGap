@@ -21,10 +21,7 @@ const engineCodeByName: Record<Engine, number> = {
 };
 
 export interface WebViewEvents extends IEventMap {
-    'did-start-loading': [];
     'did-finish-load': [];
-    'did-fail-load': [number, string];
-    'did-stop-loading': [];
     'page-title-updated': [string];
 }
 

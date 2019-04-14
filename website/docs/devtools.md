@@ -1,4 +1,4 @@
-# How to Access the Web Developer Tools on Windows
+# Web Developer Tools on Windows
 
 ## WinRT WebView
 

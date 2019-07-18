@@ -16,6 +16,9 @@ namespace DeskGap {
 
         POINT maxTrackSize;
         POINT minTrackSize;
+
+        HANDLE appIcon {nullptr};
+        HANDLE windowIcon {nullptr};
     };
 }
 

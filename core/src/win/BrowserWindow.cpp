@@ -216,11 +216,31 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetIcon(const std::optional<std::string>& iconPath) {
-        // To be implemented...
+        if (iconPath.has_value()) {
+            std::wstring wiconPath = UTF8ToWString(iconPath->c_str());
+
+            impl_->appIcon = LoadImage(nullptr, wiconPath.c_str(), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_LOADFROMFILE);
+            if (impl_->appIcon != nullptr)
+            {
+                SendMessage(impl_->windowWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(impl_->appIcon));
+            }
+
+            impl_->windowIcon = LoadImage(nullptr, wiconPath.c_str(), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
+            if (impl_->windowIcon != nullptr)
+            {            
+                SendMessage(impl_->windowWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(impl_->windowIcon));
+            }
+        }
     }
 
-
     void BrowserWindow::Destroy() {
+        if (impl_->appIcon != nullptr && impl_->windowIcon != nullptr)
+        {
+            SendMessage(impl_->windowWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(nullptr));
+            SendMessage(impl_->windowWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(nullptr));
+            DeleteObject(impl_->appIcon);
+            DeleteObject(impl_->windowIcon);
+        }
         SetWindowLongPtrW(impl_->windowWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
         DestroyWindow(impl_->windowWnd);
     }

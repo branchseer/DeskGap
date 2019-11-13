@@ -1,8 +1,9 @@
-/cmake-build-*
+cmake-build-*
 /build
 /.vs
 /.vscode
-/.idea
+.idea
 /deps
 /node_modules
 /CMakeSettings.json
+.DS_Store

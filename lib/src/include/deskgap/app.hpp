@@ -1,5 +1,5 @@
-#ifndef DESKGAP_APP_H
-#define DESKGAP_APP_H
+#ifndef DESKGAP_APP_HPP
+#define DESKGAP_APP_HPP
 
 #include <functional>
 #include <memory>
@@ -8,18 +8,14 @@
 
 namespace DeskGap {
     class App {
-    private:
-        struct Impl;
-        std::unique_ptr<Impl> impl_;
     public:
         struct EventCallbacks {
             std::function<void()> onReady;
             std::function<void()> beforeQuit;
         };
-        App(EventCallbacks&& callbacks);
 
-        void Run();
-        void Exit(int exitCode);
+        static void Run(EventCallbacks&& callbacks);
+        static void Exit(int exitCode);
 
         enum class PathName: uint32_t {
             APP_DATA = 0,
@@ -32,16 +28,12 @@ namespace DeskGap {
             VIDEOS = 7,
             HOME = 8,
         };
-
     #ifdef __APPLE__
-        void SetMenu(std::optional<std::reference_wrapper<Menu>> menu);
+        static void SetMenu(std::optional<std::reference_wrapper<Menu>> menu);
     #endif
-
-        std::string GetPath(PathName name);
-        ~App();
+        static std::string GetPath(PathName name);
+        static std::string GetResourcePath(const char* argv0);
     };
-    
-    void Loop();
 }
 
 #endif

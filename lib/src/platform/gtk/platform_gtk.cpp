@@ -2,7 +2,7 @@
 #include <memory>
 #include <gtk/gtk.h>
 
-#include "platform.h"
+#include "../../../../src/platform.h"
 
 namespace fs = std::filesystem;
 

@@ -1,5 +1,5 @@
-#ifndef WINRT_WEBVIEW_H
-#define WINRT_WEBVIEW_H
+#ifndef DESKGAP_WINRT_WEBVIEW_HPP
+#define DESKGAP_WINRT_WEBVIEW_HPP
 
 #ifdef DESKGAP_EXPORTING
    #define DECLSPEC __declspec(dllexport)

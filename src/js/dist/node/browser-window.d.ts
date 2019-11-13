@@ -1,0 +1,95 @@
+import { EventEmitter, IEventMap } from '../common/events';
+import { Menu } from './menu';
+import { WebView, WebPreferences } from './webview';
+export declare type VibrancyMaterial = 'appearance-based' | 'light' | 'dark' | 'medium-light' | 'ultra-dark' | 'titlebar' | 'selection' | 'menu' | 'popover' | 'sidebar' | 'header-view' | 'sheet' | 'window-background' | 'hud-window' | 'full-screen-ui' | 'tool-tip' | 'content-background' | 'under-window-background' | 'under-page-background';
+export declare type VibrancyBlendingMode = 'behind-window' | 'within-window';
+export declare type VibrancyState = 'follows-window' | 'active' | 'inactive';
+export declare type TitleBarStyle = 'default' | 'hidden' | 'hiddenInset';
+export interface Vibrancy {
+    material?: VibrancyMaterial;
+    blending?: VibrancyBlendingMode;
+    state?: VibrancyState;
+    left?: string | number;
+    right?: string | number;
+    top?: string | number;
+    bottom?: string | number;
+}
+export interface IBrowserWindowConstructorOptions {
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+    center: boolean;
+    title: string;
+    icon: string | null;
+    show: boolean;
+    titleBarStyle: TitleBarStyle;
+    maximizable: boolean;
+    minimizable: boolean;
+    resizable: boolean;
+    frame: boolean;
+    closable: boolean;
+    vibrancies: Vibrancy[];
+    vibrancy: VibrancyMaterial;
+    maxHeight: number;
+    maxWidth: number;
+    minHeight: number;
+    minWidth: number;
+    menu: Menu | null;
+    webPreferences: Partial<WebPreferences>;
+}
+export interface BrowserWindowEvents extends IEventMap {
+    'blur': [];
+    'focus': [];
+    'resize': [];
+    'close': [];
+    'move': [];
+    'page-title-updated': [string];
+    'ready-to-show': [];
+    'closed': [];
+}
+export declare class BrowserWindow extends EventEmitter<BrowserWindowEvents> {
+    private id_;
+    private hasBeenShown_;
+    private webview_;
+    private native_;
+    private title_;
+    private titleBarStyle_;
+    private minimumSize_;
+    private maximumSize_;
+    private menu_;
+    private menuNativeId_;
+    constructor(options?: Partial<IBrowserWindowConstructorOptions>);
+    readonly id: number;
+    setTitleBarStyle(style: TitleBarStyle): void;
+    show(): void;
+    setSize(width: number, height: number, animate?: boolean): void;
+    setMaximumSize(width: number, height: number): void;
+    setMinimumSize(width: number, height: number): void;
+    setVibrancy(material: VibrancyMaterial | null): void;
+    setVibrancies(vibrancies: Vibrancy[]): void;
+    setPosition(x: number, y: number, animate?: boolean): void;
+    setTitle(title: string): void;
+    getTitle(): string;
+    center(): void;
+    setMenu(menu: Menu | null): void;
+    private actuallySetTheMenu_;
+    getMenu(): Menu | null;
+    setIcon(path: string | null): void;
+    getPosition(): [number, number];
+    getSize(): [number, number];
+    destroy(): void;
+    isDestroyed(): boolean;
+    minimize(): void;
+    close(): void;
+    readonly webView: WebView;
+    readonly webContents: WebView;
+    loadFile(filePath: string): void;
+    loadURL(url: string): void;
+    reload(): void;
+    static getAllWindows(): BrowserWindow[];
+    static getFocusedWindow(): BrowserWindow | null;
+    static fromWebView(webview: WebView): BrowserWindow;
+    static fromWebContents(webview: WebView): BrowserWindow;
+    static fromId(id: number): BrowserWindow | null;
+}

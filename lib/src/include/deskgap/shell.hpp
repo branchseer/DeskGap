@@ -1,5 +1,5 @@
-#ifndef DESKGAP_SHELL_H
-#define DESKGAP_SHELL_H
+#ifndef DESKGAP_SHELL_HPP
+#define DESKGAP_SHELL_HPP
 
 #include <string>
 

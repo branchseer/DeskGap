@@ -1,5 +1,5 @@
-#ifndef DESKGAP_BROWSER_WINDOW_H
-#define DESKGAP_BROWSER_WINDOW_H
+#ifndef DESKGAP_BROWSER_WINDOW_HPP
+#define DESKGAP_BROWSER_WINDOW_HPP
 
 #include <string>
 #include <array>

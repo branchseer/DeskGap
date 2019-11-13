@@ -1,5 +1,5 @@
-#ifndef DESKGAP_DISPATCH_H
-#define DESKGAP_DISPATCH_H
+#ifndef DESKGAP_DISPATCH_HPP
+#define DESKGAP_DISPATCH_HPP
 
 #include <functional>
 #include <string>

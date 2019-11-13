@@ -1,5 +1,5 @@
-#ifndef DESKGAP_MENU_H
-#define DESKGAP_MENU_H
+#ifndef DESKGAP_MENU_HPP
+#define DESKGAP_MENU_HPP
 
 #include <functional>
 #include <memory>

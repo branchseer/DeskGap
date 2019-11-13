@@ -8,10 +8,10 @@
 #include <vector>
 #include <cassert>
 
-#include "platform.h"
+#include "../../../../src/platform.h"
 
-#include "../core/src/win/util/wstring_utf8.h"
-#include "../core/src/win/platform_data.h"
+#include "../../../../core/src/win/util/wstring_utf8.h"
+#include "../../../../core/src/win/platform_data.h"
 
 namespace fs = std::filesystem;
 

@@ -1,5 +1,5 @@
-#ifndef DESKGAP_DIALOG_H
-#define DESKGAP_DIALOG_H
+#ifndef DESKGAP_DIALOG_HPP
+#define DESKGAP_DIALOG_HPP
 
 #include <string>
 #include <functional>

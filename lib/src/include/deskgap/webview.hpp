@@ -1,5 +1,5 @@
-#ifndef DESKGAP_WEBVIEW_H
-#define DESKGAP_WEBVIEW_H
+#ifndef DESKGAP_WEBVIEW_HPP
+#define DESKGAP_WEBVIEW_HPP
 
 #include <functional>
 #include <memory>

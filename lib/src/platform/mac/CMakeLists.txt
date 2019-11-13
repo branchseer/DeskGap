@@ -1,6 +1,5 @@
-add_library(deskgap_platform STATIC)
 target_compile_options(deskgap_platform PUBLIC "-fobjc-arc")
-target_link_libraries(deskgap_platform -framework Cocoa -framework WebKit)
+
 target_sources(deskgap_platform PRIVATE
     cocoa/DeskGapLocalURLSchemeHandler.h
     cocoa/DeskGapLocalURLSchemeHandler.mm

@@ -19,12 +19,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nod)
 
-FetchContent_Declare(
-    boost
-    GIT_REPOSITORY https://github.com/Orphis/boost-cmake
-    GIT_TAG v1.67.0
-)
-FetchContent_MakeAvailable(boost)
+#FetchContent_Declare(
+#    boost
+#    GIT_REPOSITORY https://github.com/Orphis/boost-cmake
+#    GIT_TAG v1.67.0
+#)
+#FetchContent_MakeAvailable(boost)
 
 add_executable(DeskGapNode
     src/main.cc
@@ -45,7 +45,7 @@ set_target_properties(
     OUTPUT_NAME DeskGap
     CXX_STANDARD 17
 )
-target_link_libraries(DeskGapNode deskgap nod Boost::filesystem DeskGapNodeScript)
+target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScript)
 target_include_directories(DeskGapNode PRIVATE src/node_api js/node_modules/node-addon-api)
 
 
@@ -55,7 +55,6 @@ if(APPLE)
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/src/resources/mac/Info.plist
     )
-#    target_link_libraries(DeskGapNode -lc++fs)
 endif()
 
 if (NOT APPLE)

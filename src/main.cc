@@ -3,8 +3,20 @@
 #include <thread>
 #include <utility>
 #include "nod.h"
+#include "napi.h"
 #include "deskgap/app.hpp"
 #include "deskgap/argv.hpp"
+
+extern char BIN2CODE_DG_NODE_JS_CONTENT[];
+
+namespace {
+    Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
+        exports.Set("func", Napi::Function::New(env, [](const Napi::CallbackInfo&) {
+
+        }));
+        return exports;
+    }
+}
 
 #ifdef WIN32
 int wmain(int argc, const wchar_t** argv)
@@ -14,7 +26,13 @@ int main(int argc, const char** argv)
 {
     std::vector<std::string> args = DeskGap::Argv(argc, argv);
     std::thread node_thread([ args { std::move(args) }]() {
-        nod_start(args[0].c_str(), "console.log(process.execPath);setInterval(() => console.log(12131), 500)", true, nullptr);
+        nod_start(
+            args[0].c_str(),
+            BIN2CODE_DG_NODE_JS_CONTENT, true,
+            [](napi_env env, napi_value exports) -> napi_value {
+                return Napi::RegisterModule(env, exports, InitModule);
+            }
+        );
     });
     DeskGap::App::Run({
         []() {

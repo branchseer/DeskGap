@@ -17,4 +17,6 @@ target_sources(deskgap_platform PRIVATE
     menu_impl.h
     shell.mm
     system_preferences.mm
+    dispatch.mm
+    exception.mm
 )

@@ -2,11 +2,10 @@
 #define DESKGAP_DISPATCH_HPP
 
 #include <functional>
-#include <string>
 
 namespace DeskGap {
-    void UISync(std::function<void()>&& action);   
-    void UIAsync(std::function<void()>&& action);
+    void DispatchSync(std::function<void()>&& action);
+    void DispatchAsync(std::function<void()>&& action);
 }
 
 #endif /* ui_dispatch_h */

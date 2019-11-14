@@ -2,15 +2,11 @@
 #include <memory>
 #include <thread>
 #include <utility>
-#include <boost/filesystem.hpp>
 #include "nod.h"
 #include "napi.h"
 #include "deskgap/app.hpp"
 #include "deskgap/argv.hpp"
 #include "node_bindings/index.hpp"
-
-namespace fs = boost::filesystem;
-
 
 extern char BIN2CODE_DG_NODE_JS_CONTENT[];
 
@@ -22,13 +18,6 @@ int main(int argc, const char** argv)
 {
 
     std::vector<std::string> args = DeskGap::Argv(argc, argv);
-
-    fs::path entryPath = fs::path(DeskGap::App::GetResourcePath(args[0].c_str())) / "app";
-    if (const char* envEntryPath = getenv("DESKGAP_ENTRY"); envEntryPath != nullptr) {
-        if (fs::exists(entryPath / "DESKGAP_DEFAULT_APP")) {
-            entryPath = envEntryPath;
-        }
-    }
 
     std::thread nodeThread([ args { std::move(args) }]() {
         nod_start(

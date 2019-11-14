@@ -1,5 +1,5 @@
+#include <deskgap/system_preferences.hpp>
 #include "system_preferences_wrap.h"
-#include "system_preferences.h"
 #include "../dispatch/node_dispatch.h"
 
 Napi::Object DeskGap::SystemPreferencesObject(const Napi::Env& env) {

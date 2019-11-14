@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
+if(APPLE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10)
+endif()
+
 include(FetchContent)
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -16,18 +19,33 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nod)
 
+FetchContent_Declare(
+    boost
+    GIT_REPOSITORY https://github.com/Orphis/boost-cmake
+    GIT_TAG v1.67.0
+)
+FetchContent_MakeAvailable(boost)
+
 add_executable(DeskGapNode
     src/main.cc
     src/node_bindings/index.cc
-    src/dispatch/node_dispatch.cc
-    src/dispatch/ui_dispatch.cc
+    src/node_bindings/dispatch/node_dispatch.cc
+    src/node_bindings/dispatch/ui_dispatch.cc
+    src/node_bindings/app/app_wrap.cc
+    src/node_bindings/dialog/dialog_wrap.cc
+    src/node_bindings/menu/menu_wrap.cc
+    src/node_bindings/shell/shell_wrap.cc
+    src/node_bindings/system_preferences/system_preferences_wrap.cc
+    src/node_bindings/webview/webview_wrap.cc
+    src/node_bindings/window/browser_window_wrap.cc
+    src/Environment.cc
 )
 set_target_properties(
     DeskGapNode PROPERTIES
     OUTPUT_NAME DeskGap
     CXX_STANDARD 17
 )
-target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScript)
+target_link_libraries(DeskGapNode deskgap nod Boost::filesystem DeskGapNodeScript)
 target_include_directories(DeskGapNode PRIVATE src/node_api js/node_modules/node-addon-api)
 
 
@@ -37,6 +55,7 @@ if(APPLE)
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/src/resources/mac/Info.plist
     )
+#    target_link_libraries(DeskGapNode -lc++fs)
 endif()
 
 if (NOT APPLE)

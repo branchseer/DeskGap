@@ -19,4 +19,5 @@ target_sources(deskgap_platform PRIVATE
     system_preferences.mm
     dispatch.mm
     exception.mm
+    webview.mm
 )

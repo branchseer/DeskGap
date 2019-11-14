@@ -2,9 +2,8 @@
 #include <vector>
 
 #include "webview_wrap.h"
-#include "webview.h"
+#include <deskgap/webview.hpp>
 #include "../dispatch/dispatch.h"
-#include "../lib_path.h"
 
 namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {

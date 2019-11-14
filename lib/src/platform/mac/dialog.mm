@@ -6,8 +6,6 @@
 #include "./BrowserWindow_impl.h"
 #include "./util/string_convert.h"
 
-
-
 using CommonFileDialogOptions = DeskGap::Dialog::CommonFileDialogOptions;
 using FileFilter = CommonFileDialogOptions::FileFilter;
 

@@ -1,5 +1,5 @@
 #include "app_wrap.h"
-#include "app.h"
+#include <deskgap/app.hpp>
 #include "../dispatch/dispatch.h"
 #include "../menu/menu_wrap.h"
 #include "../util/js_native_convert.h"
@@ -8,15 +8,29 @@ namespace DeskGap {
     using namespace JSNativeConvertion;
 
         void AppWrap::Run(const Napi::CallbackInfo& info) {
-            UISync(info.Env(), [this]() {
-                this->app_->Run();
+
+
+            Napi::Object jsCallbacks = info[0].As<Napi::Object>();
+
+            App::EventCallbacks callbacks {
+                    [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
+                        jsOnReady->Call();
+                    },
+                    [jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
+                        jsBeforeQuit->Call();
+                    }
+            };
+
+            UISync(info.Env(), [&]() {
+                DeskGap::App::Run(std::move(callbacks));
             });
+
         }
 
         void AppWrap::Exit(const Napi::CallbackInfo& info) {
             uint32_t exitCode = Native<uint32_t>::From(info[0]);
             UISync(info.Env(), [this, exitCode]() {
-                this->app_->Exit(exitCode);
+                DeskGap::App::Exit(exitCode);
             });
         }
 
@@ -27,7 +41,7 @@ namespace DeskGap {
                 wrappedMenu = MenuWrap::Unwrap(jsValue.As<Napi::Object>());
             }
             UISyncDelayable(info.Env(), [this, wrappedMenu] {
-                this->app_->SetMenu(
+                DeskGap::App::SetMenu(
                     wrappedMenu == nullptr ? std::nullopt :
                     std::make_optional(std::ref(*(wrappedMenu->menu_)))
                 );
@@ -36,27 +50,13 @@ namespace DeskGap {
     #endif
 
         Napi::Value AppWrap::GetPath(const Napi::CallbackInfo& info) {
-            std::string path = app_->GetPath(static_cast<App::PathName>(Native<uint32_t>::From(info[0])));
+            std::string path = DeskGap::App::GetPath(static_cast<App::PathName>(Native<uint32_t>::From(info[0])));
             return JSFrom(info.Env(), path);
         }
 
         AppWrap::AppWrap(const Napi::CallbackInfo& info):
             Napi::ObjectWrap<AppWrap>(info)
         {
-            Napi::Object jsCallbacks = info[0].As<Napi::Object>();
-            
-            App::EventCallbacks callbacks {
-                [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
-                    jsOnReady->Call();
-                },
-                [jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
-                    jsBeforeQuit->Call();
-                }
-            };
-
-            UISync(info.Env(), [&]() {
-                app_ = std::make_unique<App>(std::move(callbacks));
-            });
         }
         Napi::Function AppWrap::Constructor(Napi::Env env) {
             return DefineClass(env, "AppNative", {
@@ -68,5 +68,4 @@ namespace DeskGap {
             #endif
             });
         }
-    
 }

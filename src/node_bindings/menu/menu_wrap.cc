@@ -1,5 +1,5 @@
 #include "menu_wrap.h"
-#include "menu.h"
+#include <deskgap/menu.hpp>
 #include "../dispatch/dispatch.h"
 #include <memory>
 #include <vector>

@@ -2,21 +2,17 @@
 #include <memory>
 #include <thread>
 #include <utility>
+#include <boost/filesystem.hpp>
 #include "nod.h"
 #include "napi.h"
 #include "deskgap/app.hpp"
 #include "deskgap/argv.hpp"
+#include "node_bindings/index.hpp"
+
+namespace fs = boost::filesystem;
+
 
 extern char BIN2CODE_DG_NODE_JS_CONTENT[];
-
-namespace {
-    Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
-        exports.Set("func", Napi::Function::New(env, [](const Napi::CallbackInfo&) {
-
-        }));
-        return exports;
-    }
-}
 
 #ifdef WIN32
 int wmain(int argc, const wchar_t** argv)
@@ -24,13 +20,22 @@ int wmain(int argc, const wchar_t** argv)
 int main(int argc, const char** argv)
 #endif
 {
+
     std::vector<std::string> args = DeskGap::Argv(argc, argv);
-    std::thread node_thread([ args { std::move(args) }]() {
+
+    fs::path entryPath = fs::path(DeskGap::App::GetResourcePath(args[0].c_str())) / "app";
+    if (const char* envEntryPath = getenv("DESKGAP_ENTRY"); envEntryPath != nullptr) {
+        if (fs::exists(entryPath / "DESKGAP_DEFAULT_APP")) {
+            entryPath = envEntryPath;
+        }
+    }
+
+    std::thread nodeThread([ args { std::move(args) }]() {
         nod_start(
             args[0].c_str(),
             BIN2CODE_DG_NODE_JS_CONTENT, true,
             [](napi_env env, napi_value exports) -> napi_value {
-                return Napi::RegisterModule(env, exports, InitModule);
+                return Napi::RegisterModule(env, exports, DeskGap::InitNodeNativeModule);
             }
         );
     });

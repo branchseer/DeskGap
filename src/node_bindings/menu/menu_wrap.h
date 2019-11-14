@@ -4,6 +4,7 @@
 #include <napi.h>
 #include <functional>
 #include <memory>
+#include <deskgap/menu.hpp>
 #include "menu.h"
 
 namespace DeskGap {

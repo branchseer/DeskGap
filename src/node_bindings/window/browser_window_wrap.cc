@@ -2,7 +2,7 @@
 #include "browser_window_wrap.h"
 #include "../menu/menu_wrap.h"
 #include "../webview/webview_wrap.h"
-#include "browser_window.h"
+#include <deskgap/browser_window.hpp>
 #include "../dispatch/dispatch.h"
 
 namespace DeskGap {

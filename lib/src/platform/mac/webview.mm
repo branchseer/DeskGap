@@ -5,9 +5,8 @@
 
 #import "./cocoa/DeskGapWindow.h"
 #import "./cocoa/DeskGapLocalURLSchemeHandler.h"
-#include "../webview/webview.h"
+#include "webview.hpp"
 #include "webview_impl.h"
-#include "../lib_path.h"
 #include "./util/string_convert.h"
 
 namespace {
@@ -151,24 +150,24 @@ namespace DeskGap {
     }
 
     WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
-        static NSString* preloadScript = nil;
+        static NSString* preloadScript = @"";
         if (preloadScript == nil) {
-            NSMutableArray<NSString*>* scripts = [NSMutableArray new];
-            NSString* scriptDir = [NSString pathWithComponents: @[
-                NSStr(LibPath()),
-                @"dist", @"ui"
-            ]];
-
-            for (NSString* scriptFilename in @[ @"preload_mac.js", @"preload.js" ]) {
-                [scripts addObject: [NSString
-                    stringWithContentsOfURL: [NSURL fileURLWithPathComponents: @[
-                        scriptDir, scriptFilename
-                    ]]
-                    encoding: NSUTF8StringEncoding
-                    error: nil
-                ]];
-            }
-            preloadScript = [scripts componentsJoinedByString: @"\n"];
+//            NSMutableArray<NSString*>* scripts = [NSMutableArray new];
+//            NSString* scriptDir = [NSString pathWithComponents: @[
+//                NSStr(LibPath()),
+//                @"dist", @"ui"
+//            ]];
+//
+//            for (NSString* scriptFilename in @[ @"preload_mac.js", @"preload.js" ]) {
+//                [scripts addObject: [NSString
+//                    stringWithContentsOfURL: [NSURL fileURLWithPathComponents: @[
+//                        scriptDir, scriptFilename
+//                    ]]
+//                    encoding: NSUTF8StringEncoding
+//                    error: nil
+//                ]];
+//            }
+//            preloadScript = [scripts componentsJoinedByString: @"\n"];
         }
 
         DeskGapWebViewDelegate* webviewDelegate = [[DeskGapWebViewDelegate alloc] initWithCallbacks: callbacks];

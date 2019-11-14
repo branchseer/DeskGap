@@ -7,8 +7,6 @@
 namespace DeskGap {
     class AppWrap: public Napi::ObjectWrap<AppWrap> {
     private:
-        std::unique_ptr<App> app_;
-
         void Run(const Napi::CallbackInfo& info);
         void Exit(const Napi::CallbackInfo& info);
 

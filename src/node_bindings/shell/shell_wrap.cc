@@ -1,5 +1,5 @@
+#include <deskgap/shell.hpp>
 #include "shell_wrap.h"
-#include "shell.h"
 #include "../dispatch/ui_dispatch.h"
 
 Napi::Object DeskGap::ShellObject(const Napi::Env& env) {

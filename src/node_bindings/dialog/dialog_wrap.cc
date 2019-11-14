@@ -1,10 +1,10 @@
 #include <optional>
 #include "dialog_wrap.h"
-#include "dialog.h"
+#include <deskgap/dialog.hpp>
 #include "../dispatch/ui_dispatch.h"
 #include "../dispatch/node_dispatch.h"
 #include "../util/js_native_convert.h"
-#include "../window/browser_window.h"
+#include "../window/browser_window_wrap.h"
 
 namespace DeskGap::JSNativeConvertion {
     using CommonFileDialogOptions = DeskGap::Dialog::CommonFileDialogOptions;

@@ -3,69 +3,59 @@
 #include "../dispatch/dispatch.h"
 #include "../menu/menu_wrap.h"
 #include "../util/js_native_convert.h"
+#include "app_startup.hpp"
 
-namespace DeskGap {
+
+Napi::Object DeskGap::AppWrap::AppObject(const Napi::Env& env) {
     using namespace JSNativeConvertion;
 
-        void AppWrap::Run(const Napi::CallbackInfo& info) {
+    Napi::Object appObject = Napi::Object::New(env);
+    appObject.Set("run", Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
+        Napi::Object jsCallbacks = info[0].As<Napi::Object>();
+        DeskGap::AppStartup::SignalAppRun({
+              [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
+                  jsOnReady->Call();
+              },
+              [jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
+                  jsBeforeQuit->Call();
+              }
+        });
+    }));
 
+    appObject.Set("exit", Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
+        uint32_t exitCode = Native<uint32_t>::From(info[0]);
+        UISync(info.Env(), [exitCode]() {
+            DeskGap::App::Exit(exitCode);
+        });
+    }));
 
-            Napi::Object jsCallbacks = info[0].As<Napi::Object>();
-
-            App::EventCallbacks callbacks {
-                    [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
-                        jsOnReady->Call();
-                    },
-                    [jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
-                        jsBeforeQuit->Call();
-                    }
-            };
-
-            UISync(info.Env(), [&]() {
-                DeskGap::App::Run(std::move(callbacks));
-            });
-
+#ifdef __APPLE__
+    appObject.Set("setMenu", Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
+        MenuWrap* wrappedMenu = nullptr;
+        if (Napi::Value jsValue = info[0]; !jsValue.IsNull()) {
+            wrappedMenu = MenuWrap::Unwrap(jsValue.As<Napi::Object>());
         }
+        UISyncDelayable(info.Env(), [wrappedMenu] {
+            DeskGap::App::SetMenu(
+                wrappedMenu == nullptr ? std::nullopt :
+                std::make_optional(std::ref(*(wrappedMenu->menu_)))
+            );
+        });
+    }));
+#endif
 
-        void AppWrap::Exit(const Napi::CallbackInfo& info) {
-            uint32_t exitCode = Native<uint32_t>::From(info[0]);
-            UISync(info.Env(), [this, exitCode]() {
-                DeskGap::App::Exit(exitCode);
-            });
-        }
+    appObject.Set("getPath", Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
+        std::string path = DeskGap::App::GetPath(static_cast<App::PathName>(Native<uint32_t>::From(info[0])));
+        return JSFrom(info.Env(), path);
+    }));
 
-    #ifdef __APPLE__
-        void AppWrap::SetMenu(const Napi::CallbackInfo& info) {
-            MenuWrap* wrappedMenu = nullptr;
-            if (Napi::Value jsValue = info[0]; !jsValue.IsNull()) {
-                wrappedMenu = MenuWrap::Unwrap(jsValue.As<Napi::Object>());
-            }
-            UISyncDelayable(info.Env(), [this, wrappedMenu] {
-                DeskGap::App::SetMenu(
-                    wrappedMenu == nullptr ? std::nullopt :
-                    std::make_optional(std::ref(*(wrappedMenu->menu_)))
-                );
-            });
-        }
-    #endif
+    appObject.Set("getArgv", Napi::Function::New(env, [](const Napi::CallbackInfo &info) {
+        return JSFrom(info.Env(), AppStartup::ExecArgs());
+    }));
 
-        Napi::Value AppWrap::GetPath(const Napi::CallbackInfo& info) {
-            std::string path = DeskGap::App::GetPath(static_cast<App::PathName>(Native<uint32_t>::From(info[0])));
-            return JSFrom(info.Env(), path);
-        }
-
-        AppWrap::AppWrap(const Napi::CallbackInfo& info):
-            Napi::ObjectWrap<AppWrap>(info)
-        {
-        }
-        Napi::Function AppWrap::Constructor(Napi::Env env) {
-            return DefineClass(env, "AppNative", {
-                InstanceMethod("run", &AppWrap::Run),
-                InstanceMethod("exit", &AppWrap::Exit),
-                InstanceMethod("getPath", &AppWrap::GetPath),
-            #ifdef __APPLE__
-                InstanceMethod("setMenu", &AppWrap::SetMenu),
-            #endif
-            });
-        }
+    appObject.Set("getResourcePath", Napi::Function::New(env, [](const Napi::CallbackInfo &info) {
+        return JSFrom(info.Env(), AppStartup::ResourcePath());
+    }));
+    return appObject;
 }
+

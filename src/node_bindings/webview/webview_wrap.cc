@@ -5,6 +5,10 @@
 #include <deskgap/webview.hpp>
 #include "../dispatch/dispatch.h"
 
+extern char BIN2CODE_DG_UI_JS_CONTENT[];
+extern int BIN2CODE_DG_UI_JS_SIZE;
+
+
 namespace DeskGap {
     Napi::Function WebViewWrap::Constructor(const Napi::Env& env) {
         return DefineClass(env, "WebViewNative", {

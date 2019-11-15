@@ -6,7 +6,6 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <variant>
 
 // On Windows the WebView class is a pure virtual interface,
 // because there are 2 implementations at runtime: WinRTWebView (using the WebViewControl in WinRT, Win10 1809+ only)
@@ -38,7 +37,7 @@ namespace DeskGap {
         };
 
         #ifndef WIN32
-        WebView(EventCallbacks&&);
+        WebView(EventCallbacks&&, const std::string& preloadScriptString);
         #endif
 
         struct HTTPHeader {

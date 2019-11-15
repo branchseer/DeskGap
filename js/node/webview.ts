@@ -1,7 +1,7 @@
 import { EventEmitter, IEventMap } from '../common/events';
 import messageNode from './message-node';
 import { evaluateJavaScript } from './internal/js-evaluation';
-import { entryPath } from './internal/bootstrap';
+import appPath from './internal/app-path';
 import path = require('path');
 import globals from './internal/globals';
 import { platform } from 'os';
@@ -86,7 +86,7 @@ export class WebView extends EventEmitter<WebViewEvents> {
     }
     
     loadFile(filePath: string): void {
-        this.native_.loadLocalFile(path.resolve(entryPath, filePath));
+        this.native_.loadLocalFile(path.resolve(appPath, filePath));
     }
     loadURL(url: string): void {
         const errorMessage = this.native_.loadRequest("GET", url, [], null);

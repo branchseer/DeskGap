@@ -1,6 +1,7 @@
 import { Menu, MenuTypeCode } from './menu';
 import defaultMenuTemplate from './internal/menu/default-template';
 import appInfo from './internal/app-info'
+import appPath from './internal/app-path'
 
 import globals from './internal/globals';
 import { EventEmitter, IEventMap } from '../common/events';
@@ -8,7 +9,7 @@ import { bulkUISync } from './internal/dispatch';
 
 import path = require('path');
 
-const { AppNative } = require('./bindings');
+const { appNative } = require('./bindings');
 
 const pathNameValues = {
     'appData': 0,
@@ -62,6 +63,7 @@ export class App extends EventEmitter<AppEvents> {
     /** @internal */ private isReady_ = false;
     /** @internal */ private triggersWindowAllClosed_ = true;
     /** @internal */ private whenReady_: Promise<void>;
+    /** @internal */ private resolveWhenReady_: () => void;
     /** @internal */ private native_: any;
     /** @internal */ private menu_: Menu | null = Menu.buildFromTemplate(defaultMenuTemplate);
     /** @internal */ private menuNativeId_: number | null = null;
@@ -70,34 +72,38 @@ export class App extends EventEmitter<AppEvents> {
         super();
 
         this.whenReady_ = new Promise((resolve) =>{
-            this.native_ = new AppNative({
-                onReady: () => {
-                    this.isReady_ = true;
-                    if (process.platform === 'darwin') {
-                        this.actuallySetTheMenu_();
-                    }
-
-                    try {
-                        this.trigger_('ready');
-                    }
-                    finally {
-                        this.removeAllListeners('ready');
-                        resolve();
-                    }
-                },
-        
-                //The native land will prevent the quit triggered by user interaction and call this,
-                //which actually exits the app by default and can be prevented by event handlers.
-                beforeQuit: () => {
-                    this.quit();
-                }
-            });
+            this.resolveWhenReady_ = resolve;
+            this.native_ = appNative;
         });
+
     }
 
     /** @internal */ 
     private run_() {
-        this.native_.run();
+        this.native_.run({
+            onReady: () => {
+                this.isReady_ = true;
+                if (process.platform === 'darwin') {
+                    this.actuallySetTheMenu_();
+                }
+
+                try {
+                    this.trigger_('ready');
+                }
+                finally {
+                    this.removeAllListeners('ready');
+                    this.resolveWhenReady_();
+                }
+            },
+    
+            //The native land will prevent the quit triggered by user interaction and call this,
+            //which actually exits the app by default and can be prevented by event handlers.
+            beforeQuit: () => {
+                this.quit();
+            }
+        });
+        
+        __non_webpack_require__(appPath);
     }
 
     /** @internal */ 
@@ -107,6 +113,10 @@ export class App extends EventEmitter<AppEvents> {
                 this.quit();
             }
         }
+    }
+
+    getAppPath(): string {
+        return appPath;
     }
 
     quit() {

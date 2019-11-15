@@ -19,13 +19,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nod)
 
-#FetchContent_Declare(
-#    boost
-#    GIT_REPOSITORY https://github.com/Orphis/boost-cmake
-#    GIT_TAG v1.67.0
-#)
-#FetchContent_MakeAvailable(boost)
-
 add_executable(DeskGapNode
     src/main.cc
     src/node_bindings/index.cc
@@ -38,14 +31,13 @@ add_executable(DeskGapNode
     src/node_bindings/system_preferences/system_preferences_wrap.cc
     src/node_bindings/webview/webview_wrap.cc
     src/node_bindings/window/browser_window_wrap.cc
-    src/Environment.cc
 )
 set_target_properties(
     DeskGapNode PROPERTIES
     OUTPUT_NAME DeskGap
     CXX_STANDARD 17
 )
-target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScript)
+target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScripts)
 target_include_directories(DeskGapNode PRIVATE src/node_api js/node_modules/node-addon-api)
 
 
@@ -74,22 +66,27 @@ if (APPLE OR LINUX)
     )
 endif()
 
-set(DESKGAP_RESOURCE_FOLDER $<TARGET_FILE_DIR:DeskGap>/resources)
-if(APPLE)
-    set(DESKGAP_RESOURCE_FOLDER $<TARGET_BUNDLE_CONTENT_DIR:DeskGap>/Resources)
-endif()
-
 if (WIN32)
     target_sources(
-        DeskGap PRIVATE
+        DeskGapNode PRIVATE
         ${CMAKE_SOURCE_DIR}/src/resources/win/App.manifest
     )
 
     set_target_properties(
-        DeskGap PROPERTIES
+        DeskGapNode PROPERTIES
         WIN32_EXECUTABLE TRUE
         LINK_FLAGS "/ENTRY:\"wmainCRTStartup\""
         COMPILE_OPTIONS "/MT"
         COMPILE_DEFINITIONS WIN32_LEAN_AND_MEAN=1
     )
 endif()
+
+set(DESKGAP_RESOURCE_FOLDER $<TARGET_FILE_DIR:DeskGapNode>/resources)
+if(APPLE)
+    set(DESKGAP_RESOURCE_FOLDER $<TARGET_BUNDLE_CONTENT_DIR:DeskGapNode>/Resources)
+endif()
+
+add_custom_command(
+    TARGET DeskGapNode POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/app ${DESKGAP_RESOURCE_FOLDER}/app
+)

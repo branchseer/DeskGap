@@ -12,6 +12,5 @@ Napi::Object DeskGap::ShellObject(const Napi::Env& env) {
         });
         return Napi::Boolean::New(info.Env(), success);
     }));
-
     return shellObject;
 }

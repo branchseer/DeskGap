@@ -22,7 +22,7 @@ namespace {
 
 
 Napi::Object DeskGap::InitNodeNativeModule(Napi::Env env, Napi::Object exports) {
-    ExportFunction(exports, DeskGap::AppWrap::Constructor(env));
+    exports.Set("appNative", DeskGap::AppWrap::AppObject(env));
     ExportFunction(exports, DeskGap::BrowserWindowWrap::Constructor(env));
     ExportFunction(exports, DeskGap::MenuWrap::Constructor(env));
     ExportFunction(exports, DeskGap::MenuItemWrap::Constructor(env));
@@ -35,11 +35,6 @@ Napi::Object DeskGap::InitNodeNativeModule(Napi::Env env, Napi::Object exports) 
     ExportFunction(exports, Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
         DeskGap::CommitUISync(info.Env());
     }, "commitUISync"));
-
-    ExportFunction(exports, Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
-
-    }, "setLibPath"));
-
 
     ExportFunction(exports, Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
         nativeExceptionConstructor = std::make_unique<Napi::FunctionReference>(Persistent(info[0].As<Napi::Function>()));
@@ -55,4 +50,3 @@ Napi::Object DeskGap::InitNodeNativeModule(Napi::Env env, Napi::Object exports) 
 const Napi::FunctionReference& DeskGap::NativeExceptionConstructor() {
     return *nativeExceptionConstructor;
 }
-

@@ -9,6 +9,9 @@
 #include "webview_impl.h"
 #include "./util/string_convert.h"
 
+extern char BIN2CODE_DG_PRELOAD_MAC_JS_CONTENT[];
+extern int BIN2CODE_DG_PRELOAD_MAC_JS_SIZE;
+
 namespace {
     NSString* const DevToolsAlertSuppressionKey = @"DeskGap.Suppressions.DevToolsAlert";
     NSArray<NSString*>* const ObservedWKWebViewKeyPaths = @[ @"title" ];
@@ -149,27 +152,8 @@ namespace DeskGap {
         }
     }
 
-    WebView::WebView(EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
-        static NSString* preloadScript = @"";
-        if (preloadScript == nil) {
-//            NSMutableArray<NSString*>* scripts = [NSMutableArray new];
-//            NSString* scriptDir = [NSString pathWithComponents: @[
-//                NSStr(LibPath()),
-//                @"dist", @"ui"
-//            ]];
-//
-//            for (NSString* scriptFilename in @[ @"preload_mac.js", @"preload.js" ]) {
-//                [scripts addObject: [NSString
-//                    stringWithContentsOfURL: [NSURL fileURLWithPathComponents: @[
-//                        scriptDir, scriptFilename
-//                    ]]
-//                    encoding: NSUTF8StringEncoding
-//                    error: nil
-//                ]];
-//            }
-//            preloadScript = [scripts componentsJoinedByString: @"\n"];
-        }
-
+    WebView::WebView(EventCallbacks&& callbacks, const std::string& preloadScriptString): impl_(std::make_unique<Impl>()) {
+        std::string preloadScript = std::string(BIN2CODE_DG_PRELOAD_MAC_JS_CONTENT, BIN2CODE_DG_PRELOAD_MAC_JS_SIZE) + preloadScriptString;
         DeskGapWebViewDelegate* webviewDelegate = [[DeskGapWebViewDelegate alloc] initWithCallbacks: callbacks];
 
         WKWebViewConfiguration* configuration = [[WKWebViewConfiguration alloc] init];
@@ -196,7 +180,7 @@ namespace DeskGap {
         
         [configuration.userContentController
             addUserScript: [[WKUserScript alloc]
-                initWithSource: preloadScript
+                initWithSource: NSStr(preloadScript)
                 injectionTime: WKUserScriptInjectionTimeAtDocumentStart
                 forMainFrameOnly: YES
             ]

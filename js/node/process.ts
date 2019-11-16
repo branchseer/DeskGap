@@ -9,5 +9,6 @@ declare global {
 }
 
 process.resourcesPath = appNative.getResourcePath();
+process.argv = appNative.getArgv();
 
 export { }

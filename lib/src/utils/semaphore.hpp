@@ -15,7 +15,6 @@ namespace {
         std::condition_variable cv_;
         int count_ = 0;
     public:
-        inline Semaphore() { }
         inline void signal() {
             std::unique_lock<std::mutex> lock(mutex_);
             ++count_;

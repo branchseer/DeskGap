@@ -7,7 +7,6 @@ ipcMain.on('hello-to-node', (e, message) => {
 let mainWindow;
 
 app.once('ready', () => {
-
     mainWindow = new BrowserWindow({
         show: false,
         width: 800, height: 600,

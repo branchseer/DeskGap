@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+
 if(APPLE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10)
 endif()
@@ -76,8 +77,6 @@ if (WIN32)
         DeskGapNode PROPERTIES
         WIN32_EXECUTABLE TRUE
         LINK_FLAGS "/ENTRY:\"wmainCRTStartup\""
-        COMPILE_OPTIONS "/MT"
-        COMPILE_DEFINITIONS WIN32_LEAN_AND_MEAN=1
     )
 endif()
 

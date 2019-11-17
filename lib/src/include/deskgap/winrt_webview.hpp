@@ -7,7 +7,7 @@
    #define DECLSPEC __declspec(dllimport)
 #endif
 
-#include "webview.h"
+#include "webview.hpp"
 #include <string>
 
 namespace DeskGap {
@@ -17,7 +17,7 @@ namespace DeskGap {
         Impl* winrtImpl_;
     public:
         static bool IsAvailable();
-        WinRTWebView(EventCallbacks&&, const std::string& libPath);
+        WinRTWebView(EventCallbacks&&, const std::string& preloadScriptString);
         virtual void LoadLocalFile(const std::string& path) override;
         virtual void LoadRequest(
             const std::string& method,

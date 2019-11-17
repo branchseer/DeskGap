@@ -28,35 +28,7 @@ namespace {
 
 
 
-void* DeskGapPlatform::InitUIThread() { 
-    OleInitialize(nullptr);
-    //CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-
-    WNDCLASSEXW dispatcherWindowClass { };
-    dispatcherWindowClass.cbSize = sizeof(WNDCLASSEXW);
-    dispatcherWindowClass.hInstance = GetModuleHandleW(nullptr);
-    dispatcherWindowClass.lpszClassName = DispatcherWndClassName;
-    dispatcherWindowClass.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
-        if (msg == WM_APP + 1) {
-            auto action = reinterpret_cast<std::function<void()>*>(lp);
-            (*action)();
-            delete action;
-            return 0;
-        }
-        else {
-            return DefWindowProcW(hwnd, msg, wp, lp);
-        }
-    };
-    RegisterClassExW(&dispatcherWindowClass);
-
-    HWND dispatchWindowWnd = CreateWindowW(
-        DispatcherWndClassName,
-        L"",
-        0, 0, 0, 0, 0,
-        nullptr, nullptr,
-        GetModuleHandleW(nullptr),
-        nullptr
-    );
+void* DeskGapPlatform::InitUIThread() {
 
     platformData = new DeskGap::PlatformData { dispatchWindowWnd, nullptr };
     return platformData;

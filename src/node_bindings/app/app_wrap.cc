@@ -12,11 +12,13 @@ Napi::Object DeskGap::AppWrap::AppObject(const Napi::Env& env) {
     Napi::Object appObject = Napi::Object::New(env);
     appObject.Set("run", Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
         Napi::Object jsCallbacks = info[0].As<Napi::Object>();
+        auto jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>());
+        auto jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>());
         DeskGap::AppStartup::SignalAppRun({
-              [jsOnReady = JSFunctionForUI::Persist(jsCallbacks.Get("onReady").As<Napi::Function>())]() {
+              [jsOnReady { std::move(jsOnReady) }]() {
                   jsOnReady->Call();
               },
-              [jsBeforeQuit = JSFunctionForUI::Persist(jsCallbacks.Get("beforeQuit").As<Napi::Function>())]() {
+              [jsBeforeQuit { std::move(jsBeforeQuit) }]() {
                   jsBeforeQuit->Call();
               }
         });

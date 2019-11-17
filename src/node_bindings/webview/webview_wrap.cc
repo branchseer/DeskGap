@@ -60,10 +60,10 @@ namespace DeskGap {
             static std::string dgPreloadScript(BIN2CODE_DG_UI_JS_CONTENT, BIN2CODE_DG_UI_JS_SIZE);
         #ifdef WIN32
             if (engine == Engine::WINRT) {
-                this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), LibPath());
+                this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), "");
             }
             else {
-                this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks));
+                this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks), "");
             }
         #else
             this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks), dgPreloadScript);

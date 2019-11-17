@@ -7,4 +7,6 @@ target_include_directories(deskgap_platform PRIVATE ../include/deskgap)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     add_subdirectory(mac)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    add_subdirectory(win)
 endif()

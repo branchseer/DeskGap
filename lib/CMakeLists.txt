@@ -10,7 +10,7 @@ set_target_properties(deskgap PROPERTIES
 
 add_subdirectory(src/platform)
 
-target_link_libraries(deskgap deskgap_platform)
+target_link_libraries(deskgap PUBLIC deskgap_platform)
 
 target_sources(deskgap PRIVATE
     src/wrappers/app_c.cc

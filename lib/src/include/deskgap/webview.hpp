@@ -11,6 +11,7 @@
 // because there are 2 implementations at runtime: WinRTWebView (using the WebViewControl in WinRT, Win10 1809+ only)
 // and TridentWebView (using IWebBrowser2, Win 7+ supported)
 #ifdef WIN32
+    #pragma warning(disable: 4275)
     #define VIRTUAL_IF_WIN32 virtual
     #define PURE_VIRTUAL_IF_WIN32(decl) virtual decl=0
 #else
@@ -67,14 +68,14 @@ namespace DeskGap {
 }
 
 #ifdef WIN32
-#include "./winrt_webview.h"
+#include "winrt_webview.hpp"
 namespace DeskGap {
     class TridentWebView: public WebView {
     private:
         struct Impl;
         Impl* tridentImpl_;
     public:
-        TridentWebView(EventCallbacks&&);
+        TridentWebView(EventCallbacks&&, const std::string& preloadScriptString);
         virtual void LoadLocalFile(const std::string& path) override;
         virtual void LoadRequest(
             const std::string& method,

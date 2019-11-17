@@ -5,7 +5,7 @@
 #include <functional>
 #include <memory>
 #include <deskgap/menu.hpp>
-#include "menu.h"
+//#include "menu.h"
 
 namespace DeskGap {
     class MenuItemWrap: public Napi::ObjectWrap<MenuItemWrap> {

@@ -16,7 +16,7 @@ endif()
 
 project(DeskGap)
 
-add_subdirectory(lib)
+add_subdirectory(../lib)
 add_subdirectory(js)
 
 FetchContent_Declare(
@@ -85,12 +85,16 @@ if (WIN32)
     )
 endif()
 
+set_target_properties(DeskGapNode PROPERTIES
+    RESOURCE app
+)
+
+
+
 set(DESKGAP_RESOURCE_FOLDER $<TARGET_FILE_DIR:DeskGapNode>/resources)
 if(APPLE)
     set(DESKGAP_RESOURCE_FOLDER $<TARGET_BUNDLE_CONTENT_DIR:DeskGapNode>/Resources)
 endif()
 
-add_custom_command(
-    TARGET DeskGapNode POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/app ${DESKGAP_RESOURCE_FOLDER}/app
-)
+add_custom_target(DeskGapNodeResources ALL ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/app ${DESKGAP_RESOURCE_FOLDER}/app)
+add_dependencies(DeskGapNodeResources DeskGapNode)

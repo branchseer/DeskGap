@@ -1,8 +1,6 @@
 {
   "name": "deskgap-dev",
   "scripts": {
-    "build-lib-node": "webpack-cli --config ./js/node/webpack.config.js",
-    "build-lib-ui": "webpack-cli --config ./js/ui/webpack.config.js",
     "build-d-ts": "tsc -p ./tsconfig-d-ts.json"
   },
   "private": true,
@@ -16,7 +14,6 @@
     "typescript": "^3.2.2",
     "webpack": "^4.28.2",
     "webpack-cli": "^3.1.2",
-
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "koa": "^2.6.2",

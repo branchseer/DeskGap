@@ -10,7 +10,7 @@
 #include "deskgap/argv.hpp"
 #include "node_bindings/index.hpp"
 #include "node_bindings/app/app_startup.hpp"
-#include "../lib/src/utils/semaphore.hpp"
+#include "../../lib/src/utils/semaphore.hpp"
 
 extern char BIN2CODE_DG_NODE_JS_CONTENT[];
 

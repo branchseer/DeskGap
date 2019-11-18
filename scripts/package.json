@@ -1,9 +1,0 @@
-{
-    "name": "deskgap-scripts",
-    "dependencies": {
-        "archiver": "^3.0.0",
-        "decompress": "^4.2.0",
-        "fs-extra": "^7.0.1",
-        "nugget": "^2.0.1"
-    }
-}

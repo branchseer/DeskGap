@@ -16,12 +16,22 @@ endif()
 
 project(DeskGap)
 
-add_subdirectory(../lib)
+set(DG_NPM_BIN_DIR ${CMAKE_CURRENT_LIST_DIR}/node_modules/.bin)
+#
+#add_custom_command(OUTPUT ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED
+#    COMMAND ${CMAKE_COMMAND} -E chdir ${DG_NODE_DEPS_DIR} npm ci
+#    COMMAND ${CMAKE_COMMAND} -E touch ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED
+#    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/package.json ${CMAKE_CURRENT_LIST_DIR}/package-lock.json
+#)
+#
+#add_custom_target(DeskGapNodeDeps ALL DEPENDS ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED)
+
+add_subdirectory(../lib lib)
 add_subdirectory(js)
 
 FetchContent_Declare(
     nod
-    GIT_REPOSITORY http://github.com/patr0nus/nod
+    GIT_REPOSITORY https://github.com/patr0nus/nod
 )
 FetchContent_MakeAvailable(nod)
 
@@ -44,8 +54,7 @@ set_target_properties(
     CXX_STANDARD 17
 )
 target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScripts)
-target_include_directories(DeskGapNode PRIVATE src/node_api js/node_modules/node-addon-api)
-
+target_include_directories(DeskGapNode PRIVATE src/node_api node_modules/node-addon-api)
 
 if(APPLE)
     set_target_properties(
@@ -89,12 +98,10 @@ set_target_properties(DeskGapNode PROPERTIES
     RESOURCE app
 )
 
-
-
 set(DESKGAP_RESOURCE_FOLDER $<TARGET_FILE_DIR:DeskGapNode>/resources)
 if(APPLE)
     set(DESKGAP_RESOURCE_FOLDER $<TARGET_BUNDLE_CONTENT_DIR:DeskGapNode>/Resources)
 endif()
 
-add_custom_target(DeskGapNodeResources ALL ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/app ${DESKGAP_RESOURCE_FOLDER}/app)
+add_custom_target(DeskGapNodeResources ALL ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/app ${DESKGAP_RESOURCE_FOLDER}/app)
 add_dependencies(DeskGapNodeResources DeskGapNode)

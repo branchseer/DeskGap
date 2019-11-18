@@ -14,7 +14,7 @@ let lastEvaluationId = 0;
 
 const evaluations = new Map<number, { resolve: (result: any) => void, reject: (error: any) => void }>();
 
-export function RegisterJSEvaluationHandlers(messageNode: EventEmitter<ChannelsSentByUI>) {
+export function RegisterJSEvaluationHandlers(messageNode: EventEmitter<ChannelsSentByUI, any>) {
     messageNode.on(ChannelNames.RESOLVED, (e, evaluationId, result) => {
         const evaluation = evaluations.get(evaluationId);
         if (evaluation != null) {

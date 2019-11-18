@@ -1,6 +1,5 @@
 target_compile_options(deskgap_platform
     PRIVATE -GR -await
-    PUBLIC "-MT$<$<CONFIG:Debug>:d>"
 )
 
 target_compile_definitions(deskgap_platform PRIVATE WIN32_LEAN_AND_MEAN UNICODE _UNICODE DESKGAP_EXPORTING)

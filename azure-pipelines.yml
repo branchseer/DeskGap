@@ -11,9 +11,11 @@ jobs:
         linux:
           imageName: 'ubuntu-16.04'
           cmakeGenerator: 'Unix Makefiles'
+          buildDistPath: 'build/Release'
         mac:
           imageName: 'macos-10.14'
           cmakeGenerator: 'Unix Makefiles'
+          buildDistPath: 'build'
     pool:
       vmImage: $(imageName)
 
@@ -61,13 +63,8 @@ jobs:
 
     - script: |
         npm ci
-        mkdir build
-      displayName: 'Install npm deps and mkdir build'
-
-    - script: |
-        cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S ../node
-        cmake --build . --target all --config Release
-      workingDirectory: build
+        cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
+        cmake --build build --target all --config Release
       displayName: 'Build'
 
     - script: |
@@ -76,7 +73,7 @@ jobs:
       condition: eq(variables['Agent.OS'], 'Linux')
 
     - script:
-        node node/test/start.js build
+        node node/test/start.js $(buildDistPath)
       displayName: 'test'
       env:
         DISPLAY: ':99.0'

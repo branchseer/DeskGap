@@ -13,7 +13,7 @@ module.exports = (distPath, entryPath, args) => {
         executablePath = path.join(distPath, 'DeskGap/DeskGap');
     }
 
-    const deskgapProcess = spawn(executablePath, args, {
+    const deskgapProcess = spawn(path.resolve(executablePath), args, {
         stdio: 'inherit',
         windowsHide: false,
         env: {

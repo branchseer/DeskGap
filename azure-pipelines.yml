@@ -55,8 +55,12 @@ jobs:
     - script: |
         npm ci
         mkdir build
-        cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
-        cmake --build build --target all --config Release
+      displayName: 'Install npm deps and mkdir build'
+
+    - script: |
+        cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S ../node
+        cmake --build . --target all --config Release
+      workingDirectory: build
       displayName: 'Build'
 
     - script: |

@@ -1,7 +1,13 @@
-const { runDeskGap } = require('../npm/util');
+const runDeskGap = require('../npm/run');
 const path = require('path');
 
-const buildPath = require('../scripts/build-folder');
-let distPath = path.resolve(buildPath, 'Release');
+const distPath = process.argv[2];
 
-runDeskGap(distPath, __dirname, []);
+if (distPath == null) {
+    console.error("Missing [deskgap-dist-path]");
+    console.error('Usage: node start.js [deskgap-dist-path]');
+    process.exit(1);
+}
+else {
+    runDeskGap(distPath, __dirname, []);
+}

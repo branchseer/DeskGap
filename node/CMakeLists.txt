@@ -16,7 +16,9 @@ endif()
 
 project(DeskGap)
 
-set(DG_NPM_BIN_DIR ${CMAKE_CURRENT_LIST_DIR}/node_modules/.bin)
+set(DG_NODE_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/../node_modules)
+set(DG_NODE_BIN_DIR ${DG_NODE_MODULES_DIR}/.bin)
+set(DG_BIN2CODE node ${CMAKE_CURRENT_LIST_DIR}/scripts/bin2code.js)
 #
 #add_custom_command(OUTPUT ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED
 #    COMMAND ${CMAKE_COMMAND} -E chdir ${DG_NODE_DEPS_DIR} npm ci
@@ -54,7 +56,7 @@ set_target_properties(
     CXX_STANDARD 17
 )
 target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScripts)
-target_include_directories(DeskGapNode PRIVATE src/node_api node_modules/node-addon-api)
+target_include_directories(DeskGapNode PRIVATE src/node_api ${DG_NODE_MODULES_DIR}/node-addon-api)
 
 if(APPLE)
     set_target_properties(

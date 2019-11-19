@@ -11,9 +11,9 @@
 #include "node_bindings/index.hpp"
 #include "node_bindings/app/app_startup.hpp"
 #include "../../lib/src/utils/semaphore.hpp"
-
-extern char BIN2CODE_DG_NODE_JS_CONTENT[];
-
+extern "C" {
+    extern char BIN2CODE_DG_NODE_JS_CONTENT[];
+}
 namespace {
     Semaphore appRunSemaphore;
     std::vector<std::string> execArgs;
@@ -41,6 +41,8 @@ int wmain(int argc, const wchar_t** argv)
 int main(int argc, const char** argv)
 #endif
 {
+    DeskGap::App::Init();
+
     std::thread nodeThread([argc, argv]() {
         execArgs = DeskGap::Argv(argc, argv);
         const char* argv0 = execArgs[0].c_str();

@@ -4,9 +4,12 @@
 #include "./util/wstring_utf8.h"
 #include <filesystem>
 #include "app.hpp"
+#include "webview_impl.h"
+#include "dispatch_wnd.hpp"
 
 namespace DeskGap {
-    void App::Run(EventCallbacks&& callbacks) {
+    HWND dispatchWindowWnd;
+    void App::Init() {
         OleInitialize(nullptr);
 
         const wchar_t* const DispatcherWndClassName = L"DeskGapDispatcherWindow";
@@ -16,7 +19,7 @@ namespace DeskGap {
         dispatcherWindowClass.hInstance = GetModuleHandleW(nullptr);
         dispatcherWindowClass.lpszClassName = DispatcherWndClassName;
         dispatcherWindowClass.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) -> LRESULT {
-            if (msg == WM_APP + 1) {
+            if (msg == DG_DISPATCH_MSG) {
                 auto action = reinterpret_cast<std::function<void()>*>(lp);
                 (*action)();
                 delete action;
@@ -28,7 +31,7 @@ namespace DeskGap {
         };
         RegisterClassExW(&dispatcherWindowClass);
 
-        HWND dispatchWindowWnd = CreateWindowW(
+        dispatchWindowWnd = CreateWindowW(
                 DispatcherWndClassName,
                 L"",
                 0, 0, 0, 0, 0,
@@ -37,8 +40,32 @@ namespace DeskGap {
                 nullptr
         );
     }
+    void App::Run(EventCallbacks&& callbacks) {
+        callbacks.onReady();
+        MSG msg;
+        BOOL res;
+        while ((res = GetMessageW(&msg, nullptr, 0, 0)) != -1) {
+            if (msg.message == WM_MENUCOMMAND) {
+                MENUINFO info { };
+                info.cbSize = sizeof(info);
+                info.fMask = MIM_MENUDATA;
+                GetMenuInfo((HMENU)msg.lParam, &info);
+                auto clickHandlers = reinterpret_cast<std::vector<std::function<void()>*>*>(info.dwMenuData);
+                (*((*clickHandlers)[msg.wParam]))();
+            }
+            else if (msg.message == WM_QUIT) {
+                return;
+            }
+            else if (msg.hwnd) {
+                if (tridentWebViewTranslateMessage != nullptr) {
+                    if (tridentWebViewTranslateMessage(&msg)) continue;
+                }
+                TranslateMessage(&msg);
+                DispatchMessageW(&msg);
+            }
+        }
+    }
 
-    
     void App::Exit(int exitCode) {
         ExitProcess(static_cast<UINT>(exitCode));
     }

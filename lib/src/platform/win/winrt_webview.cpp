@@ -18,10 +18,16 @@
 #include <winrt/Windows.Web.Http.Headers.h>
 #include <winrt/Windows.Foundation.Metadata.h>
 
-#include "../webview/winrt_webview.h"
+#include "winrt_webview.hpp"
 #include "webview_impl.h"
 
 #pragma comment(lib, "WindowsApp")
+
+
+extern "C" {
+    extern char BIN2CODE_DG_PRELOAD_WINRT_JS_CONTENT[];
+    extern int BIN2CODE_DG_PRELOAD_WINRT_JS_SIZE;
+}
 
 namespace fs = std::filesystem;
 
@@ -164,20 +170,13 @@ namespace DeskGap {
             );
         }; 
     };
-    
-    WinRTWebView::WinRTWebView(EventCallbacks&& callbacks, const std::string& libPath) {
-        if (preloadScript == nullptr) {
-            std::ostringstream scriptStream;
-            fs::path scriptFolder = fs::path(libPath) / "dist" / "ui";
 
-            for (const std::string& scriptFilename: { "dg_preload_winrt.js", "preload.js" }) {
-                winrt::hstring scriptFullPath = winrt::to_hstring((scriptFolder / scriptFilename).string());
-                std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
-                scriptStream << scriptFile.rdbuf();
-            }
-
-            preloadScript = std::make_unique<winrt::hstring>(winrt::to_hstring(scriptStream.str()));
-        }
+    WinRTWebView::WinRTWebView(EventCallbacks&& callbacks, const std::string& preloadScriptString) {
+        std::string script;
+        script.reserve(BIN2CODE_DG_PRELOAD_WINRT_JS_SIZE + preloadScriptString.size());
+        script.assign(BIN2CODE_DG_PRELOAD_WINRT_JS_CONTENT, BIN2CODE_DG_PRELOAD_WINRT_JS_SIZE);
+        script.append(preloadScriptString);
+        preloadScript = std::make_unique<winrt::hstring>(winrt::to_hstring(script));
 
         auto winrtImpl = std::make_unique<Impl>(callbacks);
 
@@ -191,6 +190,7 @@ namespace DeskGap {
         //The real creation of WebViewControl happens in WinRTWebView::Impl::InitWithParent,
         //which is called by BrowserWindow, because it needs the handle of the window.
     }
+
 
     void WinRTWebView::LoadLocalFile(const std::string& path) {
         winrtImpl_->PrepareScript();

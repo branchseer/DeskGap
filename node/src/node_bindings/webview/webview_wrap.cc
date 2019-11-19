@@ -5,8 +5,14 @@
 #include <deskgap/webview.hpp>
 #include "../dispatch/dispatch.h"
 
-extern char BIN2CODE_DG_UI_JS_CONTENT[];
-extern int BIN2CODE_DG_UI_JS_SIZE;
+extern "C" {
+    extern char BIN2CODE_DG_UI_JS_CONTENT[];
+    extern int BIN2CODE_DG_UI_JS_SIZE;
+#ifdef WIN32
+    extern char BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_CONTENT[];
+    extern char BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_SIZE[];
+#endif
+}
 
 
 namespace DeskGap {
@@ -59,11 +65,15 @@ namespace DeskGap {
         ]() mutable {
             static std::string dgPreloadScript(BIN2CODE_DG_UI_JS_CONTENT, BIN2CODE_DG_UI_JS_SIZE);
         #ifdef WIN32
+            static std::string dgPreloadScriptWithPromise =
+                    std::string(BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_CONTENT, BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_SIZE) +
+                    dgPreloadScript;
+
             if (engine == Engine::WINRT) {
-                this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), "");
+                this->webview_ = std::make_unique<WinRTWebView>(std::move(eventCallbacks), dgPreloadScript);
             }
             else {
-                this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks), "");
+                this->webview_ = std::make_unique<TridentWebView>(std::move(eventCallbacks), dgPreloadScriptWithPromise);
             }
         #else
             this->webview_ = std::make_unique<WebView>(std::move(eventCallbacks), dgPreloadScript);

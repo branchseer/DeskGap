@@ -12,12 +12,18 @@ using std::shared_ptr;
 using std::function;
 using std::make_shared;
 
+namespace {
+    GtkApplication* gtkApp;
+}
+
 namespace DeskGap {
-    void App::Run(EventCallbacks&& callbacks) {
-        GtkApplication* gtkApp = gtk_application_new(nullptr, G_APPLICATION_FLAGS_NONE);
+    void App::Init() {
+        gtkApp = gtk_application_new(nullptr, G_APPLICATION_FLAGS_NONE);
         g_application_hold(G_APPLICATION(gtkApp));
         // Suppress no activate handler warning:
         g_signal_connect(gtkApp, "activate", G_CALLBACK([](){ }), nullptr);
+    }
+    void App::Run(EventCallbacks&& callbacks) {
         callbacks.onReady();
         g_application_run(G_APPLICATION(gtkApp), 0, NULL);
         g_object_unref(gtkApp);

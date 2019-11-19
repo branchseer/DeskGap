@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(deskgap)
 
+set(DG_BIN2CODE node ${CMAKE_CURRENT_LIST_DIR}/bin2code.js)
+
 add_library(deskgap STATIC)
 target_include_directories(deskgap PUBLIC src/include)
 set_target_properties(deskgap PROPERTIES

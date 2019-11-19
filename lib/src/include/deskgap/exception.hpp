@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <string>
+#include <functional>
 
 namespace DeskGap {
     struct Exception {

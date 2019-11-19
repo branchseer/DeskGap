@@ -9,9 +9,10 @@
 #include "webview_impl.h"
 #include "./util/string_convert.h"
 
-extern char BIN2CODE_DG_PRELOAD_MAC_JS_CONTENT[];
-extern int BIN2CODE_DG_PRELOAD_MAC_JS_SIZE;
-
+extern "C" {
+    extern char BIN2CODE_DG_PRELOAD_MAC_JS_CONTENT[];
+    extern int BIN2CODE_DG_PRELOAD_MAC_JS_SIZE;
+}
 namespace {
     NSString* const DevToolsAlertSuppressionKey = @"DeskGap.Suppressions.DevToolsAlert";
     NSArray<NSString*>* const ObservedWKWebViewKeyPaths = @[ @"title" ];

@@ -2,7 +2,7 @@
 #include <cassert>
 #include <thread>
 
-#include "../system_preferences/system_preferences.h"
+#include "system_preferences.hpp"
 
 #pragma comment(lib, "advapi32.lib")
 

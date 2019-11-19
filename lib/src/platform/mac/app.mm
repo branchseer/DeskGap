@@ -47,9 +47,11 @@ using std::make_shared;
 namespace DeskGap {
     static DeskGapAppDelegate* appDelegate;
 
-    void App::Run(EventCallbacks&& callbacks) {
+    void App::Init() {
         [NSApplication sharedApplication];
+    }
 
+    void App::Run(EventCallbacks&& callbacks) {
         appDelegate = [[DeskGapAppDelegate alloc] initWithCallbacks: callbacks];
         NSApp.delegate = appDelegate;
         [NSApp run];

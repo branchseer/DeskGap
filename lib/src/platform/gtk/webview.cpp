@@ -9,9 +9,10 @@
 #include "./glib_exception.h"
 #include "./util/convert_js_result.h"
 
-extern char BIN2CODE_DG_PRELOAD_GTK_JS_CONTENT[];
-extern int BIN2CODE_DG_PRELOAD_GTK_JS_SIZE;
-
+extern "C" {
+    extern char BIN2CODE_DG_PRELOAD_GTK_JS_CONTENT[];
+    extern int BIN2CODE_DG_PRELOAD_GTK_JS_SIZE;
+}
 namespace fs = std::filesystem;
 
 namespace {

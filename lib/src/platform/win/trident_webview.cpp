@@ -14,17 +14,18 @@
 #include <mshtmhst.h>
 #include <forward_list>
 
-#include "../webview/webview.h"
+#include "webview.hpp"
 #include "webview_impl.h"
-#include "../lib_path.h"
 #include "./util/win32_check.h"
 #include "./util/wstring_utf8.h"
-#include "./platform_data.h"
-#include "../platform_data.h"
 
 #pragma comment(lib, "comsuppw")
 
 namespace fs = std::filesystem;
+
+extern "C" {
+    extern char BIN2CODE_DG_PRELOAD_TRIDENT_JS_CONTENT[];
+}
 
 namespace {
     const DISPID kExternalPostDispid = 0x1000;
@@ -56,6 +57,7 @@ namespace {
 }
 
 namespace DeskGap {
+    bool(*tridentWebViewTranslateMessage)(MSG* msg) = nullptr;
     struct TridentWebView::Impl:
         public WebView::Impl,
         public IOleClientSite,
@@ -95,6 +97,8 @@ namespace DeskGap {
             return nullptr;
         }
     public:
+        std::wstring preloadScript;
+
         std::wstring lastErrorMessage;
         HRESULT ExecuteJavaScript(const std::wstring& code) {
             HRESULT hr = S_OK;
@@ -164,9 +168,8 @@ namespace DeskGap {
         }
 
         virtual void InitWithParent(HWND containerWnd) override {
-            static bool isFirstRun = true;
-            if (isFirstRun) {
-                static_cast<PlatformData*>(GetPlatformData())->tridentWebViewTranslateMessage = [](MSG* msg) {
+            if (tridentWebViewTranslateMessage == nullptr) {
+                tridentWebViewTranslateMessage = [](MSG* msg) {
                     for (Impl* impl: impls_) {
                         if (IsChild(impl->containerWnd, msg->hwnd)) {
                             if (impl->inPlaceActiveObject->TranslateAcceleratorW(msg) == S_OK) {
@@ -176,7 +179,6 @@ namespace DeskGap {
                     }
                     return false;
                 };
-                isFirstRun = false;
             }
 
             this->containerWnd = containerWnd;
@@ -381,26 +383,7 @@ namespace DeskGap {
                     if (paramWebBrowser2 != webBrowser2) return S_OK;
                 }
 
-                static std::unique_ptr<std::wstring> preloadScript = nullptr;
-                
-                if (preloadScript == nullptr) {
-                    std::ostringstream scriptStream;
-                    fs::path scriptFolder = fs::path(LibPath()) / "dist" / "ui";
-                    // Wrap the preload script into (function() { ... })(), because there is a `return` in it (dg_preload_trident.js).
-                    scriptStream << "(function(){\n";
-
-                    for (const std::string& scriptFilename: { "dg_preload_trident.js", "es6-promise.auto.min.js", "preload.js" }) {
-                        std::wstring scriptFullPath = UTF8ToWString((scriptFolder / scriptFilename).string().c_str());
-                        std::ifstream scriptFile(scriptFullPath.c_str(), std::ios::binary);
-                        scriptStream << scriptFile.rdbuf();
-                    }
-
-                    scriptStream << "\n})();\n";
-
-                    preloadScript = std::make_unique<std::wstring>(UTF8ToWString(scriptStream.str().c_str()));
-                }
-
-                ExecuteJavaScript(*preloadScript);
+                ExecuteJavaScript(preloadScript);
             }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE) {
                 IDispatch* dispatch = pDispParams->rgvarg[1].pdispVal;
@@ -440,8 +423,12 @@ namespace DeskGap {
     std::forward_list<TridentWebView::Impl*> TridentWebView::Impl::impls_;
 
     
-    TridentWebView::TridentWebView(EventCallbacks&& callbacks) {
+    TridentWebView::TridentWebView(EventCallbacks&& callbacks, const std::string& preloadScript) {
+        static std::wstring wideDGPreloadTridentJS = UTF8ToWString(BIN2CODE_DG_PRELOAD_TRIDENT_JS_CONTENT);
+        std::wstring wideAdditionalPreloadScript = UTF8ToWString(preloadScript.c_str());
         auto tridentImpl = std::make_unique<Impl>(callbacks);
+
+        tridentImpl->preloadScript = L"(function(){\n" + wideDGPreloadTridentJS + wideAdditionalPreloadScript + L"\n})();\n";
 
         //impl_ for reference owning, and winrtImpl_ for method calling
         tridentImpl_ = tridentImpl.get();

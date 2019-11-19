@@ -13,7 +13,7 @@ namespace DeskGap {
             std::function<void()> onReady;
             std::function<void()> beforeQuit;
         };
-
+        static void Init();
         static void Run(EventCallbacks&& callbacks);
         static void Exit(int exitCode);
 

@@ -2,7 +2,7 @@
 
 #include "win32_check.h"
 #include <filesystem>
-#include "../../webview/winrt_webview.h"
+#include "winrt_webview.hpp"
 
 HMODULE DeskGap::GetWinRTDLLModule() {
     namespace fs = std::filesystem;

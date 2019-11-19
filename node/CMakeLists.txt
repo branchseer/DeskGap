@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
 
 if(WIN32)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
 
 if(APPLE)
@@ -22,6 +22,7 @@ set(DG_LIB_DIR ${CMAKE_CURRENT_LIST_DIR}/../lib)
 
 add_subdirectory(${DG_LIB_DIR} lib)
 set(DG_BIN2CODE node ${DG_LIB_DIR}/bin2code.js)
+set(NPM_WEBPACK npm --prefix ${CMAKE_CURRENT_LIST_DIR}/.. run webpack --)
 add_subdirectory(js)
 
 FetchContent_Declare(
@@ -84,7 +85,7 @@ if (WIN32)
 
     set_target_properties(
         DeskGapNode PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE $<IF:$<CONFIG:Release>,TRUE,FALSE>
         LINK_FLAGS "/ENTRY:\"wmainCRTStartup\""
     )
 endif()
@@ -100,3 +101,7 @@ endif()
 
 add_custom_target(DeskGapNodeResources ALL ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/app ${DESKGAP_RESOURCE_FOLDER}/app)
 add_dependencies(DeskGapNodeResources DeskGapNode)
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    add_custom_target(DeskGapWinRTDLL ALL ${CMAKE_COMMAND} -E copy $<TARGET_FILE:deskgap_winrt> $<TARGET_FILE_DIR:DeskGapNode>)
+endif()

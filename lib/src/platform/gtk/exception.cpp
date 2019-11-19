@@ -2,9 +2,6 @@
 // Created by Wang, Chi on 2019/11/19.
 //
 
-//
-// Created by Wang, Chi on 2019/11/14.
-//
 #include "exception.hpp"
 #include "glib_exception.h"
 

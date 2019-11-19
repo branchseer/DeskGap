@@ -18,17 +18,10 @@ project(DeskGap)
 
 set(DG_NODE_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/../node_modules)
 set(DG_NODE_BIN_DIR ${DG_NODE_MODULES_DIR}/.bin)
-set(DG_BIN2CODE node ${CMAKE_CURRENT_LIST_DIR}/scripts/bin2code.js)
-#
-#add_custom_command(OUTPUT ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED
-#    COMMAND ${CMAKE_COMMAND} -E chdir ${DG_NODE_DEPS_DIR} npm ci
-#    COMMAND ${CMAKE_COMMAND} -E touch ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED
-#    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/package.json ${CMAKE_CURRENT_LIST_DIR}/package-lock.json
-#)
-#
-#add_custom_target(DeskGapNodeDeps ALL DEPENDS ${DG_NODE_DEPS_DIR}/node_modules/NODE_DEPS_INSTALLED)
+set(DG_LIB_DIR ${CMAKE_CURRENT_LIST_DIR}/../lib)
 
-add_subdirectory(../lib lib)
+add_subdirectory(${DG_LIB_DIR} lib)
+set(DG_BIN2CODE node ${DG_LIB_DIR}/bin2code.js)
 add_subdirectory(js)
 
 FetchContent_Declare(

@@ -1,5 +1,3 @@
-const { spawn } = require('child_process');
-const path = require('path');
 const nugget = require('nugget');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -14,38 +12,6 @@ exports.downloadFile = (url, target) => new Promise((resolve, reject) => {
         }
     });
 });
-
-exports.runDeskGap = (distPath, entryPath, args) => {
-    let executablePath;
-    if (process.platform === 'darwin') {
-        executablePath = path.join(distPath, 'DeskGap.app/Contents/MacOS/DeskGap');
-    }
-    else if (process.platform === 'win32') {
-        executablePath = path.join(distPath, 'DeskGap/DeskGap.exe');
-    }
-    else if (process.platform === 'linux') {
-        executablePath = path.join(distPath, 'DeskGap/DeskGap');
-    }
-
-    const deskgapProcess = spawn(executablePath, args, {
-        stdio: 'inherit',
-        windowsHide: false,
-        env: {
-            ...process.env,
-            'DESKGAP_ENTRY': path.resolve(entryPath)
-        }
-    });
-    
-    for (const signal of ['SIGINT', 'SIGTERM']) {
-        process.on(signal, () => {
-            if (!deskgapProcess.killed) {
-                deskgapProcess.kill(signal);
-            }
-        })
-    }
-
-    deskgapProcess.once('close', (code) => process.exit(code));
-};
 
 exports.sha256OfPath = (path) => {
     return new Promise((resolve, reject) => {

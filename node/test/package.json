@@ -3,14 +3,5 @@
     "productName": "DeskGap Test",
     "private": true,
     "main": "index.js",
-    "version": "0.0.1",
-    "dependencies": {
-        "chai": "^4.2.0",
-        "chai-as-promised": "^7.1.1",
-        "koa": "^2.6.2",
-        "mocha": "^5.2.0"
-    },
-    "scripts": {
-        "start": "node start.js"
-    }
+    "version": "0.0.1"
 }

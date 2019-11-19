@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { runDeskGap } = require('./util');
+const runDeskGap = require('./run');
 const path = require('path');
 
 const distPath = process.env.DESKGAP_DIST_PATH || path.join(__dirname, 'dist');

@@ -4,6 +4,8 @@ const path = require('path');
 
 const { expect } = chai;
 
+const mac = process.platform === 'darwin';
+
 describe('BrowserWindow module', () => {
     const windowAllClosedHandler = () => {};
     
@@ -47,12 +49,14 @@ describe('BrowserWindow module', () => {
         })
     });
     describe('win.setMenu(menu)', () => {
-        it('should not throw when it is called after the window has been shown', () => {
+        it('should not throw when it is called after the window has been shown', function () {
+            if (mac) return this.skip();
             const win = new BrowserWindow();
             win.setMenu(null);
             win.destroy();
         });
-        it('should not throw when it is called before the window has been shown', () => {
+        it('should not throw when it is called before the window has been shown', function () {
+            if (mac) return this.skip();
             const win = new BrowserWindow({ show: false });
             win.setMenu(null);
             win.show();

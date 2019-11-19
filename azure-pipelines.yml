@@ -19,6 +19,8 @@ jobs:
 
     steps:
     - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
     - script: |
         sudo apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common wget
         wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -

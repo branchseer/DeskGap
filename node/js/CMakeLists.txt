@@ -23,7 +23,7 @@ add_custom_command(
 )
 
 
-add_library(DeskGapNodeScripts OBJECT ${CMAKE_CURRENT_BINARY_DIR}/dg_node.c ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.c ${CMAKE_CURRENT_BINARY_DIR}/es6_promise_auto_min.c)
+add_library(DeskGapNodeScripts OBJECT ${CMAKE_CURRENT_BINARY_DIR}/dg_node.c ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.c)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     add_custom_command(

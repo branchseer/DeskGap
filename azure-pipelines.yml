@@ -31,6 +31,13 @@ jobs:
       displayName: 'Setup the apt repos on Linux'
 
     - script: |
+        sudo rm -rf /usr/local/bin/cmake*
+        sudo rm -rf /usr/local/bin/ctest*
+        sudo rm -rf /usr/local/doc/cmake
+        sudo rm -rf /usr/local/man/man1/cmake*
+        sudo rm -rf /usr/local/man/man1/ctest*
+        sudo rm -rf /usr/local/man/man7/cmake*
+        sudo rm -rf /usr/local/share/cmake*
         sudo apt-get install -y cmake
       condition: eq( variables['Agent.OS'], 'Linux' )
       displayName: 'Install the up-to-date version of CMake on Linux'

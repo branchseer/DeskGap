@@ -54,6 +54,7 @@ jobs:
 
     - script: |
         npm ci
+        mkdir build
         cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
         cmake --build build --target all --config Release
       displayName: 'Build'

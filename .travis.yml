@@ -1,0 +1,44 @@
+language: node_js
+node_js:
+  - 12
+
+jobs:
+  include:
+    - os: linux
+      dist: xenial
+      env:
+        - DG_CMAKE_GENERATOR="Unix Makefiles"
+        - DG_DIST_PATH="build/Release"
+      services:
+        - xvfb
+
+    - os: windows
+      env:
+        - DG_CMAKE_GENERATOR="Visual Studio 15 2017"
+        - DG_DIST_PATH="build/Release"
+
+before_install:
+  - |
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      sudo apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common wget
+      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
+      sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+      sudo apt-get -q update
+      
+      sudo apt-get install -y cmake libgtk-3-dev libwebkit2gtk-4.0-dev g++-8
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+      sudo update-alternatives --config gcc
+    fi
+    
+    if [ "$TRAVIS_OS_NAME" = "windows" ]; then
+      choco install -y cmake
+    fi
+    
+install:
+  - |
+    npm ci
+    cmake -G "$DG_CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE=Release -S node -B build
+    cmake --build build --target all --config Release
+    
+script: node node/test/start.js $DG_DIST_PATH

@@ -57,11 +57,6 @@ jobs:
       displayName: 'Install the up-to-date version of CMake on macOS'
 
     - script: |
-        choco install -y cmake
-      condition: eq( variables['Agent.OS'], 'Windows_NT' )
-      displayName: 'Install the up-to-date version of CMake on Windows'
-
-    - script: |
         npm ci
         cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
         cmake --build build --config Release

@@ -36,6 +36,8 @@ before_install:
     
 install:
   - |
+    cmake --version
+    mkdir build
     npm ci
     cmake -G "$DG_CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE=Release -S node -B build
     cmake --build build --config Release

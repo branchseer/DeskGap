@@ -7,7 +7,7 @@ const { once } = require('events');
 
 class DeskGapProcessError extends Error {
     constructor(result) {
-        super('The DeskGap instance exited with a non-zero status');
+        super(`The DeskGap instance exited with a non-zero status: ${result.code}. Signal: ${result.signal}. stdout: ${result.stdout}. stderr: ${result.stderr}`);
         this.result = result;
     }
 }

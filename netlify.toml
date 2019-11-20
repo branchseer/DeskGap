@@ -1,7 +1,7 @@
 [build]
-  base = "website/"
+  base = "docs/"
   command = "bash build.sh"
-  publish = "website/site"
+  publish = "docs/site"
 
 [[redirects]]
   from = "/dl/macos"

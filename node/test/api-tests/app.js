@@ -8,8 +8,9 @@ describe('process', () => {
     describe('process.argv', () => {
         it('returns an array containing the command line arguments passed to the app', async () => {
             const result = await spawnDeskGapAppAsync('arbitrary-code', `
+                const { app } = require('deskgap');
                 process.stdout.write(process.argv[2] + process.argv[3]);
-                process.exit();
+                app.exit();
             `, 'hello', '你好');
             expect(result.stdout).to.equal('hello你好');
         });

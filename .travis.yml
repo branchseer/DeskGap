@@ -12,12 +12,6 @@ jobs:
       services:
         - xvfb
 
-    - os: osx
-      osx_image: xcode11.2
-      env:
-        - DG_CMAKE_GENERATOR="Unix Makefiles"
-        - DG_DIST_PATH="build"
-
 before_install:
   - |
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then

@@ -17,6 +17,7 @@ jobs:
       env:
         - DG_CMAKE_GENERATOR="Unix Makefiles"
         - DG_DIST_PATH="build"
+        - HOMEBREW_NO_AUTO_UPDATE=1
 
 before_install:
   - |
@@ -34,7 +35,7 @@ before_install:
     fi
     
     if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      brew install cmake
+      brew upgrade cmake
     fi
     
 install:

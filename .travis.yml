@@ -8,6 +8,7 @@ node_js:
 
 script:
   - |
+    brew upgrade cmake || true
     cmake --version
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S node -B build
     cmake --build build --config Release

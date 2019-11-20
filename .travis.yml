@@ -10,8 +10,10 @@ before_install:
       sudo apt-get install -y g++-8 libgtk-3-dev libwebkit2gtk-4.0-dev > /dev/null
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 
-      wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
-      tar -xvf cmake-3.15.5-Linux-x86_64.tar.gz > /dev/null
+      if [ ! -d "$cmake-3.15.5-Linux-x86_64" ]; then
+        wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
+        tar -xvf cmake-3.15.5-Linux-x86_64.tar.gz > /dev/null
+      fi
       export PATH=$PWD/cmake-3.15.5-Linux-x86_64/bin:$PATH
     fi
 
@@ -27,15 +29,9 @@ jobs:
     - stage: Build and test
       os: linux
       dist: xenial
-      addons:
-        apt:
-          update: true
-          sources:
-          - ubuntu-toolchain-r-test
-          packages:
-          - g++-8
-          - libgtk-3-dev
-          - libwebkit2gtk-4.0-dev
+      cache:
+        directories:
+        - cmake-3.15.5-Linux-x86_64
       env:
         - DG_CMAKE_GENERATOR="Unix Makefiles"
         - DG_DIST_PATH="build/Release"

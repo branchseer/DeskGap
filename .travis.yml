@@ -20,6 +20,14 @@ jobs:
 before_install:
   - |
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      sudo rm -rf /usr/local/bin/cmake*
+      sudo rm -rf /usr/local/bin/ctest*
+      sudo rm -rf /usr/local/doc/cmake
+      sudo rm -rf /usr/local/man/man1/cmake*
+      sudo rm -rf /usr/local/man/man1/ctest*
+      sudo rm -rf /usr/local/man/man7/cmake*
+      sudo rm -rf /usr/local/share/cmake*
+      
       sudo apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common wget
       wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
       sudo apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ xenial main'

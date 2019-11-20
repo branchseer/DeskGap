@@ -15,9 +15,9 @@ add_custom_command(
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.c
     COMMAND ${NPM_WEBPACK}
-    --config ${CMAKE_CURRENT_LIST_DIR}/ui/webpack.config.js
-    $<$<CONFIG:Release>:-p> --mode=$<IF:$<CONFIG:Release>,production,development>
-    -o ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.js
+        --config ${CMAKE_CURRENT_LIST_DIR}/ui/webpack.config.js
+        $<$<CONFIG:Release>:-p> --mode=$<IF:$<CONFIG:Release>,production,development>
+        -o ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.js
     COMMAND ${DG_BIN2CODE} ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.js ${CMAKE_CURRENT_BINARY_DIR}/dg_ui.c
     DEPENDS ${UI_TS_FILES} ${COMMON_TS_FILES} ui/tsconfig.json ui/webpack.config.js
 )

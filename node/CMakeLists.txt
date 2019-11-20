@@ -23,6 +23,9 @@ set(DG_LIB_DIR ${CMAKE_CURRENT_LIST_DIR}/../lib)
 add_subdirectory(${DG_LIB_DIR} lib)
 set(DG_BIN2CODE node ${DG_LIB_DIR}/bin2code.js)
 set(NPM_WEBPACK npm --prefix ${CMAKE_CURRENT_LIST_DIR}/.. run webpack --)
+if(WIN32)
+    set(NPM_WEBPACK cmd /c ${NPM_WEBPACK})
+endif()
 add_subdirectory(js)
 
 FetchContent_Declare(

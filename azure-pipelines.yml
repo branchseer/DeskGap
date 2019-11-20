@@ -13,8 +13,8 @@ jobs:
           cmakeGenerator: 'Unix Makefiles'
           buildDistPath: 'build/Release'
         win:
-          imageName: 'vs2017-win2016'
-          cmakeGenerator: 'Visual Studio 15 2017'
+          imageName: 'win2019'
+          cmakeGenerator: 'Visual Studio 16 2019'
           buildDistPath: 'build/Release'
         mac:
           imageName: 'macos-10.14'

@@ -12,6 +12,10 @@ jobs:
           imageName: 'ubuntu-16.04'
           cmakeGenerator: 'Unix Makefiles'
           buildDistPath: 'build/Release'
+        linux:
+          imageName: 'vs2017-win2016'
+          cmakeGenerator: 'Visual Studio 15 2017'
+          buildDistPath: 'build/Release'
         mac:
           imageName: 'macos-10.14'
           cmakeGenerator: 'Unix Makefiles'
@@ -23,33 +27,18 @@ jobs:
     - task: NodeTool@0
       inputs:
         versionSpec: '12.x'
-    - script: |
-        sudo apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common wget
-        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
-        sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-      condition: eq( variables['Agent.OS'], 'Linux' )
-      displayName: 'Setup the apt repos on Linux'
 
     - script: |
-        sudo rm -rf /usr/local/bin/cmake*
-        sudo rm -rf /usr/local/bin/ctest*
-        sudo rm -rf /usr/local/doc/cmake
-        sudo rm -rf /usr/local/man/man1/cmake*
-        sudo rm -rf /usr/local/man/man1/ctest*
-        sudo rm -rf /usr/local/man/man7/cmake*
-        sudo rm -rf /usr/local/share/cmake*
-        sudo apt-get install -y cmake
+        wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
+        tar -xvf cmake-3.15.5-Linux-x86_64.tar.gz > /dev/null
+        export PATH=$PWD/cmake-3.15.5-Linux-x86_64/bin:$PATH
+        echo "##vso[task.setvariable variable=PATH]$PATH"
       condition: eq( variables['Agent.OS'], 'Linux' )
       displayName: 'Install the up-to-date version of CMake on Linux'
 
     - script: |
-        sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
-      condition: eq( variables['Agent.OS'], 'Linux' )
-      displayName: 'Install dev files of gtk and webkit on Linux'
-
-    - script: |
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test > /dev/null
+        sudo apt-get update -y  > /dev/null
         sudo apt-get install -y g++-8
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
         sudo update-alternatives --config gcc
@@ -57,18 +46,30 @@ jobs:
       displayName: 'Install gcc-8 and g++-8 on Linux'
 
     - script: |
+        sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+      condition: eq( variables['Agent.OS'], 'Linux' )
+      displayName: 'Install dev files of gtk and webkit on Linux'
+
+
+    - script: |
         brew install cmake
       condition: eq( variables['Agent.OS'], 'Darwin' )
       displayName: 'Install the up-to-date version of CMake on macOS'
 
     - script: |
+        choco install -y cmake
+      condition: eq( variables['Agent.OS'], 'Windows_NT' )
+      displayName: 'Install the up-to-date version of CMake on Windows'
+
+    - script: |
         npm ci
         cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
-        cmake --build build --target all --config Release
+        cmake --build build --config Release
       displayName: 'Build'
 
     - script: |
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        sleep 6
       displayName: Start xvfb
       condition: eq(variables['Agent.OS'], 'Linux')
 

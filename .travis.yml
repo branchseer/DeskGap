@@ -37,6 +37,6 @@ install:
   - |
     npm ci
     cmake -G "$DG_CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE=Release -S node -B build
-    cmake --build build --target all --config Release
+    cmake --build build --config Release
     
 script: node node/test/start.js $DG_DIST_PATH

@@ -88,9 +88,9 @@ if (WIN32)
 
     set_target_properties(
         DeskGapNode PROPERTIES
-        WIN32_EXECUTABLE $<IF:$<CONFIG:Release>,TRUE,FALSE>
         LINK_FLAGS "/ENTRY:\"wmainCRTStartup\""
     )
+    target_link_options(DeskGapNode PRIVATE /SUBSYSTEM:$<IF:$<CONFIG:Release>,WINDOWS,CONSOLE>)
 endif()
 
 set_target_properties(DeskGapNode PROPERTIES

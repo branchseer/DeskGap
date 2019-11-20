@@ -2,7 +2,9 @@ site_name: DeskGap
 
 strict: true
 repo_url: https://github.com/patr0nus/DeskGap
-edit_uri: edit/master/website/docs
+edit_uri: edit/master/docs
+
+docs_dir: ./api
 
 theme:
   name: 'material'

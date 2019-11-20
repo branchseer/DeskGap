@@ -12,7 +12,7 @@ jobs:
           imageName: 'ubuntu-16.04'
           cmakeGenerator: 'Unix Makefiles'
           buildDistPath: 'build/Release'
-        linux:
+        win:
           imageName: 'vs2017-win2016'
           cmakeGenerator: 'Visual Studio 15 2017'
           buildDistPath: 'build/Release'

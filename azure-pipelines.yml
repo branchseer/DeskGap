@@ -57,8 +57,11 @@ jobs:
       displayName: 'Install the up-to-date version of CMake on macOS'
 
     - script: |
+        echo Installing npm deps
         npm ci
+        echo CMake configuring
         cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
+        echo CMake Building
         cmake --build build --config Release
       displayName: 'Build'
 

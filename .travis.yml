@@ -17,7 +17,6 @@ jobs:
       env:
         - DG_CMAKE_GENERATOR="Unix Makefiles"
         - DG_DIST_PATH="build"
-        - HOMEBREW_NO_AUTO_UPDATE=1
 
 before_install:
   - |
@@ -32,10 +31,6 @@ before_install:
       wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
       tar -xvf cmake-3.15.5-Linux-x86_64.tar.gz > /dev/null
       export PATH=$PWD/cmake-3.15.5-Linux-x86_64/bin:$PATH
-    fi
-    
-    if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      brew upgrade cmake
     fi
     
 install:

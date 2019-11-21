@@ -26,7 +26,7 @@ namespace {
 
 - (void)deskgap_toggleDevTools: (id)sender {
     BOOL isDevToolsEnabled = ![[self.configuration.preferences valueForKey: @"developerExtrasEnabled"] boolValue];
-    [self.configuration.preferences setValue: [NSNumber numberWithBool: isDevToolsEnabled] forKey: @"developerExtrasEnabled"];
+    [self.configuration.preferences setValue:@(isDevToolsEnabled) forKey:@"developerExtrasEnabled"];
 
     if (isDevToolsEnabled) {
         if (!self.window) return;
@@ -166,7 +166,7 @@ namespace DeskGap {
             [configuration setURLSchemeHandler: handler forURLScheme: localURLScheme];
         }
 
-        [configuration.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"allowFileAccessFromFileURLs"];
+        [configuration.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
 
         for (NSString* handlerName in @[StringMessageHandlerName, WindowDragHandlerName]) {
             [configuration.userContentController
@@ -271,7 +271,7 @@ namespace DeskGap {
                     if (errorUserInfo) {
                         NSURL* sourceURL = [errorUserInfo valueForKey: @"WKJavaScriptExceptionSourceURL"];
                         if (sourceURL) {
-                            [errorUserInfo setObject: [sourceURL absoluteString] forKey: @"WKJavaScriptExceptionSourceURL"];
+                            errorUserInfo[@"WKJavaScriptExceptionSourceURL"] = [sourceURL absoluteString];
                         }
                         NSData* errorInfoJSONData = nil;
                         @try {
@@ -302,7 +302,7 @@ namespace DeskGap {
 
 
     void WebView::SetDevToolsEnabled(bool enabled) {
-        [impl_->wkWebView.configuration.preferences setValue: [NSNumber numberWithBool: enabled] forKey: @"developerExtrasEnabled"];
+        [impl_->wkWebView.configuration.preferences setValue:@(enabled) forKey:@"developerExtrasEnabled"];
     }
     WebView::~WebView() = default;
 

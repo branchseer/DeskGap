@@ -380,6 +380,7 @@ namespace DeskGap {
 
     void BrowserWindow::Destroy() {
         [impl_->nsWindow close];
+        impl_->nsWindow = nil;
     }
     void BrowserWindow::Close() {
         [impl_->nsWindow performClose: nil];

@@ -161,20 +161,18 @@ namespace DeskGap {
         NSLog(@"OS Version: %@", [[NSProcessInfo processInfo] operatingSystemVersionString]);
         NSLog(@"configuration responds to setURLSchemeHandler: %d", [configuration respondsToSelector:@selector(setURLSchemeHandler:forURLScheme:)]);
 
-        if (@available(macOS 10.13, *)) {
-            NSLog(@"10.13 available");
+        if (@available(macOS 10.14, *)) {
+            NSLog(@"10.14 available");
         }
         else {
-            NSLog(@"10.13 not available");
+            NSLog(@"10.14 not available");
         }
         if (@available(macOS 10.13, *)) {
-            if ([configuration respondsToSelector:@selector(setURLSchemeHandler:forURLScheme:)]) {
-                //WKURLSchemeHandlers enables web workers and ajax requesting local files in 10.13+
-                DeskGapLocalURLSchemeHandler *handler = [DeskGapLocalURLSchemeHandler new];
-                impl_->localURLSchemeHandler = handler;
-                NSLog(@"Calling setURLSchemeHandler");
-                [configuration setURLSchemeHandler:handler forURLScheme:localURLScheme];
-            }
+            //WKURLSchemeHandlers enables web workers and ajax requesting local files in 10.13+
+            DeskGapLocalURLSchemeHandler *handler = [DeskGapLocalURLSchemeHandler new];
+            impl_->localURLSchemeHandler = handler;
+            NSLog(@"Calling setURLSchemeHandler");
+            [configuration setURLSchemeHandler:handler forURLScheme:localURLScheme];
         }
 
         [configuration.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];

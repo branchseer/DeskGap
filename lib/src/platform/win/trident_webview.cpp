@@ -63,6 +63,8 @@ namespace DeskGap {
         public IOleClientSite,
         public IOleInPlaceSite,
         public IDocHostUIHandler,
+        public IInternetSecurityManager,
+        public IServiceProvider,
         public DWebBrowserEvents2 {
     private:
         static std::forward_list<Impl*> impls_;
@@ -226,11 +228,64 @@ namespace DeskGap {
             check(CoDisconnectObject(oleObject, 0));
         }
 
+
+        // IInternetSecurityManager Begin
+        STDMETHODIMP ProcessUrlAction(LPCWSTR url, DWORD action, BYTE *policy,
+                                      DWORD policy_size, BYTE *context,
+                                      DWORD context_size, DWORD flags,
+                                      DWORD reserved) override {
+            return S_OK;
+        }
+
+        STDMETHODIMP MapUrlToZone(LPCWSTR url, DWORD *zone, DWORD flags) override {
+            *zone = URLZONE_TRUSTED;
+            return S_OK;
+        }
+
+        STDMETHODIMP GetSecurityId(LPCWSTR url, BYTE *security_id,
+                                   DWORD *security_id_size, DWORD_PTR reserved) override {
+            return INET_E_DEFAULT_ACTION;
+        }
+
+        STDMETHODIMP GetSecuritySite(IInternetSecurityMgrSite **site) override {
+            return INET_E_DEFAULT_ACTION;
+        }
+
+        STDMETHODIMP GetZoneMappings(DWORD zone, IEnumString **enum_string,
+                                     DWORD flags) override {
+            return INET_E_DEFAULT_ACTION;
+        }
+
+        STDMETHODIMP QueryCustomPolicy(LPCWSTR url, REFGUID guid_key, BYTE **policy,
+                                       DWORD *policy_size, BYTE *context,
+                                       DWORD context_size, DWORD reserved) override {
+            return INET_E_DEFAULT_ACTION;
+        }
+
+        STDMETHODIMP SetSecuritySite(IInternetSecurityMgrSite *site) override {
+            return INET_E_DEFAULT_ACTION;
+        }
+
+        STDMETHODIMP SetZoneMapping(DWORD zone, LPCWSTR pattern, DWORD flags) override {
+            return INET_E_DEFAULT_ACTION;
+        }
+        // IInternetSecurityManager End
+
+        STDMETHODIMP QueryService( REFGUID guidService, REFIID riid, void** ppvObject) override {
+            if (guidService == SID_SInternetSecurityManager && riid == IID_IInternetSecurityManager) {
+                *ppvObject = static_cast<IInternetSecurityManager*>(this);
+                return S_OK;
+            }
+            return E_NOINTERFACE;
+        }
+
         // IUnknown Begin
         HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void**ppvObject) override {
-            if (riid == IID_IUnknown)
-            {
+            if (riid == IID_IUnknown) {
                 *ppvObject = static_cast<IOleClientSite*>(this);
+            }
+            else if (riid == IID_IServiceProvider) {
+                *ppvObject = static_cast<IServiceProvider*>(this);
             }
             else if (riid == IID_IOleInPlaceSite)
             {

@@ -123,10 +123,8 @@ namespace DeskGap {
                 [panel setAccessoryView: accessoryView];
                 [accessoryView selectFilterAt: 0];
 
-                if (@available(macOS 10.11, *)) {
-                    if ([panel isKindOfClass: [NSOpenPanel class]]) {
-                        [(NSOpenPanel*)panel setAccessoryViewDisclosed: YES];
-                    }
+                if ([panel isKindOfClass: [NSOpenPanel class]]) {
+                    [(NSOpenPanel*)panel setAccessoryViewDisclosed: YES];
                 }
             }
 

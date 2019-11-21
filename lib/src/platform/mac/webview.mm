@@ -56,7 +56,6 @@ namespace {
     return YES;
 }
 
-//This only works in 10.11+. Haven't figured a way to hide the Reload item in 10.10
 - (void)willOpenMenu:(NSMenu *)menu withEvent:(NSEvent *)event {
     static NSArray<NSString*>* identifiersToBeDeleted = @[
         @"WKMenuItemIdentifierGoBack",
@@ -167,10 +166,7 @@ namespace DeskGap {
             [configuration setURLSchemeHandler: handler forURLScheme: localURLScheme];
         }
 
-        if (@available(macOS 10.11, *)) {
-            //This makes web workers work in 10.11 and 10.12
-            [configuration.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"allowFileAccessFromFileURLs"];
-        }
+        [configuration.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"allowFileAccessFromFileURLs"];
 
         for (NSString* handlerName in @[StringMessageHandlerName, WindowDragHandlerName]) {
             [configuration.userContentController
@@ -219,18 +215,14 @@ namespace DeskGap {
 
             NSURL* localFileRequestURL = [NSURL URLWithString: [NSString stringWithFormat: @"%@://host/%@", localURLScheme, encodedFilename]];
             [impl_->wkWebView loadRequest:[NSURLRequest requestWithURL: localFileRequestURL]];
-        } else
-        if (@available(macOS 10.11, *)) {
+        }
+        else {
             static NSURL* rootURL = [NSURL fileURLWithPath: @"/"];
             NSURL* fileURL = [NSURL fileURLWithPath: NSStr(path)];
             [impl_->wkWebView
                 loadFileURL: fileURL
                 allowingReadAccessToURL: rootURL
             ];
-        }
-        else {
-            NSURL* fileURL = [NSURL fileURLWithPath: NSStr(path)];
-            [impl_->wkWebView loadRequest: [NSURLRequest requestWithURL: fileURL]];
         }
     }
 

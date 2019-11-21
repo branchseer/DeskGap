@@ -15,11 +15,10 @@ script:
     cmake --version
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S node -B build
     cmake --build build --config Release
-    node node/test/start.js build
 
 jobs:
   include:
-    - stage: Build and test
+    - stage: Build
       os: osx
       osx_image: xcode11.2
       cache:

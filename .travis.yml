@@ -13,7 +13,7 @@ workspaces:
 
 script:
   - |
-    defaults read loginwindow SystemVersionStampAsString
+    echo "import platform; print(platform.mac_ver()[0])" | python3
     node node/test/start.js build
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
 
     - stage: Test on older versions of macOS
       os: osx
-      osx_image: xcode9.4
+      osx_image: xcode9.3
 
     - os: osx
       osx_image: xcode8.3

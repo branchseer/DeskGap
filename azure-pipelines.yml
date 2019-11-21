@@ -74,7 +74,7 @@ jobs:
       displayName: Start xvfb
       condition: eq(variables['Agent.OS'], 'Linux')
 
-    - script:
+    - bash:
         node node/test/start.js $(buildDistPath)
       displayName: 'test'
       env:

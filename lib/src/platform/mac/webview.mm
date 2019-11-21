@@ -158,11 +158,20 @@ namespace DeskGap {
 
         WKWebViewConfiguration* configuration = [[WKWebViewConfiguration alloc] init];
 
+        NSLog(@"OS Version: %@", [[NSProcessInfo processInfo] operatingSystemVersionString]);
+        NSLog(@"configuration responds to setURLSchemeHandler: %d", [configuration respondsToSelector:@selector(setURLSchemeHandler:forURLScheme:)]);
 
+        if (@available(macOS 10.13, *)) {
+            NSLog(@"10.13 available");
+        }
+        else {
+            NSLog(@"10.13 not available");
+        }
         if (@available(macOS 10.13, *)) {
             //WKURLSchemeHandlers enables web workers and ajax requesting local files in 10.13+
             DeskGapLocalURLSchemeHandler* handler = [DeskGapLocalURLSchemeHandler new];
             impl_->localURLSchemeHandler = handler;
+            NSLog(@"Calling setURLSchemeHandler");
             [configuration setURLSchemeHandler: handler forURLScheme: localURLScheme];
         }
 

@@ -20,7 +20,7 @@ jobs:
   include:
     - stage: Build
       os: osx
-      osx_image: xcode11.2
+      osx_image: xcode10.3
       cache:
         directories:
           - cmake-3.15.5-Darwin-x86_64

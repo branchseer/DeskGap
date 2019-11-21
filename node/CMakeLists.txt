@@ -6,7 +6,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 endif()
 
 include(FetchContent)

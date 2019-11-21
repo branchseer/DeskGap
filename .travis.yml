@@ -52,13 +52,3 @@ jobs:
         use:
           - mac-binaries
       script: node node/test/start.js build
-
-
-    - os: osx
-      osx_image: xcode6.4
-      workspaces:
-        use:
-          - mac-binaries
-      script: node node/test/start.js build
-
-    

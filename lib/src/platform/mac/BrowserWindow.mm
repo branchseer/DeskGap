@@ -167,17 +167,13 @@ namespace DeskGap {
             { "medium-light", NSVisualEffectMaterialMediumLight },
             { "ultra-dark", NSVisualEffectMaterialUltraDark },
             { "titlebar", NSVisualEffectMaterialTitlebar },
-            { "selection", NSVisualEffectMaterialSelection }
+            { "selection", NSVisualEffectMaterialSelection },
+            { "menu", NSVisualEffectMaterialMenu },
+            { "popover", NSVisualEffectMaterialPopover},
+            { "sidebar", NSVisualEffectMaterialSidebar }
         };
         if (!isMapInitialized) {
             isMapInitialized = true;
-            if (@available(macOS 10.11, *)) {
-                materialsByString.insert({
-                    { "menu", NSVisualEffectMaterialMenu },
-                    { "popover", NSVisualEffectMaterialPopover},
-                    { "sidebar", NSVisualEffectMaterialSidebar }
-                });
-            }
             if (@available(macOS 10.14, *)) {
                 materialsByString.insert({
                     { "header-view", NSVisualEffectMaterialHeaderView },

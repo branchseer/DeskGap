@@ -4,9 +4,7 @@ DeskGap is a framework for building cross-platform desktop apps with web technol
 
 To enable native capabilities while keeping the size down, DeskGap bundles a [Node.js](https://nodejs.org/) runtime and leaves the HTML rendering to the operating system‘s webview.
 
-[![Build Status](https://dev.azure.com/patr0nus/DeskGap/_apis/build/status/patr0nus.DeskGap?branchName=master)](https://dev.azure.com/patr0nus/DeskGap/_build/latest?definitionId=6&branchName=master)
-
-[![Build Status](https://travis-ci.com/patr0nus/DeskGap.svg?branch=master)](https://travis-ci.com/patr0nus/DeskGap)
+[![Build Status](https://dev.azure.com/patr0nus/DeskGap/_apis/build/status/patr0nus.DeskGap?branchName=master)](https://dev.azure.com/patr0nus/DeskGap/_build/latest?definitionId=6&branchName=master) [![Build Status](https://travis-ci.com/patr0nus/DeskGap.svg?branch=master)](https://travis-ci.com/patr0nus/DeskGap)
 
 ## Supported Platforms
 
@@ -22,7 +20,7 @@ To enable native capabilities while keeping the size down, DeskGap bundles a [No
   <tbody>
     <tr>
       <td>Version</td>
-      <td>10.10+</td>
+      <td>10.11+</td>
       <td>7 SP1<sup>1</sup> - 10 version 1803</td>
       <td>10 version 1809+</td>
       <td>Tested on Ubuntu 16.04 LTS</td>

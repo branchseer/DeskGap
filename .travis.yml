@@ -8,7 +8,10 @@ node_js:
 
 script:
   - |
-    brew upgrade cmake || true
+    if [ ! -d "cmake-3.15.5-Darwin-x86_64" ]; then
+      curl -L https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Darwin-x86_64.tar.gz | tar xz
+    fi
+    export PATH=$PWD/cmake-3.15.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
     cmake --version
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S node -B build
     cmake --build build --config Release
@@ -19,6 +22,9 @@ jobs:
     - stage: Build and test
       os: osx
       osx_image: xcode11.2
+      cache:
+        directories:
+          - cmake-3.15.5-Darwin-x86_64
       workspaces:
         create:
           name: mac-binaries

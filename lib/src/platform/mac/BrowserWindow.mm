@@ -302,6 +302,7 @@ namespace DeskGap {
 
 
     void BrowserWindow::Show() {
+        [NSApp activateIgnoringOtherApps: YES];
         [impl_->nsWindow makeKeyAndOrderFront: nil];
     }
 

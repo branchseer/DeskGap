@@ -24,7 +24,7 @@ namespace fs = std::filesystem;
 
 extern "C" {
     extern char BIN2CODE_DG_PRELOAD_TRIDENT_JS_CONTENT[];
-    extern char BIN2CODE_DG_PRELOAD_TRIDENT_JS_SIZE[];
+    extern int BIN2CODE_DG_PRELOAD_TRIDENT_JS_SIZE;
 }
 
 namespace {
@@ -422,7 +422,6 @@ namespace DeskGap {
     };
     std::forward_list<TridentWebView::Impl*> TridentWebView::Impl::impls_;
 
-    
     TridentWebView::TridentWebView(EventCallbacks&& callbacks, const std::string& preloadScript) {
         static std::string dgPreloadTridentJS(BIN2CODE_DG_PRELOAD_TRIDENT_JS_CONTENT, BIN2CODE_DG_PRELOAD_TRIDENT_JS_SIZE);
         auto tridentImpl = std::make_unique<Impl>(callbacks);
@@ -430,7 +429,9 @@ namespace DeskGap {
         std::ostringstream scriptStream;
         scriptStream << "(function(){\n" << dgPreloadTridentJS << preloadScript << "\n})();\n";
 
-        tridentImpl->preloadScript = UTF8ToWString(scriptStream.str().c_str());
+        std::string script = scriptStream.str();
+
+        tridentImpl->preloadScript = UTF8ToWString(script.c_str());
 
         //impl_ for reference owning, and winrtImpl_ for method calling
         tridentImpl_ = tridentImpl.get();

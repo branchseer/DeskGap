@@ -15,7 +15,7 @@ describe('asyncNode', () => {
     });
 
     describe('asyncNode.require(moduleName)', () => {
-        withWebView(it, 'can require built-in modules', async (win) => {
+        withWebView(it.only, 'can require built-in modules', async (win) => {
             const execution = win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('os').then(function (os) {
                     return os.invoke('platform').value();

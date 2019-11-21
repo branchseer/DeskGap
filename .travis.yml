@@ -1,6 +1,7 @@
 branches:
   only:
   - master
+  - objc-availiablity-ci
 
 language: node_js
 node_js:

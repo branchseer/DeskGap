@@ -10,7 +10,7 @@ extern "C" {
     extern int BIN2CODE_DG_UI_JS_SIZE;
 #ifdef WIN32
     extern char BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_CONTENT[];
-    extern char BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_SIZE[];
+    extern int BIN2CODE_ES6_PROMISE_AUTO_MIN_JS_SIZE;
 #endif
 }
 

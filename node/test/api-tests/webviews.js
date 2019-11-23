@@ -50,8 +50,12 @@ describe('webViews', () => {
             
             
         it('should return false for "winrt" if the Windows version is lower that 10.0.17763 or the user is Administrator', function() {
-            if (!win || win1809 || !isAdmin) return this.skip();
-            expect(webViews.isEngineAvailable('winrt')).to.be.false;
+            if (win && (!win1809 || isAdmin)) {
+                expect(webViews.isEngineAvailable('winrt')).to.be.false;
+            }
+            else {
+                this.skip();
+            }
         });
     });
 

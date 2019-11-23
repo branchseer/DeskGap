@@ -6,6 +6,11 @@
 #include "exception.hpp"
 
 std::optional<DeskGap::Exception> DeskGap::TryCatch(std::function<void()>&& action) {
-    action();
+    try {
+        action();
+    }
+    catch (const DeskGap::Exception& e) {
+        return e;
+    }
     return std::nullopt;
 }

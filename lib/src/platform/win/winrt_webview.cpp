@@ -115,16 +115,14 @@ namespace DeskGap {
                 { }
             );
 
-            HANDLE actionCompleted = CreateEventExW(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-            HANDLE events[1] = { actionCompleted };
-            DWORD handleCount = ARRAYSIZE(events);
+            HANDLE actionCompleted = CreateEventExW(nullptr, nullptr, 0, SYNCHRONIZE | EVENT_MODIFY_STATE);
             DWORD handleIndex = 0;
 
             asyncOperation.Completed([&](const auto&, const auto&) {
                 SetEvent(actionCompleted);
             });
 
-            CoWaitForMultipleHandles(0, INFINITE, handleCount, events, &handleIndex);
+            CoWaitForMultipleHandles(0, INFINITE, 1, &actionCompleted, &handleIndex);
             CloseHandle(actionCompleted);
 
             assert(asyncOperation.Status() == AsyncStatus::Completed);

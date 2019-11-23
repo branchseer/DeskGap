@@ -76,6 +76,30 @@ jobs:
 
     - bash:
         node node/test/start.js $(buildDistPath)
-      displayName: 'test'
+      displayName: 'Test'
       env:
         DISPLAY: ':99.0'
+
+    - powershell: |
+        $pass = "A4%_b*g3dV"
+        $userName = $env:UserName
+
+        $securePass = ConvertTo-SecureString $pass -AsPlainText -Force
+
+        $UserAccount = Get-LocalUser -Name $userName
+        $UserAccount | Set-LocalUser -Password $securePass
+
+        $cred =  New-Object -TypeName PSCredential -ArgumentList $userName, $securePass
+
+        winrm quickconfig -quiet
+
+        $remoteSession = new-pssession -computername localhost -Credential $cred
+        Invoke-Command -Session $remoteSession -ScriptBlock {
+          Set-Location $using:pwd
+          node node/test/start.js $(buildDistPath)
+        }
+        $remoteLastExitCode = Invoke-Command -ScriptBlock { $lastexitcode } -Session $remoteSession
+
+        exit $remoteLastExitCode
+      displayName: 'Test on Windows without admin privilege'
+      condition: eq(variables['Agent.OS'], 'Windows_NT')

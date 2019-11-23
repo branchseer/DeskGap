@@ -20,6 +20,7 @@
 
 #include "winrt_webview.hpp"
 #include "webview_impl.h"
+#include "exception.hpp"
 
 #pragma comment(lib, "WindowsApp")
 
@@ -125,7 +126,10 @@ namespace DeskGap {
             CoWaitForMultipleHandles(0, INFINITE, 1, &actionCompleted, &handleIndex);
             CloseHandle(actionCompleted);
 
-            assert(asyncOperation.Status() == AsyncStatus::Completed);
+            if (asyncOperation.Status() != AsyncStatus::Completed) {
+                winrt::hresult_error hrError(asyncOperation.ErrorCode());
+                throw DeskGap::Exception { "HRESULT: " + std::to_string(hrError.code()), winrt::to_string(hrError.message()) };
+            }
 
             webViewControl = asyncOperation.GetResults();
             webViewControl.Settings().IsScriptNotifyAllowed(true);

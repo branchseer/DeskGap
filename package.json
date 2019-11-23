@@ -12,6 +12,7 @@
     "chai-as-promised": "^7.1.1",
     "es6-promise": "^4.2.8",
     "events": "^3.0.0",
+    "is-elevated": "^3.0.0",
     "koa": "^2.11.0",
     "mocha": "^6.2.2",
     "node-addon-api": "^1.7.1",

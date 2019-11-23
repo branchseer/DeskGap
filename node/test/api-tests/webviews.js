@@ -1,6 +1,7 @@
 const { webViews, BrowserWindow } = require('deskgap');
 const { expect } = require('chai');
 const { once } = require('events');
+const isElevated = require('is-elevated');
 const os = require('os');
 const path = require('path');
 
@@ -26,6 +27,10 @@ const win1809 = win && (() => {
 
 describe('webViews', () => {
     describe('webViews.isEngineAvailable(engine)', () => {
+        let isAdmin;
+        before(async () => {
+            isAdmin = await isElevated();
+        });
         it('should return false if the os is not Windows', function () {
             if (win) return this.skip();
             for (const engine of ["winrt", "trident"]) {
@@ -38,14 +43,14 @@ describe('webViews', () => {
             expect(webViews.isEngineAvailable('trident')).to.be.true;
         });
 
-        it('should return true for "winrt" if the Windows version is 10.0.17763 or higher', function() {
-            if (!win1809) return this.skip();
+        it('should return true for "winrt" if the Windows version is 10.0.17763 or higher and the user is not Administrator', function() {
+            if (!win1809 || isAdmin) return this.skip();
             expect(webViews.isEngineAvailable('winrt')).to.be.true;
         });
             
             
-        it('should return false for "winrt" if the Windows version is lower that 10.0.17763', function() {
-            if (!win || win1809) return this.skip();
+        it('should return false for "winrt" if the Windows version is lower that 10.0.17763 or the user is Administrator', function() {
+            if (!win || win1809 || !isAdmin) return this.skip();
             expect(webViews.isEngineAvailable('winrt')).to.be.false;
         });
     });

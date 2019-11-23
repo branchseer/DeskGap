@@ -5,7 +5,7 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 
 const mocha = new Mocha({
-    timeout: 5000
+    timeout: 10000
 });
 
 const testDir = path.join(__dirname, 'api-tests');

@@ -81,13 +81,18 @@ jobs:
         DISPLAY: ':99.0'
 
     - powershell: |
+        $Acl = Get-ACL .
+        $AccessRule= New-Object System.Security.AccessControl.FileSystemAccessRule("everyone","FullControl","ContainerInherit,Objectinherit","none","Allow")
+        $Acl.AddAccessRule($AccessRule)
+        Set-Acl . $Acl
+
         $pass = "A4%_b*g3dV"
-        $userName = $env:UserName
+        $userName = "DeskGapUser"
 
         $securePass = ConvertTo-SecureString $pass -AsPlainText -Force
 
-        $UserAccount = Get-LocalUser -Name $userName
-        $UserAccount | Set-LocalUser -Password $securePass
+        New-LocalUser $userName -Password $securePass -FullName $userName
+        Add-LocalGroupMember -Group "Administrators" -Member $userName
 
         $cred =  New-Object -TypeName PSCredential -ArgumentList $userName, $securePass
 

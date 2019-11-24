@@ -87,20 +87,24 @@ jobs:
         DISPLAY: ':99.0'
 
     - powershell: |
-        $securePass = ConvertTo-SecureString $env:dgUserPass -AsPlainText -Force
-        New-LocalUser $env:dgUserName -Password $securePass -FullName $env:dgUserName
+        $taskname = "Test DeskGap without admin rights"
+        $action = New-ScheduledTaskAction -WorkingDirectory $pwd -Execute "cmd" -Argument "/V:ON /c node node/test/start.js $(buildDistPath) > test_stdout 2> test_stderr & echo !ERRORLEVEL! > test_errlevel"
+        $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname | Out-Null
+        Start-ScheduledTask -TaskName $taskname
 
-        $Acl = Get-ACL .
-        $AccessRule= New-Object System.Security.AccessControl.FileSystemAccessRule($env:dgUserName,"FullControl","ContainerInherit,Objectinherit","none","Allow")
-        $Acl.AddAccessRule($AccessRule)
-        Set-Acl . $Acl
-      displayName: 'Create a normal user on Windows'
-      condition: eq(variables['Agent.OS'], 'Windows_NT')
+        While ((schtasks.exe /query /TN "$taskname" /FO CSV | ConvertFrom-Csv | select -expandproperty Status -first 1) -eq "Running") {
+        	sleep -s 5
+        }
 
-    - script: |
-        psexec -accepteula -u %dgUserName% -p %dgUserPass% -w %cd% cmd /c "node node/test/start.js $(buildDistPath) > test_out 2>&1"
-        set TestErrorLevel=%ERRORLEVEL%
-        type test_out
-        exit /B %TestErrorLevel%
+        Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
+
+        $test_stdout = Get-Content test_stdout | Out-String
+        $test_stderr = Get-Content $test_stderr | Out-String
+        $test_errlevel = Get-Content test_errlevel | Out-String
+        Write-Output $test_stdout
+        Write-Output $test_stderr
+        exit $test_errlevel
+
       displayName: 'Test on Windows without admin privilege'
       condition: eq(variables['Agent.OS'], 'Windows_NT')

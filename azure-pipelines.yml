@@ -16,6 +16,8 @@ jobs:
           imageName: 'windows-2019'
           cmakeGenerator: 'Visual Studio 16 2019'
           buildDistPath: 'build/Release'
+          dgUserName: 'DeskGapUser'
+          dgUserPass: 'A4_bg3dVd'
         mac:
           imageName: 'macos-10.14'
           cmakeGenerator: 'Unix Makefiles'
@@ -50,11 +52,15 @@ jobs:
       condition: eq( variables['Agent.OS'], 'Linux' )
       displayName: 'Install dev files of gtk and webkit on Linux'
 
-
     - script: |
         brew install cmake
       condition: eq( variables['Agent.OS'], 'Darwin' )
       displayName: 'Install the up-to-date version of CMake on macOS'
+
+    - script: |
+        choco install -y pstools
+      condition: eq( variables['Agent.OS'], 'Windows_NT' )
+      displayName: 'Install the psexec tool on Windows'
 
     - script: |
         npm ci
@@ -81,30 +87,20 @@ jobs:
         DISPLAY: ':99.0'
 
     - powershell: |
+        $securePass = ConvertTo-SecureString $env:dgUserPass -AsPlainText -Force
+        New-LocalUser $env:dgUserName -Password $securePass -FullName $env:dgUserName
+
         $Acl = Get-ACL .
-        $AccessRule= New-Object System.Security.AccessControl.FileSystemAccessRule("everyone","FullControl","ContainerInherit,Objectinherit","none","Allow")
+        $AccessRule= New-Object System.Security.AccessControl.FileSystemAccessRule($env:dgUserName,"FullControl","ContainerInherit,Objectinherit","none","Allow")
         $Acl.AddAccessRule($AccessRule)
         Set-Acl . $Acl
+      displayName: 'Create a normal user on Windows'
+      condition: eq(variables['Agent.OS'], 'Windows_NT')
 
-        $pass = "A4%_b*g3dV"
-        $userName = "DeskGapUser"
-
-        $securePass = ConvertTo-SecureString $pass -AsPlainText -Force
-
-        New-LocalUser $userName -Password $securePass -FullName $userName
-        Add-LocalGroupMember -Group "Administrators" -Member $userName
-
-        $cred =  New-Object -TypeName PSCredential -ArgumentList $userName, $securePass
-
-        winrm quickconfig -quiet
-
-        $remoteSession = new-pssession -computername localhost -Credential $cred
-        Invoke-Command -Session $remoteSession -ScriptBlock {
-          Set-Location $using:pwd
-          node node/test/start.js $(buildDistPath)
-        }
-        $remoteLastExitCode = Invoke-Command -ScriptBlock { $lastexitcode } -Session $remoteSession
-
-        exit $remoteLastExitCode
+    - script: |
+        psexec -accepteula -u %userName% -p %pass% -w %cd% cmd /c "node node/test/start.js $(buildDistPath) > test_out 2>&1"
+        set TestErrorLevel=%ERRORLEVEL%
+        type test_out
+        exit /B %TestErrorLevel%
       displayName: 'Test on Windows without admin privilege'
       condition: eq(variables['Agent.OS'], 'Windows_NT')

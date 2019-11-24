@@ -87,6 +87,33 @@ jobs:
         DISPLAY: ':99.0'
 
     - powershell: |
+        New-Variable -Name Key
+        New-Variable -Name PromptOnSecureDesktop_Name
+        New-Variable -Name ConsentPromptBehaviorAdmin_Name
+
+        Function Set-RegistryValue {
+          [cmdletbinding(SupportsShouldProcess=$True,ConfirmImpact="Low")]
+          Param ($key, $name, $value, $type="Dword")
+          If ((Test-Path -Path $key) -Eq $false) { New-Item -ItemType Directory -Path $key | Out-Null }
+          	If ($pscmdlet.ShouldProcess($value)) {
+               Set-ItemProperty -Path $key -Name $name -Value $value -Type $type
+        	}
+        }
+
+        Function Get-RegistryValue($key, $value) {
+           (Get-ItemProperty $key $value).$value
+        }
+
+        $Key = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+
+        Set-RegistryValue -Key $Key -Name "ConsentPromptBehaviorAdmin" -Value 2
+        Set-RegistryValue -Key $Key -Name "PromptOnSecureDesktop" -Value 1
+        Set-RegistryValue -Key $Key -Name "EnableLUA" -Value 1
+        Set-RegistryValue -Key $Key -Name "FilterAdministratorToken" -Value 1
+      displayName: 'Turn on UAC'
+      condition: eq(variables['Agent.OS'], 'Windows_NT')
+
+    - powershell: |
         $taskname = "Test DeskGap without admin rights"
         $action = New-ScheduledTaskAction -WorkingDirectory $pwd -Execute "cmd" -Argument "/V:ON /c node node/test/start.js $(buildDistPath) > test_stdout 2> test_stderr & echo !ERRORLEVEL! > test_errlevel"
         $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)

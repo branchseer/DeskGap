@@ -98,7 +98,7 @@ jobs:
       condition: eq(variables['Agent.OS'], 'Windows_NT')
 
     - script: |
-        psexec -accepteula -u %userName% -p %pass% -w %cd% cmd /c "node node/test/start.js $(buildDistPath) > test_out 2>&1"
+        psexec -accepteula -u %dgUserName% -p %dgUserPass% -w %cd% cmd /c "node node/test/start.js $(buildDistPath) > test_out 2>&1"
         set TestErrorLevel=%ERRORLEVEL%
         type test_out
         exit /B %TestErrorLevel%

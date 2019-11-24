@@ -100,7 +100,7 @@ jobs:
         Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
 
         $test_stdout = Get-Content test_stdout | Out-String
-        $test_stderr = Get-Content $test_stderr | Out-String
+        $test_stderr = Get-Content test_stderr | Out-String
         $test_errlevel = Get-Content test_errlevel | Out-String
         Write-Output $test_stdout
         Write-Output $test_stderr

@@ -58,11 +58,6 @@ jobs:
       displayName: 'Install the up-to-date version of CMake on macOS'
 
     - script: |
-        choco install -y pstools
-      condition: eq( variables['Agent.OS'], 'Windows_NT' )
-      displayName: 'Install the psexec tool on Windows'
-
-    - script: |
         npm ci
       displayName: 'npm ci'
 
@@ -85,53 +80,3 @@ jobs:
       displayName: 'Test'
       env:
         DISPLAY: ':99.0'
-
-    - powershell: |
-        New-Variable -Name Key
-        New-Variable -Name PromptOnSecureDesktop_Name
-        New-Variable -Name ConsentPromptBehaviorAdmin_Name
-
-        Function Set-RegistryValue {
-          [cmdletbinding(SupportsShouldProcess=$True,ConfirmImpact="Low")]
-          Param ($key, $name, $value, $type="Dword")
-          If ((Test-Path -Path $key) -Eq $false) { New-Item -ItemType Directory -Path $key | Out-Null }
-          	If ($pscmdlet.ShouldProcess($value)) {
-               Set-ItemProperty -Path $key -Name $name -Value $value -Type $type
-        	}
-        }
-
-        Function Get-RegistryValue($key, $value) {
-           (Get-ItemProperty $key $value).$value
-        }
-
-        $Key = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-
-        Set-RegistryValue -Key $Key -Name "ConsentPromptBehaviorAdmin" -Value 2
-        Set-RegistryValue -Key $Key -Name "PromptOnSecureDesktop" -Value 1
-        Set-RegistryValue -Key $Key -Name "EnableLUA" -Value 1
-        Set-RegistryValue -Key $Key -Name "FilterAdministratorToken" -Value 1
-      displayName: 'Turn on UAC'
-      condition: eq(variables['Agent.OS'], 'Windows_NT')
-
-    - powershell: |
-        $taskname = "Test DeskGap without admin rights"
-        $action = New-ScheduledTaskAction -WorkingDirectory $pwd -Execute "cmd" -Argument "/V:ON /c node node/test/start.js $(buildDistPath) > test_stdout 2> test_stderr & echo !ERRORLEVEL! > test_errlevel"
-        $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname | Out-Null
-        Start-ScheduledTask -TaskName $taskname
-
-        While ((schtasks.exe /query /TN "$taskname" /FO CSV | ConvertFrom-Csv | select -expandproperty Status -first 1) -eq "Running") {
-        	sleep -s 5
-        }
-
-        Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
-
-        $test_stdout = Get-Content test_stdout | Out-String
-        $test_stderr = Get-Content test_stderr | Out-String
-        $test_errlevel = Get-Content test_errlevel | Out-String
-        Write-Output $test_stdout
-        Write-Output $test_stderr
-        exit $test_errlevel
-
-      displayName: 'Test on Windows without admin privilege'
-      condition: eq(variables['Agent.OS'], 'Windows_NT')

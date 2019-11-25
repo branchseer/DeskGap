@@ -3,48 +3,25 @@
 ## Prerequisites
 
 * A recent version of [Node.js](http://nodejs.org)
-* [node-gyp](https://github.com/nodejs/node-gyp#installation)
+* [CMake](https://cmake.org) 3.15+
 
 ### macOS
-* Xcode 10 or later
-* [CMake](https://cmake.org) 3.10 or later
+* Xcode 10+
 
 ### Windows
-* Windows 10 April 2018 Update (version 1803) or later
-* The "Desktop development with C++" workload from [Visual Studio 2017](https://docs.microsoft.com/en-us/visualstudio/releasenotes/vs2017-relnotes) (the free “Community” version is OK)
+* Windows 10 April 2018 Update (version 1809) or later
+* The "Desktop development with C++" workload from [Visual Studio 2019](https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes)
 
 ### Linux
+
 * `gcc-8` and `g++-8`
-* [CMake](https://cmake.org) 3.10 or later
+* libgtk-3-dev version 3.18.9 or later
+* libwebkit2gtk-4.0-dev version 2.20.5 later
 
 
 ## Steps
-
-### Download the Dependencies
-1. Download the npm dependencies: execute `npm ci --ignore-scripts` in the following locations:
-    * `core/`
-    * `scripts/`
-    * `npm/`
-    * `test/`
-2. Download the prebuilt Node.js static library: `node scripts/download-deps.js`. (Alternatively, [build Node.js from source](http://github.com/patr0nus/libnode). Note that it may take a while)
-
-### Configure
-1. Configure node-gyp: `cd core && npm run configure-native`
-2. Configure cmake:
-    1. `mkdir build && cd build`
-    2. Generate the project:
-        * macOS: `cmake -G Xcode ..`  
-        * Windows: `cmake -G "Visual Studio 15 2017" ..`  
-        * Linux: `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..`
-   
-### Compile
-1. Compile TypeScript:
-    1. `cd core/`
-    2. `npm run build-lib-node`
-    3. `npm run build-lib-ui`
-2. Build the native bindings: `cd core && npm run build-native`
-3. Build the executable and copy the resources:
-    1. `cd build/`
-    2. Build all the CMake targets:
-        * macOS or Windows: `cmake --build . --target ALL_BUILD --config Release`
-        * Linux: `make`
+1. Download the npm dependencies: `npm ci`
+2. Generate the buildsystem:
+    - Windows: `cmake -G "Visual Studio 16 2019" -S node -B build`
+    - macOS or Linux: `cmake -G "Unix Makefiles" -S node -B build`
+3. Build DeskGap: `cmake --build build`

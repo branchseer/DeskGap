@@ -5,15 +5,18 @@ pr:
   - master
 
 jobs:
-  - job: build
+  - job: BuildAndTest
     strategy:
       matrix:
         linux:
           imageName: 'ubuntu-16.04'
+          deskGapPlatform: 'linux-x64'
         win:
           imageName: 'windows-2019'
+          deskGapPlatform: 'win32-ia32'
         mac:
           imageName: 'macos-10.14'
+          deskGapPlatform: 'darwin-x64'
     pool:
       vmImage: $(imageName)
 
@@ -49,8 +52,7 @@ jobs:
       condition: eq( variables['Agent.OS'], 'Darwin' )
       displayName: 'Install the up-to-date version of CMake on macOS'
 
-    - script: |
-        npm ci
+    - script: npm ci
       displayName: 'npm ci'
 
     - bash: |
@@ -69,3 +71,29 @@ jobs:
       displayName: 'Test'
       env:
         DISPLAY: ':99.0'
+
+    - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: node/dist_build/dist
+          artifactName: $(deskGapPlatform)
+
+  - job: TestOnOlderWindows
+    dependsOn: BuildAndTest
+    strategy:
+      matrix:
+        win2016:
+          imageName: 'vs2017-win2016'
+        win2012r2:
+          imageName: 'vs2015-win2012r2'
+    pool:
+      vmImage: $(imageName)
+    steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        downloadType: 'single'
+        artifactName: 'win32-ia32'
+        downloadPath: $(System.DefaultWorkingDirectory)
+    - script: npm ci
+      displayName: 'npm ci'
+    - script: node node/test/start.js win32-ia32/dist
+      displayName: 'Test'

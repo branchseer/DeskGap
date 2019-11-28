@@ -5,16 +5,16 @@ pr:
   - master
 
 jobs:
-  - job: BuildAndTest
+  - job: Build
     strategy:
       matrix:
-        linux:
+        linux-x64:
           imageName: 'ubuntu-16.04'
           deskGapPlatform: 'linux-x64'
-        win:
+        win32-ia32:
           imageName: 'windows-2019'
           deskGapPlatform: 'win32-ia32'
-        mac:
+        darwin-x64:
           imageName: 'macos-10.14'
           deskGapPlatform: 'darwin-x64'
     pool:
@@ -60,40 +60,47 @@ jobs:
         bash node/scripts/dist.sh
       displayName: 'Build'
 
-    - script: |
-        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        sleep 6
-      displayName: Start xvfb
-      condition: eq(variables['Agent.OS'], 'Linux')
-
-    - bash:
-        node node/test/start.js node/dist_build/dist
-      displayName: 'Test'
-      env:
-        DISPLAY: ':99.0'
-
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: node/dist_build/dist
         artifactName: $(deskGapPlatform)
 
-  - job: TestOnOlderWindows
-    dependsOn: BuildAndTest
+  - job: Test
     strategy:
       matrix:
+        win2019:
+          imageName: 'windows-2019'
+          deskGapPlatform: 'win32-ia32'
         win2016:
           imageName: 'vs2017-win2016'
+          deskGapPlatform: 'win32-ia32'
         win2012r2:
           imageName: 'vs2015-win2012r2'
-    pool:
-      vmImage: $(imageName)
+          deskGapPlatform: 'win32-ia32'
+        mac:
+          imageName: 'macos-10.14'
+          deskGapPlatform: 'darwin-x64'
+        linux:
+          imageName: 'ubuntu-16.04'
+          deskGapPlatform: 'linux-x64'
+    dependsOn: 'Build $(deskGapPlatform)'
     steps:
     - task: DownloadBuildArtifacts@0
       inputs:
         downloadType: 'single'
-        artifactName: 'win32-ia32'
+        artifactName: $(deskGapPlatform)
         downloadPath: $(System.DefaultWorkingDirectory)
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
     - script: npm ci
       displayName: 'npm ci'
-    - script: node node/test/start.js win32-ia32/dist
+    - script: |
+        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        sleep 6
+      displayName: 'Start xvfb'
+      condition: eq(variables['Agent.OS'], 'Linux')
+    - bash: node node/test/start.js $(deskGapPlatform)
       displayName: 'Test'
+      env:
+        DISPLAY: ':99.0'

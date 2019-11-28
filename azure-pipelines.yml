@@ -83,7 +83,7 @@ jobs:
         linux:
           imageName: 'ubuntu-16.04'
           deskGapPlatform: 'linux-x64'
-    dependsOn: 'Build $(deskGapPlatform)'
+    dependsOn: Build
     steps:
     - task: DownloadBuildArtifacts@0
       inputs:

@@ -62,7 +62,7 @@ jobs:
 
     - task: PublishBuildArtifacts@1
       inputs:
-        pathtoPublish: node/dist_build/dist
+        pathtoPublish: dist_build/dist
         artifactName: $(deskGapPlatform)
 
   - job: Test

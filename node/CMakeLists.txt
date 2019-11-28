@@ -81,7 +81,7 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     set_target_properties(DeskGapNode PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY $<CONFIG>/DeskGap
     )
-endf()
+endif()
 
 set(DESKGAP_RESOURCE_FOLDER $<TARGET_FILE_DIR:DeskGapNode>/resources)
 if(APPLE)

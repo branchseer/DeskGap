@@ -28,6 +28,7 @@ if(WIN32)
 endif()
 add_subdirectory(js)
 
+set(NOD_NODE_VERSION v12.13.1)
 FetchContent_Declare(
     nod
     GIT_REPOSITORY https://github.com/patr0nus/nod

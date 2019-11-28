@@ -16,6 +16,7 @@ describe('asyncNode', () => {
 
     describe('asyncNode.require(moduleName)', () => {
         withWebView(it, 'can require built-in modules', async (win) => {
+            const onceAsyncNodeResult = once(messageNode, 'async-node-result');
             const execution = win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('os').then(function (os) {
                     return os.invoke('platform').value();
@@ -23,12 +24,13 @@ describe('asyncNode', () => {
                     deskgap.messageUI.send('async-node-result', result);
                 })
             `);
-            const [, result] = await once(messageNode, 'async-node-result');
+            const [, result] = await onceAsyncNodeResult;
             expect(result).to.equal(require('os').platform());
             await execution;
         }, true);
 
         withWebView(it, 'should resolve relative paths to the entry of the app', async (win) => {
+            const onceAsyncNodeResult = once(messageNode, 'async-node-result');
             const execution = win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('./fixtures/modules/async-node-simple-module').then(function(m) {
                     return m.value();
@@ -36,7 +38,7 @@ describe('asyncNode', () => {
                     deskgap.messageUI.send('async-node-result', result);
                 })
             `);
-            const [, result] = await once(messageNode, 'async-node-result');
+            const [, result] = await onceAsyncNodeResult;
             expect(result).to.equal('hello asyncNode');
             await execution;
         }, true);

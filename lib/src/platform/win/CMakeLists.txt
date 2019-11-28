@@ -49,3 +49,4 @@ target_sources(deskgap_platform PRIVATE
 )
 
 target_link_libraries(deskgap_platform PRIVATE deskgap_platform_trident_preload_script deskgap_winrt)
+target_link_options(deskgap_platform PUBLIC "/DELAYLOAD:deskgap_winrt.dll")

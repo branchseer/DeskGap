@@ -53,7 +53,7 @@ set_target_properties(
     OUTPUT_NAME DeskGap
     CXX_STANDARD 17
 )
-target_link_libraries(DeskGapNode deskgap nod DeskGapNodeScripts)
+target_link_libraries(DeskGapNode PUBLIC deskgap nod DeskGapNodeScripts)
 target_include_directories(DeskGapNode PRIVATE src/node_api ${DG_NODE_MODULES_DIR}/node-addon-api)
 
 if(APPLE)

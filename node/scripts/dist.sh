@@ -18,15 +18,15 @@ ls
 mkdir dist
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   mkdir dist/DeskGap
-  cp DeskGap dist/DeskGap
-  cp -r resources dist/DeskGap
+  cp Release/DeskGap/DeskGap dist/DeskGap
+  cp -r Release/DeskGap/resources dist/DeskGap
   strip -x dist/DeskGap/DeskGap
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   cp -r DeskGap.app dist
   strip -x dist/DeskGap.app/Contents/MacOS/DeskGap
 else
   mkdir dist/DeskGap
-  cp Release/deskgap_winrt.dll dist/DeskGap
-  cp Release/DeskGap.exe dist/DeskGap
-  cp -r Release/resources dist/DeskGap
+  cp Release/DeskGap/deskgap_winrt.dll dist/DeskGap
+  cp Release/DeskGap/DeskGap.exe dist/DeskGap
+  cp -r Release/DeskGap/resources dist/DeskGap
 fi

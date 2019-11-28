@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-deskGapNodeDir=scriptDir/..
+deskGapNodeDir=$scriptDir/..
 
 rm -rf dist_build
 

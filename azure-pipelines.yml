@@ -92,19 +92,28 @@ jobs:
         downloadType: 'single'
         artifactName: $(deskGapPlatform)
         downloadPath: $(System.DefaultWorkingDirectory)
+
     - script: chmod -R 755 $(deskGapPlatform)
       displayName: 'Set Permissions'
       condition: ne(variables['Agent.OS'], 'Windows_NT')
+
     - task: NodeTool@0
       inputs:
         versionSpec: '12.x'
+
     - script: npm ci
       displayName: 'npm ci'
+
+    - script: sudo apt-get install -y libwebkit2gtk-4.0-37 > /dev/null
+      displayName: 'Install webkit2gtk'
+      condition: eq(variables['Agent.OS'], 'Linux')
+
     - script: |
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         sleep 6
       displayName: 'Start xvfb'
       condition: eq(variables['Agent.OS'], 'Linux')
+
     - bash: node node/test/start.js $(deskGapPlatform)
       displayName: 'Test'
       env:

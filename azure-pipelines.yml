@@ -66,6 +66,7 @@ jobs:
         artifactName: $(deskGapPlatform)
 
   - job: Test
+    dependsOn: Build
     strategy:
       matrix:
         win2019:
@@ -83,7 +84,8 @@ jobs:
         linux:
           imageName: 'ubuntu-16.04'
           deskGapPlatform: 'linux-x64'
-    dependsOn: Build
+    pool:
+      vmImage: $(imageName)
     steps:
     - task: DownloadBuildArtifacts@0
       inputs:

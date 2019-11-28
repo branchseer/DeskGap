@@ -92,6 +92,9 @@ jobs:
         downloadType: 'single'
         artifactName: $(deskGapPlatform)
         downloadPath: $(System.DefaultWorkingDirectory)
+    - script: chmod -R 755 $(deskGapPlatform)
+      displayName: 'Set Permissions'
+      condition: ne(variables['Agent.OS'], 'Windows_NT')
     - task: NodeTool@0
       inputs:
         versionSpec: '12.x'

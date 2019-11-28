@@ -10,18 +10,10 @@ jobs:
       matrix:
         linux:
           imageName: 'ubuntu-16.04'
-          cmakeGenerator: 'Unix Makefiles'
-          buildDistPath: 'build/Release'
         win:
           imageName: 'windows-2019'
-          cmakeGenerator: 'Visual Studio 16 2019'
-          buildDistPath: 'build/Release'
-          dgUserName: 'DeskGapUser'
-          dgUserPass: 'A4_bg3dVd'
         mac:
           imageName: 'macos-10.14'
-          cmakeGenerator: 'Unix Makefiles'
-          buildDistPath: 'build'
     pool:
       vmImage: $(imageName)
 
@@ -63,10 +55,7 @@ jobs:
 
     - bash: |
         cmake --version
-        echo CMake Configuring
-        cmake -G '$(cmakeGenerator)' -DCMAKE_BUILD_TYPE=Release -S node -B build
-        echo CMake Building
-        cmake --build build --config Release
+        bash node/scripts/dist.sh
       displayName: 'Build'
 
     - script: |
@@ -76,7 +65,7 @@ jobs:
       condition: eq(variables['Agent.OS'], 'Linux')
 
     - bash:
-        node node/test/start.js $(buildDistPath)
+        node node/test/start.js node/dist_build/dist
       displayName: 'Test'
       env:
         DISPLAY: ':99.0'

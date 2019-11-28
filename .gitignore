@@ -7,3 +7,4 @@ cmake-build-*
 node_modules
 /CMakeSettings.json
 .DS_Store
+/node/dist_build

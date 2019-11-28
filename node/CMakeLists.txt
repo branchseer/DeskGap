@@ -63,23 +63,6 @@ if(APPLE)
     )
 endif()
 
-if (NOT APPLE)
-    set_target_properties(DeskGapNode
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY $<CONFIG>/DeskGap
-    )
-endif()
-
-if (APPLE OR LINUX)
-    add_custom_command(
-        TARGET DeskGapNode POST_BUILD
-        COMMAND
-        $<$<CONFIG:Release>:strip>
-        $<$<CONFIG:Release>:-x>
-        $<$<CONFIG:Release>:$<TARGET_FILE:DeskGapNode>>
-    )
-endif()
-
 if (WIN32)
     target_sources(
         DeskGapNode PRIVATE

@@ -73,9 +73,9 @@ jobs:
         DISPLAY: ':99.0'
 
     - task: PublishBuildArtifacts@1
-        inputs:
-          pathtoPublish: node/dist_build/dist
-          artifactName: $(deskGapPlatform)
+      inputs:
+        pathtoPublish: node/dist_build/dist
+        artifactName: $(deskGapPlatform)
 
   - job: TestOnOlderWindows
     dependsOn: BuildAndTest

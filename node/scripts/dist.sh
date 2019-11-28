@@ -9,7 +9,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]] || [[ "$OSTYPE" == "darwin"* ]]; then
   cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S "$deskGapNodeDir" -B dist_build
   cmake --build dist_build
 else
-  cmake -G "Visual Studio 16 2019" -S "$deskGapNodeDir" -B dist_build
+  cmake -G "Visual Studio 16 2019" -A Win32 -S "$deskGapNodeDir" -B dist_build
   cmake --build dist_build --config Release
 fi
 

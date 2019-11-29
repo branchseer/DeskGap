@@ -8,4 +8,4 @@ node_modules
 /CMakeSettings.json
 .DS_Store
 /node/dist_build
-/npm_dist
+/dists

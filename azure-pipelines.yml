@@ -60,10 +60,8 @@ jobs:
         bash node/scripts/dist.sh
       displayName: 'Build'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathtoPublish: dist_build/dist
-        artifactName: $(deskGapPlatform)
+    - publish: $(System.DefaultWorkingDirectory)/dist_build/dist
+      artifact: $(deskGapPlatform)
 
   - job: Test
     dependsOn: Build
@@ -87,13 +85,10 @@ jobs:
     pool:
       vmImage: $(imageName)
     steps:
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        downloadType: 'single'
-        artifactName: $(deskGapPlatform)
-        downloadPath: $(System.DefaultWorkingDirectory)
+    - download: current
+      artifact: $(deskGapPlatform)
 
-    - script: chmod -R 755 $(deskGapPlatform)
+    - script: chmod -R 755 "$(Pipeline.Workspace)/$(deskGapPlatform)"
       displayName: 'Set Permissions'
       condition: ne(variables['Agent.OS'], 'Windows_NT')
 
@@ -114,7 +109,7 @@ jobs:
       displayName: 'Start xvfb'
       condition: eq(variables['Agent.OS'], 'Linux')
 
-    - bash: node node/test/start.js $(deskGapPlatform)
+    - bash: node node/test/start.js "$(Pipeline.Workspace)/$(deskGapPlatform)"
       displayName: 'Test'
       env:
         DISPLAY: ':99.0'

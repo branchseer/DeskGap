@@ -1,6 +1,7 @@
 const { app } = require('deskgap');
 const chai = require('chai');
 const { spawnDeskGapAppAsync } = require('../utils');
+const fs = require('fs');
 
 const { expect } = chai;
 
@@ -14,6 +15,12 @@ describe('process', () => {
             `, 'hello', '你好');
             expect(result.stdout).to.equal('hello你好');
         });
+    });
+    describe('process.versions.deskgap', () => {
+        it('returns the version of DeskGap', () => {
+            const versionFromSource = fs.readFileSync(path.resolve(__dirname, '..', '..', 'VERSION'), 'utf8');
+            expect(process.versions.deskgap).to.equal(versionFromSource);
+        })
     });
 });
 

@@ -9,7 +9,7 @@ add_custom_command(
         $<$<CONFIG:Release>:-p> --mode=$<IF:$<CONFIG:Release>,production,development>
         -o ${CMAKE_CURRENT_BINARY_DIR}/dg_node.js
     COMMAND ${DG_BIN2CODE} ${CMAKE_CURRENT_BINARY_DIR}/dg_node.js ${CMAKE_CURRENT_BINARY_DIR}/dg_node.c
-    DEPENDS ${NODE_TS_FILES} ${COMMON_TS_FILES} node/tsconfig.json node/webpack.config.js
+    DEPENDS ${NODE_TS_FILES} ${COMMON_TS_FILES} node/tsconfig.json node/webpack.config.js ${CMAKE_CURRENT_LIST_DIR}/../VERSION
 )
 
 add_custom_command(

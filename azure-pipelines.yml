@@ -69,6 +69,9 @@ jobs:
     pool:
       vmImage: 'ubuntu-16.04'
     steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '12.x'
       - task: DownloadPipelineArtifact@2
         inputs:
           targetPath: "$(Pipeline.Workspace)/dists"
@@ -148,6 +151,9 @@ jobs:
     pool:
       vmImage: $(imageName)
     steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '12.x'
       - download: current
         artifact: npmTarball
       - download: current

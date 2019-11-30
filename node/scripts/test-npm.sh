@@ -3,7 +3,7 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 
-$npmTGZFile=$1
+npmTGZFile=$1
 if [ ! -f "$npmTGZFile" ]; then
     echo "The npmTGZFile file does not exist: $npmTGZFile"
     exit 1

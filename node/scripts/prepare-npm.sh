@@ -3,7 +3,7 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 deskgapVersion=$(<$scriptDir/../VERSION)
 
-$distsDir=$1
+distsDir=$1
 if [ ! -d "$distsDir" ]; then
     echo "The distsDir folder does not exist: $distsDir"
     exit 1

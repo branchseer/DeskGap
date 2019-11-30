@@ -69,8 +69,10 @@ jobs:
     pool:
       vmImage: 'ubuntu-16.04'
     steps:
-      - download: current
-      - bash: bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)"
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          targetPath: "$(Pipeline.Workspace)/dists"
+      - bash: bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)/dists"
       - publish: $(System.DefaultWorkingDirectory)/npm.tgz
         artifact: npmTarball
       - publish: $(System.DefaultWorkingDirectory)/dist_zips

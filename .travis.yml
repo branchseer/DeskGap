@@ -35,7 +35,7 @@ jobs:
           fi
           export PATH=$PWD/cmake-3.15.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
           cmake --version
-          bash node/scripts/dist.sh
+          bash node/scripts/build.sh
 
     - stage: Test on older versions of macOS
       os: osx

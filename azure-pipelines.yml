@@ -57,7 +57,7 @@ jobs:
 
     - bash: |
         cmake --version
-        bash node/scripts/dist.sh
+        bash node/scripts/build.sh
       displayName: 'Build'
 
     - publish: $(System.DefaultWorkingDirectory)/dist_build/dist

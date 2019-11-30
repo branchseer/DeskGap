@@ -10,7 +10,7 @@ if [ ! -f "$npmTGZFile" ]; then
 fi
 
 rm -rf ./npm_test && cp -r $scriptDir/../npm/test ./npm_test
-npm --prefix npm/test install
-npm --prefix npm/test install "$npmTGZFile"
-npm --prefix npm/test run test-js
-npm --prefix npm/test run test-ts
+npm --prefix npm_test install
+npm --prefix npm_test install "$npmTGZFile"
+npm --prefix npm_test run test-js
+npm --prefix npm_test run test-ts

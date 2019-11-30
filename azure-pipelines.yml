@@ -152,4 +152,4 @@ jobs:
         artifact: npmTarball
       - download: current
         artifact: distZips
-      - bash: DESKGAP_DIST_FOLDER="$(Pipeline.Workspace)/distZips" bash node/scripts/test-npm.js "$(Pipeline.Workspace)/npm.tgz"
+      - bash: DESKGAP_DIST_FOLDER="$(Pipeline.Workspace)/distZips" bash node/scripts/test-npm.sh "$(Pipeline.Workspace)/npm.tgz"

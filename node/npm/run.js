@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = (distPath, entryPath, args) => {
     let executablePath;
@@ -11,6 +12,7 @@ module.exports = (distPath, entryPath, args) => {
     }
     else if (process.platform === 'linux') {
         executablePath = path.join(distPath, 'DeskGap/DeskGap');
+        fs.chmodSync(executablePath, 544);
     }
 
     const deskgapProcess = spawn(path.resolve(executablePath), args, {

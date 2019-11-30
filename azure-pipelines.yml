@@ -72,7 +72,9 @@ jobs:
       - task: DownloadPipelineArtifact@2
         inputs:
           targetPath: "$(Pipeline.Workspace)/dists"
-      - bash: bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)/dists"
+      - bash: |
+          npm ci
+          bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)/dists"
       - publish: $(System.DefaultWorkingDirectory)/npm.tgz
         artifact: npmTarball
       - publish: $(System.DefaultWorkingDirectory)/dist_zips

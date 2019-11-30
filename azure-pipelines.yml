@@ -66,7 +66,8 @@ jobs:
   - job: PrepareNPM
     dependsOn: Build
     displayName: 'Prepare npm Package'
-    vmImage: 'ubuntu-16.04'
+    pool:
+      vmImage: 'ubuntu-16.04'
     steps:
       - download: current
       - bash: bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)"

@@ -63,6 +63,18 @@ jobs:
     - publish: $(System.DefaultWorkingDirectory)/dist_build/dist
       artifact: $(deskGapPlatform)
 
+  - job: PrepareNPM
+    dependsOn: Build
+    displayName: 'Prepare npm Package'
+    vmImage: 'ubuntu-16.04'
+    steps:
+      - download: current
+      - bash: bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)"
+      - publish: $(System.DefaultWorkingDirectory)/npm.tgz
+        artifact: npmTarball
+      - publish: $(System.DefaultWorkingDirectory)/dist_zips
+        artifact: distZips
+
   - job: Test
     dependsOn: Build
     strategy:
@@ -113,3 +125,26 @@ jobs:
       displayName: 'Test'
       env:
         DISPLAY: ':99.0'
+
+  - job: TestNPM
+    displayName: 'Test npm Package'
+    dependsOn: PrepareNPM
+    strategy:
+      matrix:
+        win:
+          imageName: 'windows-2019'
+          deskGapPlatform: 'win32-ia32'
+        mac:
+          imageName: 'macos-10.14'
+          deskGapPlatform: 'darwin-x64'
+        linux:
+          imageName: 'ubuntu-16.04'
+          deskGapPlatform: 'linux-x64'
+    pool:
+      vmImage: $(imageName)
+    steps:
+      - download: current
+        artifact: npmTarball
+      - download: current
+        artifact: distZips
+      - bash: DESKGAP_DIST_FOLDER="$(Pipeline.Workspace)/distZips" bash node/scripts/test-npm.js "$(Pipeline.Workspace)/npm.tgz"

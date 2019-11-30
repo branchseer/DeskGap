@@ -26,14 +26,13 @@ if (deskGapPlatform == null) {
 
 const distZipFile = require('./dist_files/' + deskGapPlatform);
 const distZipFilePath = path.join(__dirname, distZipFile.filename);
-const downloadURL = "https://dl.bintray.com/patr0nus/DeskGap/" + distZipFile.filename;
 
 (async () => {
     try {
         fs.unlinkSync(distZipFilePath);
     } catch (e) { }
 
-    await downloadFile(downloadURL, distZipFilePath);
+    await downloadFile(distZipFile.filename, distZipFilePath);
     const sha256 = await sha256OfPath(distZipFilePath);
     if (sha256 !== distZipFile.sha256) {
         console.error(`SHA256 mismatch (${sha256} !== ${distZipFile.sha256})`);
@@ -47,4 +46,7 @@ const downloadURL = "https://dl.bintray.com/patr0nus/DeskGap/" + distZipFile.fil
 
     await decompress(distZipFilePath, 'dist');
     fs.unlinkSync(distZipFilePath);
-})();
+})().catch(e => {
+    console.error(e.stack || e.toString());
+    process.exit(1);
+});

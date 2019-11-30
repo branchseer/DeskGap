@@ -6,7 +6,6 @@
         "module": "commonjs",
         "emitDeclarationOnly": true,
         "lib": ["es2017", "dom"],
-        "declarationDir": "../../npm/types",
         "declaration": true,
         "stripInternal": true
     }

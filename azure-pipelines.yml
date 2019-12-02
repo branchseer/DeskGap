@@ -181,7 +181,7 @@ jobs:
         artifact: distZips
       - task: Bash@3
         inputs:
-          filePaths: $(Build.SourcesDirectory)/node/scripts/test-npm.sh
+          filePath: $(Build.SourcesDirectory)/node/scripts/test-npm.sh
           arguments: "$(Pipeline.Workspace)/npmTarball/npm.tgz"
         env:
           DESKGAP_DIST_FOLDER: $(Pipeline.Workspace)/distZips

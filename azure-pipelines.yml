@@ -25,7 +25,8 @@ jobs:
       inputs:
         versionSpec: '12.x'
 
-    - script: |
+    - bash: |
+        set -e
         wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
         tar -xvf cmake-3.15.5-Linux-x86_64.tar.gz > /dev/null
         export PATH=$PWD/cmake-3.15.5-Linux-x86_64/bin:$PATH
@@ -33,7 +34,8 @@ jobs:
       condition: eq( variables['Agent.OS'], 'Linux' )
       displayName: 'Install the up-to-date version of CMake on Linux'
 
-    - script: |
+    - bash: |
+        set -e
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test > /dev/null
         sudo apt-get update -y  > /dev/null
         sudo apt-get install -y g++-8
@@ -42,25 +44,30 @@ jobs:
       condition: eq( variables['Agent.OS'], 'Linux' )
       displayName: 'Install gcc-8 and g++-8 on Linux'
 
-    - script: |
-        sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+    - bash: sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
       condition: eq( variables['Agent.OS'], 'Linux' )
       displayName: 'Install dev files of gtk and webkit on Linux'
 
-    - script: |
-        brew install cmake
+    - bash: brew install cmake
       condition: eq( variables['Agent.OS'], 'Darwin' )
       displayName: 'Install the up-to-date version of CMake on macOS'
 
     - script: npm ci
       displayName: 'npm ci'
 
-    - bash: |
-        cmake --version
-        bash node/scripts/build.sh
+    - bash: bash node/scripts/build.sh
       displayName: 'Build'
 
-    - publish: $(System.DefaultWorkingDirectory)/dist_build/dist
+    - task: ArchiveFiles@2
+      displayName: 'Tar binary'
+      inputs:
+        rootFolderOrFile: $(System.DefaultWorkingDirectory)/dist_build/dist
+        includeRootFolder: false
+        archiveType: tar
+        tarCompression: none
+        archiveFile: $(Pipeline.Workspace)/dist.tar
+
+    - publish: $(Pipeline.Workspace)/dist.tar
       artifact: $(deskGapPlatform)
 
   - job: PrepareNPM
@@ -72,12 +79,19 @@ jobs:
       - task: NodeTool@0
         inputs:
           versionSpec: '12.x'
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          targetPath: "$(Pipeline.Workspace)/dists"
+      - download: current
       - bash: |
-          npm ci
-          bash node/scripts/prepare-npm.sh "$(Pipeline.Workspace)/dists"
+          set -e
+          mkdir dists
+          for distTarPath in $(find $(Pipeline.Workspace) -type f -path '*/dist.tar'); do
+            platformName=$(basename $(dirname $distTarPath))
+            mkdir dists/$platformName
+            tar -xf $distTarPath -C dists/$platformName
+          done
+        displayName: 'Untar binaries'
+
+      - bash: npm ci
+      - bash: bash node/scripts/prepare-npm.sh dists
       - publish: $(System.DefaultWorkingDirectory)/npm.tgz
         artifact: npmTarball
       - publish: $(System.DefaultWorkingDirectory)/dist_zips
@@ -108,9 +122,12 @@ jobs:
     - download: current
       artifact: $(deskGapPlatform)
 
-    - script: chmod -R 755 "$(Pipeline.Workspace)/$(deskGapPlatform)"
-      displayName: 'Set Permissions'
-      condition: ne(variables['Agent.OS'], 'Windows_NT')
+    - task: ExtractFiles@1
+      inputs:
+        archiveFilePatterns: "$(Pipeline.Workspace)/$(deskGapPlatform)/dist.tar"
+        destinationFolder: $(System.DefaultWorkingDirectory)/dists
+    - bash: ls dists
+
 
     - task: NodeTool@0
       inputs:
@@ -119,17 +136,18 @@ jobs:
     - script: npm ci
       displayName: 'npm ci'
 
-    - script: sudo apt-get install -y libwebkit2gtk-4.0-37 > /dev/null
+    - bash: sudo apt-get install -y libwebkit2gtk-4.0-37 > /dev/null
       displayName: 'Install webkit2gtk'
       condition: eq(variables['Agent.OS'], 'Linux')
 
-    - script: |
+    - bash: |
+        set -e
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         sleep 6
       displayName: 'Start xvfb'
       condition: eq(variables['Agent.OS'], 'Linux')
 
-    - bash: node node/test/start.js "$(Pipeline.Workspace)/$(deskGapPlatform)"
+    - bash: node node/test/start.js "$(System.DefaultWorkingDirectory)/dists"
       displayName: 'Test'
       env:
         DISPLAY: ':99.0'

@@ -8,6 +8,5 @@ cd npm_test
 echo "Installing denpendencies of npm_test"
 npm install
 echo "Installing DeskGap to npm_test"
-npm npm_test install ../npm.tgz
-npm npm_test run test-js
-npm npm_test run test-ts
+npm install ../npm.tgz
+npm test

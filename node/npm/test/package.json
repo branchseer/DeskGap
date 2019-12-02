@@ -2,8 +2,7 @@
 	"name": "deskgap_npm_test",
 	"version": "0.0.1",
 	"scripts": {
-		"test-js": "deskgap .",
-		"test-ts": "tsc index-ts.ts && deskgap index-ts.js"
+		"test": "deskgap . && tsc index-ts.ts && deskgap index-ts.js"
 	},
 	"devDependencies": {
 		"typescript": "^3.7.2"

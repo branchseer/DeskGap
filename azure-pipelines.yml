@@ -169,6 +169,9 @@ jobs:
     pool:
       vmImage: $(imageName)
     steps:
+      - bash: sudo apt-get install -y libwebkit2gtk-4.0-37 > /dev/null
+        displayName: 'Install webkit2gtk'
+        condition: eq(variables['Agent.OS'], 'Linux')
       - task: NodeTool@0
         inputs:
           versionSpec: '12.x'

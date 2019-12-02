@@ -12,8 +12,6 @@ module.exports = (distPath, entryPath, args) => {
     }
     else if (process.platform === 'linux') {
         executablePath = path.join(distPath, 'DeskGap/DeskGap');
-        const executablePermissions = fs.statSync(executablePath).mode & parseInt('777', 8);
-        fs.chmodSync(executablePath, executablePermissions | fs.constants.S_IXUSR);
     }
 
     const deskgapProcess = spawn(path.resolve(executablePath), args, {

@@ -186,8 +186,11 @@ jobs:
         displayName: 'Start xvfb'
         condition: eq(variables['Agent.OS'], 'Linux')
 
-      - bash: cp $(Pipeline.Workspace)/npmTarball/npm.tgz .
-        displayName: 'Copy npm.tgz to the working dir'
+      - task: CopyFiles@2
+        inputs:
+          sourceFolder: "$(Pipeline.Workspace)/npmTarball"
+          contents: "npm.tgz"
+          targetFolder: "$(System.DefaultWorkingDirectory)"
 
       - task: Bash@3
         inputs:

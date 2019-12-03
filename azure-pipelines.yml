@@ -210,4 +210,4 @@ jobs:
       runOnce:
         deploy:
           steps:
-          - scripts: echo deployment steps here
+          - script: echo deployment steps here

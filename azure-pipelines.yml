@@ -99,9 +99,9 @@ stages:
       - publish: $(System.DefaultWorkingDirectory)/dist_zips
         artifact: distZips
 - stage: Test
+  dependsOn: Build
   jobs:
   - job: Test
-    dependsOn: Build
     strategy:
       matrix:
         win2019:

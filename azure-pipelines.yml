@@ -4,7 +4,9 @@ trigger:
 pr:
   - master
 
-jobs:
+stages:
+- stage: Dev
+  jobs:
   - job: Build
     strategy:
       matrix:
@@ -96,7 +98,8 @@ jobs:
         artifact: npmTarball
       - publish: $(System.DefaultWorkingDirectory)/dist_zips
         artifact: distZips
-
+- stage: Test
+  jobs:
   - job: Test
     dependsOn: Build
     strategy:
@@ -199,15 +202,19 @@ jobs:
           DISPLAY: ':99.0'
           DESKGAP_DIST_FOLDER: $(Pipeline.Workspace)/distZips
 
+- stage: Production
+  dependsOn: Test
+  jobs:
   - deployment: Publish
     pool:
       vmImage: 'Ubuntu-16.04'
-    dependsOn:
-      - Test
-      - TestNPM
     environment: Publish
     strategy: 
       runOnce:
         deploy:
           steps:
-          - script: echo deployment steps here
+          - download: current
+            artifact: npmTarball
+          - download: current
+            artifact: distZips
+          - bash: ls "$(Pipeline.Workspace)"

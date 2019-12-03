@@ -198,3 +198,16 @@ jobs:
         env:
           DISPLAY: ':99.0'
           DESKGAP_DIST_FOLDER: $(Pipeline.Workspace)/distZips
+
+  - deployment: Publish
+    pool:
+      vmImage: 'Ubuntu-16.04'
+    dependsOn:
+      - Test
+      - TestNPM
+    environment: Publish
+    strategy: 
+      runOnce:
+        deploy:
+          steps:
+          - scripts: echo deployment steps here

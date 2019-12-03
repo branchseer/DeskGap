@@ -15,7 +15,9 @@ describe('asyncNode', () => {
     });
 
     describe('asyncNode.require(moduleName)', () => {
-        withWebView(it, 'can require built-in modules', async (win) => {
+        withWebView(it, 'can require built-in modules', async function (win) {
+            // TODO: This test takes toooooo much time (sometimes over 10s) on win2012r2
+            this.timeout(20 * 1000);
             const onceAsyncNodeResult = once(messageNode, 'async-node-result');
             const execution = win.webView.executeJavaScript(`
                 deskgap.asyncNode.require('os').then(function (os) {

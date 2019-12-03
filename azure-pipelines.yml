@@ -5,7 +5,8 @@ pr:
   - master
 
 stages:
-- stage: Dev
+- stage: 'BuildAndTest'
+  displayName: 'Build & Test'
   jobs:
   - job: Build
     strategy:
@@ -98,10 +99,9 @@ stages:
         artifact: npmTarball
       - publish: $(System.DefaultWorkingDirectory)/dist_zips
         artifact: distZips
-- stage: Test
-  dependsOn: Build
-  jobs:
+
   - job: Test
+    dependsOn: Build
     strategy:
       matrix:
         win2019:
@@ -203,7 +203,7 @@ stages:
           DESKGAP_DIST_FOLDER: $(Pipeline.Workspace)/distZips
 
 - stage: Production
-  dependsOn: Test
+  dependsOn: BuildAndTest
   jobs:
   - deployment: Publish
     pool:

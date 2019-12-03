@@ -179,7 +179,6 @@ jobs:
         artifact: npmTarball
       - download: current
         artifact: distZips
-
       - bash: |
           set -e
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -187,10 +186,15 @@ jobs:
         displayName: 'Start xvfb'
         condition: eq(variables['Agent.OS'], 'Linux')
 
+      - task: CopyFiles@2
+        inputs:
+          sourceFolder: "$(Pipeline.Workspace)/npmTarball"
+          contents: "npm.tgz"
+          targetFolder: "$(System.DefaultWorkingDirectory)"
+
       - task: Bash@3
         inputs:
           filePath: $(Build.SourcesDirectory)/node/scripts/test-npm.sh
-          arguments: "$(Pipeline.Workspace)/npmTarball/npm.tgz"
         env:
           DISPLAY: ':99.0'
           DESKGAP_DIST_FOLDER: $(Pipeline.Workspace)/distZips

@@ -21,4 +21,5 @@ if [[ ! $statusCode == 2* ]]; then
 	exit 1
 fi
 
+echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
 npm publish $DESKGAP_NPM_TARBALL

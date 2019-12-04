@@ -208,16 +208,12 @@ stages:
   dependsOn: BuildAndTest
   condition: eq(variables['DESKGAP_AZ_RELEASE'], '1')
   jobs:
-  - deployment: Publish
+  - job: Publish
     pool:
       vmImage: 'Ubuntu-16.04'
-    strategy: 
-      runOnce:
-        deploy:
-          steps:
-          - download: none # disable automatic download
-          - download: current
-            artifact: npmTarball
-          - download: current
-            artifact: distZips
-          - bash: ls "$(Pipeline.Workspace)"
+    steps:
+    - download: current
+      artifact: npmTarball
+    - download: current
+      artifact: distZips
+    - bash: ls "$(Pipeline.Workspace)"

@@ -206,7 +206,7 @@ stages:
 
 - stage: Release
   dependsOn: BuildAndTest
-  condition: contains(variables['Build.SourceVersionMessage'], '[ci release]')
+  condition: and(succeeded(), eq(variables['DESKGAP_AP_RELEASE'], '1'))
   jobs:
   - job: Publish
     pool:

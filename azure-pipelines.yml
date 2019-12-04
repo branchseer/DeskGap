@@ -222,7 +222,7 @@ stages:
         echo "##vso[task.setvariable variable=DESKGAP_VERSION]$deskgapVersion"
     - task: GitHubRelease@0
       inputs:
-        gitHubConnection: 'GitHub connection 1'
+        gitHubConnection: 'Creating DeskGap Releases'
         action: 'create'
         repositoryName: '$(Build.Repository.Name)'
         target: '$(Build.SourceVersion)'

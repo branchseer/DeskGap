@@ -204,17 +204,18 @@ stages:
           DESKGAP_NPM_TEST_INSTALL_WHAT: ../npm.tgz
           DESKGAP_NPM_TEST_VERSION_FILE: $(Build.SourcesDirectory)/node/VERSION
 
-- stage: Production
+- stage: Release
   dependsOn: BuildAndTest
+  condition: eq(variables['DESKGAP_AZ_RELEASE'], '1')
   jobs:
   - deployment: Publish
     pool:
       vmImage: 'Ubuntu-16.04'
-    environment: Publish
     strategy: 
       runOnce:
         deploy:
           steps:
+          - download: none # disable automatic download
           - download: current
             artifact: npmTarball
           - download: current

@@ -22,6 +22,9 @@
 ## Steps
 1. Download the npm dependencies: `npm ci`
 2. Generate the buildsystem:
-    - Windows: `cmake -G "Visual Studio 16 2019" -S node -B build`
+    - Windows: `cmake -G "Visual Studio 16 2019" -A Win32 -S node -B build`
     - macOS or Linux: `cmake -G "Unix Makefiles" -S node -B build`
 3. Build DeskGap: `cmake --build build`
+4. Test:
+	- macOS: `node node/test/start.js build`
+	- Windows or Linux: `node node/test/start.js build/Release`

@@ -6,8 +6,19 @@ deskgapVersion=$(<$scriptDir/../VERSION)
 for zipFilePath in $DESKGAP_DISTS_DIR/*.zip
 do
 	zipFilename=$(basename $zipFilePath)
+	uploadUrl=https://api.bintray.com/content/patr0nus/DeskGap/releases/$deskgapVersion/$zipFilename
 	echo Uploading $zipFilename
-	curl -T "$zipFilePath" -u$DESKGAP_BINTRAY_USER:$DESKGAP_BINTRAY_KEY https://api.bintray.com/content/patr0nus/DeskGap/releases/$deskgapVersion/$zipFilename
+	statusCode=$(curl -s -o /dev/null -w "%{http_code}" -T "$zipFilePath" -u$DESKGAP_BINTRAY_USER:$DESKGAP_BINTRAY_KEY $uploadUrl)
+	if [[ ! $statusCode == 2* ]]; then
+		echo Upload failed: HTTP $statusCode
+		exit 1
+	fi
 done
-curl -X POST -u$DESKGAP_BINTRAY_USER:$DESKGAP_BINTRAY_KEY https://api.bintray.com/content/patr0nus/DeskGap/releases/$deskgapVersion/publish
+
+statusCode=$(curl -X POST -u$DESKGAP_BINTRAY_USER:$DESKGAP_BINTRAY_KEY https://api.bintray.com/content/patr0nus/DeskGap/releases/$deskgapVersion/publish)
+if [[ ! $statusCode == 2* ]]; then
+	echo Publish failed: HTTP $statusCode
+	exit 1
+fi
+
 npm publish $DESKGAP_NPM_TARBALL

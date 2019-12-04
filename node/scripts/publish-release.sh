@@ -15,7 +15,7 @@ do
 	fi
 done
 
-statusCode=$(curl -X POST -u$DESKGAP_BINTRAY_USER:$DESKGAP_BINTRAY_KEY https://api.bintray.com/content/patr0nus/DeskGap/releases/$deskgapVersion/publish)
+statusCode=$(curl -s -o /dev/null -w "%{http_code}" -X POST -u$DESKGAP_BINTRAY_USER:$DESKGAP_BINTRAY_KEY https://api.bintray.com/content/patr0nus/DeskGap/releases/$deskgapVersion/publish)
 if [[ ! $statusCode == 2* ]]; then
 	echo Publish failed: HTTP $statusCode
 	exit 1

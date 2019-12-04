@@ -206,7 +206,7 @@ stages:
 
 - stage: Release
   dependsOn: BuildAndTest
-  condition: eq(variables['DESKGAP_AZ_RELEASE'], '1')
+  condition: contains(variables['Build.SourceVersionMessage'], '[ci release]')
   jobs:
   - job: Publish
     pool:
@@ -216,4 +216,46 @@ stages:
       artifact: npmTarball
     - download: current
       artifact: distZips
-    - bash: ls "$(Pipeline.Workspace)"
+
+    - bash: |
+        deskgapVersion=$(<$(Build.SourcesDirectory)/node/VERSION)
+        echo "##vso[task.setvariable variable=DESKGAP_VERSION]$deskgapVersion"
+    - task: GitHubRelease@0
+      inputs:
+        gitHubConnection: 'GitHub connection 1'
+        action: 'create'
+        repositoryName: '$(Build.Repository.Name)'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'manual'
+        tag: 'v$(DESKGAP_VERSION)'
+        assets: |
+          $(Pipeline.Workspace)/distZips/*
+          $(Pipeline.Workspace)/npmTarball/*
+        isDraft: false
+        addChangeLog: false
+        releaseNotesSource: 'file'
+        releaseNotesFile: $(Build.SourcesDirectory)/node/VERSION/WHATS_NEW.md
+
+    - task: Bash@3
+      displayName: "Publish to Binary and npm"
+      inputs:
+        filePath: $(Build.SourcesDirectory)/node/scripts/publish-release.sh
+      env:
+        DESKGAP_DISTS_DIR: $(Pipeline.Workspace)/distZips
+        DESKGAP_NPM_TARBALL: $(Pipeline.Workspace)/npmTarball/npm.tgz
+        DESKGAP_NPM_TEST_VERSION_FILE: $(Build.SourcesDirectory)/node/VERSION
+
+    - bash: |
+        set -e
+        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        sleep 6
+      displayName: 'Start xvfb'
+
+    - task: Bash@3
+      displayName: "Final Test After Release"
+      inputs:
+        filePath: $(Build.SourcesDirectory)/node/scripts/test-npm.sh
+      env:
+        DISPLAY: ':99.0'
+        DESKGAP_NPM_TEST_INSTALL_WHAT: deskgap
+        DESKGAP_NPM_TEST_VERSION_FILE: $(Build.SourcesDirectory)/node/VERSION

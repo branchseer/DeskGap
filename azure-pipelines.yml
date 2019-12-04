@@ -201,6 +201,8 @@ stages:
         env:
           DISPLAY: ':99.0'
           DESKGAP_DIST_FOLDER: $(Pipeline.Workspace)/distZips
+          DESKGAP_NPM_TEST_INSTALL_WHAT: ../npm.tgz
+          DESKGAP_NPM_TEST_VERSION_FILE: $(Build.SourcesDirectory)/node/VERSION
 
 - stage: Production
   dependsOn: BuildAndTest

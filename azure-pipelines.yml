@@ -210,7 +210,7 @@ stages:
   jobs:
   - job: Publish
     pool:
-      vmImage: 'Ubuntu-16.04'
+      vmImage: 'Ubuntu-18.04'
     steps:
     - download: current
       artifact: npmTarball
@@ -243,7 +243,9 @@ stages:
       env:
         DESKGAP_DISTS_DIR: $(Pipeline.Workspace)/distZips
         DESKGAP_NPM_TARBALL: $(Pipeline.Workspace)/npmTarball/npm.tgz
-        DESKGAP_NPM_TEST_VERSION_FILE: $(Build.SourcesDirectory)/node/VERSION
+        NPM_TOKEN: $(NPM_TOKEN)
+        DESKGAP_BINTRAY_USER: $(DESKGAP_BINTRAY_USER)
+        DESKGAP_BINTRAY_KEY: $(DESKGAP_BINTRAY_KEY)
 
     - bash: |
         set -e

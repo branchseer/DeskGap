@@ -234,7 +234,7 @@ stages:
         isDraft: false
         addChangeLog: false
         releaseNotesSource: 'file'
-        releaseNotesFile: $(Build.SourcesDirectory)/node/VERSION/WHATS_NEW.md
+        releaseNotesFile: $(Build.SourcesDirectory)/node/WHATS_NEW.md
 
     - task: Bash@3
       displayName: "Publish to Binary and npm"

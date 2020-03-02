@@ -104,7 +104,7 @@ export function RegisterAsyncNodeHandlers(untypedMessageNode: any) {
 
     //createRequireFromPath accepts a path and creates a require function that acts as if it's called in the file of that path.
     //The path must be in a form of file, but it doesn't matter if it exists.
-    const requireFromEntry = moduleUtils.createRequireFromPath(path.join(appPath, 'file.js'));
+    const requireFromEntry = moduleUtils.createRequire(path.join(appPath, 'file.js'));
 
     messageNode.on(ChannelNames.GET_MODULE_OBJECT, (e, requestId, moduleName) => {
         try {

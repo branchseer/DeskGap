@@ -28,10 +28,11 @@ if(WIN32)
 endif()
 add_subdirectory(js)
 
-set(NOD_NODE_VERSION v13.6.0)
+set(NOD_NODE_VERSION v13.8.0)
 FetchContent_Declare(
     nod
     GIT_REPOSITORY https://github.com/patr0nus/nod
+    GIT_TAG b489232d46f19521151ef5ca3d9d660c734e526a
 )
 FetchContent_MakeAvailable(nod)
 
@@ -54,7 +55,7 @@ set_target_properties(
     CXX_STANDARD 17
 )
 target_link_libraries(DeskGapNode PUBLIC deskgap nod DeskGapNodeScripts)
-target_include_directories(DeskGapNode PRIVATE src/node_api ${DG_NODE_MODULES_DIR}/node-addon-api)
+target_include_directories(DeskGapNode PRIVATE ${DG_NODE_MODULES_DIR}/node-addon-api)
 
 if(APPLE)
     set_target_properties(

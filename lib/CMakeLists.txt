@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 
-include(CheckFunctionExists)
-
 project(deskgap)
 
 add_library(deskgap STATIC)
@@ -10,15 +8,12 @@ set_target_properties(deskgap PROPERTIES
     CXX_STANDARD 17
 )
 
-check_function_exists(bin2code HAVE_BIN2CODE)
-if (NOT HAVE_BIN2CODE)
-    FetchContent_Declare(
-        bin2code
-        GIT https://github.com/patr0nus/bin2code
-        GIT_TAG 8499e274c959483c3ecfc10587567a700f083438
-    )
-    FetchContent_MakeAvailable(bin2code)
-endif()
+FetchContent_Declare(
+    bin2code
+    GIT https://github.com/patr0nus/bin2code
+    GIT_TAG 8499e274c959483c3ecfc10587567a700f083438
+)
+FetchContent_MakeAvailable(bin2code)
 
 add_subdirectory(src/platform)
 

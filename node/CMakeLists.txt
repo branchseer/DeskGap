@@ -24,7 +24,7 @@ add_subdirectory(${DG_LIB_DIR} lib)
 
 FetchContent_Declare(
     bin2code
-    GIT https://github.com/patr0nus/bin2code
+    GIT_REPOSITORY https://github.com/patr0nus/bin2code
     GIT_TAG 8499e274c959483c3ecfc10587567a700f083438
 )
 FetchContent_MakeAvailable(bin2code)

@@ -22,14 +22,8 @@ add_library(deskgap_platform_winrt_preload_script OBJECT
 
 target_link_libraries(deskgap_winrt PRIVATE deskgap_platform_winrt_preload_script)
 
-add_custom_command(
-    OUTPUT
-        ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_trident.c
-        ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_winrt.c
-    COMMAND ${DG_BIN2CODE} ${CMAKE_CURRENT_LIST_DIR}/dg_preload_trident.js ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_trident.c
-    COMMAND ${DG_BIN2CODE} ${CMAKE_CURRENT_LIST_DIR}/dg_preload_winrt.js ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_winrt.c
-    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/dg_preload_trident.js ${CMAKE_CURRENT_LIST_DIR}/dg_preload_winrt.js
-)
+bin2code(${CMAKE_CURRENT_LIST_DIR}/dg_preload_trident.js ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_trident.c)
+bin2code(${CMAKE_CURRENT_LIST_DIR}/dg_preload_winrt.js ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_winrt.c)
 
 target_sources(deskgap_platform PRIVATE
     argv.cpp

@@ -21,7 +21,14 @@ set(DG_NODE_BIN_DIR ${DG_NODE_MODULES_DIR}/.bin)
 set(DG_LIB_DIR ${CMAKE_CURRENT_LIST_DIR}/../lib)
 
 add_subdirectory(${DG_LIB_DIR} lib)
-set(DG_BIN2CODE node ${DG_LIB_DIR}/bin2code.js)
+
+FetchContent_Declare(
+    bin2code
+    GIT https://github.com/patr0nus/bin2code
+    GIT_TAG 8499e274c959483c3ecfc10587567a700f083438
+)
+FetchContent_MakeAvailable(bin2code)
+
 set(NPM_WEBPACK npm --prefix ${CMAKE_CURRENT_LIST_DIR}/.. run webpack --)
 if(WIN32)
     set(NPM_WEBPACK cmd /c ${NPM_WEBPACK})

@@ -39,7 +39,7 @@ set(NOD_NODE_VERSION v13.8.0)
 FetchContent_Declare(
     nod
     GIT_REPOSITORY https://github.com/patr0nus/nod
-    GIT_TAG b489232d46f19521151ef5ca3d9d660c734e526a
+    GIT_TAG 4ae80d7e96ca0991c6db857096cd40695f7e1821
 )
 FetchContent_MakeAvailable(nod)
 

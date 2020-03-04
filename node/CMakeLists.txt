@@ -29,7 +29,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(bin2code)
 
-set(NPM_WEBPACK npm --prefix ${CMAKE_CURRENT_LIST_DIR}/.. run webpack --)
+find_program(NPM_EXECUTABLE NAMES npm HINTS /opt/local/bin)
+if (NOT DEFINED NPM_EXECUTABLE)
+    message(FATAL_ERROR "npm required but not found")
+endif()
+
+set(NPM_WEBPACK ${NPM_EXECUTABLE} --prefix ${CMAKE_CURRENT_LIST_DIR}/.. run webpack --)
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    set(NPM_WEBPACK ${CMAKE_COMMAND} -E env "PATH=$ENV{PATH}:/opt/local/bin" ${NPM_WEBPACK})
+endif()
+
 if(WIN32)
     set(NPM_WEBPACK cmd /c ${NPM_WEBPACK})
 endif()

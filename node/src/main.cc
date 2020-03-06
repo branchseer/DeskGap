@@ -2,8 +2,6 @@
 #include <memory>
 #include <thread>
 #include <utility>
-#include <mutex>
-#include <condition_variable>
 #include "nod.h"
 #include "napi.h"
 #include "deskgap/app.hpp"

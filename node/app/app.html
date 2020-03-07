@@ -7,8 +7,8 @@
     <title>DeskGap API Demo</title>
     <link rel="stylesheet" href="app.css" />
     <script type="text/javascript">
-    var asyncNode = window.deskgap.asyncNode;
-    var messageUI = window.deskgap.messageUI;
+    var defaultService = { }
+    deskgap.publishServices({ '': defaultService });
     </script>
 </head>
 <body>
@@ -18,8 +18,6 @@
         <ol><a href="#h-dialog">dialog</a></ol>
         <ol><a href="#h-draggable-area">Draggable Area</a></ol>
         <ol><a href="#h-browser-window">Browser Window</a></ol>
-        <ol><a href="#h-message">Messages</a></ol>
-        <ol><a href="#h-async-node">asyncNode</a></ol>
     </ul>
     <main>
         <h1>DeskGap API Demo</h1>
@@ -32,11 +30,13 @@ contextMenu.popup(browserWindow);
 <button onclick="popupContextMenu()">Run</button>
             </code></pre>
             <script type="text/javascript">
+            var itemLabel = document.getElementById('context-menu-item-label').value;
             function popupContextMenu() {
-                var itemLabel = document.getElementById('context-menu-item-label').value;
-                asyncNode.require('deskgap').then(function(deskgap) {
-                    return deskgap.prop('Menu').invoke('buildFromTemplate', [{ label: itemLabel }]).invoke('popup', asyncNode.getCurrentWindow()).value();
-                });
+                alert(1)
+                deskgap.getService('').send(
+                    'execute',
+                    "const contextMenu = require('deskgap').Menu.buildFromTemplate([{ label: " + JSON.stringify(itemLabel) + " }]);contextMenu.popup(browserWindow);"
+                );
             }
             </script>
         </section>
@@ -54,9 +54,7 @@ dialog.showErrorBox('<input id="error-box-title" value="Title" />', '<input id="
             function showErrorBox() {
                 var title = document.getElementById('error-box-title').value;
                 var content = document.getElementById('error-box-content').value;
-                asyncNode.require('deskgap').then(function(deskgap) {
-                    deskgap.prop('dialog').invoke('showErrorBox', title, content).value();
-                });
+                deskgap.getService('dialog').send('showErrorBox', title, content);
             }
             </script>
 
@@ -76,13 +74,11 @@ await dialog.showOpenDialogAsync(browserWindow, {
                     if (allowsMultiSelections) {
                         properties.push('multiSelections');
                     }
-                    asyncNode.require('deskgap').then(function(deskgap) {
-                        return deskgap.prop('dialog').invoke('showOpenDialogAsync',
-                            asyncNode.getCurrentWindow(), {
-                                properties: properties
-                            }
-                        ).resolve().value();
-                    }).then(function(result) {
+                    
+                deskgap.getService('').call(
+                    'execute',
+                    "return require('deskgap').dialog.showOpenDialogAsync(browserWindow, { properties: " + JSON.stringify(properties) +"});"
+                ).then(function(result) {
                         document.getElementById('open-dialog-result').textContent = JSON.stringify(result, null, 4);
                     });
                 }
@@ -97,11 +93,10 @@ await dialog.showSaveDialogAsync(browserWindow, { })
             <span class="result" id="save-dialog-result"></span>
             <script type="text/javascript">
                 function showSaveDialogAsync() {
-                    asyncNode.require('deskgap').then(function(deskgap) {
-                        return deskgap.prop('dialog').invoke('showSaveDialogAsync',
-                            asyncNode.getCurrentWindow(), { }
-                        ).resolve().value();
-                    }).then(function(result) {
+                    deskgap.getService('').call(
+                        'execute',
+                        "return require('deskgap').dialog.showSaveDialogAsync(browserWindow, { })"
+                    ).then(function(result) {
                         document.getElementById('save-dialog-result').textContent = JSON.stringify(result, null, 4);
                     });
                 }
@@ -133,13 +128,9 @@ browserWindow.on('focus', () => console.log('Focused'));
             <script type="text/javascript">
             (function() {
                 var $lastOutput = document.getElementById('window-events-output');
-                messageUI.on('window-blur', function() {
-                    $lastOutput.textContent = "Not Focused";
-                });
-
-                messageUI.on('window-focus', function() {
-                    $lastOutput.textContent = "Focused";
-                });
+                defaultService['windowEvent'] = function (eventName) {
+                    $lastOutput.textContent = eventName === "blur" ? "Not Focused": "Focused";
+                }
             })();
             </script>
 
@@ -155,16 +146,22 @@ browserWindow.center();<button onclick="centerWindow();">Run</button>
                 var width = parseInt(document.getElementById('window-width').value, 10);
                 var height = parseInt(document.getElementById('window-height').value, 10);
                 if (isNaN(width) || isNaN(height)) return;
-                asyncNode.getCurrentWindow().invoke('setSize', width, height).value();
+                deskgap.getService('browserWindow').send(
+                    'setSize', width, height
+                )
             }
             function setWindowPos() {
                 var x = parseInt(document.getElementById('window-x').value, 10);
                 var y = parseInt(document.getElementById('window-y').value, 10);
                 if (isNaN(x) || isNaN(y)) return;
-                asyncNode.getCurrentWindow().invoke('setPosition', x, y).value();
+
+                deskgap.getService('browserWindow').send(
+                    'setPosition', x, y
+                )
+                // asyncNode.getCurrentWindow().invoke('setPosition', x, y).value();
             }
             function centerWindow() {
-                asyncNode.getCurrentWindow().invoke('center').value();
+                deskgap.getService('browserWindow').send('center')
             }
             </script>
 
@@ -183,7 +180,7 @@ browserWindow.setTitleBarStyle('<select id="title-bar-style-select">
                 var $select = document.getElementById('title-bar-style-select');
                 $select.addEventListener('change', function() {
                     var selectedValue = $select.options[$select.selectedIndex].value;
-                    asyncNode.getCurrentWindow().invoke('setTitleBarStyle', selectedValue).value();
+                    deskgap.getService('browserWindow').send('setTitleBarStyle', selectedValue)
                 });
                 $select.disabled = deskgap.platform !== 'darwin';
             })();
@@ -209,10 +206,10 @@ browserWindow.setVibrancies([
                     else {
                         document.body.classList.remove('sidebar-vibrancy');
                     }
-                    asyncNode.getCurrentWindow().invoke('setVibrancies', [
+                    deskgap.getService('browserWindow').send('setVibrancies', [
                         $sidebarVibrancy.checked ? { 'material': 'sidebar', left: 0, top: 0, bottom: 0, width: 200 }: null,
                         $backgroundVibrancy.checked ? { 'material': 'under-window-background', left: 200, top: 0, bottom: 0, right: 0 }: null
-                    ]).value();
+                    ]);
                 }
 
                 $sidebarVibrancy.addEventListener('change', setWindowVibrancies);
@@ -224,86 +221,6 @@ browserWindow.setVibrancies([
             
             </script>
         </section>
-        <section>
-            <h2 id="h-message">Messages</h2>
-            <p>Asynchronously sending messages between Node.js and UI.</p>
-            <span class="note">Node.js script</span>
-            <pre><code>
-messageNode.on('hello-to-node', (e, message) => {
-    e.sender.send('hello-from-node', "Hello, " + message);
-});
-            </code></pre>
-            <span class="note">UI script</span>
-            <pre><code>
-messageUI.on('hello-from-node', (e, message) => {
-    console.log(message);
-});
-messageUI.send('hello-to-node', '<input id="ui-message-content" value="World" />');
-            </code></pre>
-            <button onclick="sendMessage()">Run</button><span class="result" id="node-message"></span>
-
-            <script type="text/javascript">
-            messageUI.on('hello-from-node', function (e, message) {
-                document.getElementById('node-message').textContent = message;
-            });
-            function sendMessage() {
-                messageUI.send('hello-to-node', document.getElementById('ui-message-content').value);
-            }
-            </script>
-
-        </section>
-        <section>
-            <h2 id="h-async-node">asyncNode</h2>
-            <p>Asynchronously calling Node.js from UI.</p>
-            <h3>Access global values in Node.js</h3>
-            <span class="note">UI script</span>
-            <pre><code>
-await deskgap.asyncNode.getGlobal('process').prop('<input id='async-node-global-prop' value="version" />').value();
-            </code></pre>
-            <button onclick="runAsyncNode1()">Run</button><span class="result" id="async-node-global-result"></span>
-
-            <script type="text/javascript">
-            function runAsyncNode1() {
-                asyncNode.getGlobal('process').prop(document.getElementById('async-node-global-prop').value).value()
-                    .then(function(result) {
-                        document.getElementById('async-node-global-result').textContent = result;
-                    });
-            }
-            </script>
-
-            <h3>Require Node.js CommonJS modules</h3>
-            <span class="note">UI script</span>
-            <pre><code>
-const os = await deskgap.asyncNode.require('os');
-await os.invoke('<input id='async-node-os-method' value='freemem' />').value();
-            </code></pre>
-            <button onclick="runAsyncNode2()">Run</button><span class="result" id="async-node-os-result"></span>
-
-            <script type="text/javascript">
-                function runAsyncNode2() {
-                    asyncNode.require('os').then(function(os) {
-                        return os.invoke(document.getElementById('async-node-os-method').value).value();
-                    }).then(function(result) {
-                        document.getElementById('async-node-os-result').textContent = result;
-                    });
-                }
-            </script>
-
-            <h3>Access the current BrowserWindow object</h3>
-            <span class="note">UI script</span>
-            <pre><code>
-await deskgap.asyncNode.getCurrentWindow().invoke('getPosition').value();
-            </code></pre>
-            <button onclick="runAsyncNode3()">Run</button><span class="result" id="async-node-window-result"></span>
-            <script type="text/javascript">
-                function runAsyncNode3() {
-                    asyncNode.getCurrentWindow().invoke('getPosition').value().then(function(position) {
-                        document.getElementById('async-node-window-result').textContent = position.toString();
-                    })
-                }
-            </script>
-        </section>
-        
     </main>
 </body>
 </html>

@@ -1,4 +1,4 @@
-import { EventEmitter, IEventMap } from '../common/events';
+import { EventEmitter, IEventMap } from './internal/events';
 import appPath from './internal/app-path';
 import path = require('path');
 import globals from './internal/globals';

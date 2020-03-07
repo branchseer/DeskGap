@@ -1,4 +1,4 @@
-import { EventEmitter, IEventMap } from '../common/events';
+import { EventEmitter, IEventMap } from './internal/events';
 
 const spNative = require('./bindings').systemPreferencesNative;
 

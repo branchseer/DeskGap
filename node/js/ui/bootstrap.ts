@@ -1,5 +1,3 @@
-import { EventEmitter } from '../common/events'
-
 declare var window: any;
 
 //This is the interface of window.deskgap in preload_${platform}.js

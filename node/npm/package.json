@@ -16,6 +16,7 @@
     "decompress": "^4.2.0",
     "fs-extra": "^7.0.1",
     "nugget": "^2.0.1",
-    "@types/node": "^12.12.14"
+    "@types/node": "^12.12.14",
+    "json-talk": "^0.1.1"
   }
 }

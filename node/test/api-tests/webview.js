@@ -49,7 +49,7 @@ describe('BrowserWindow#webView', () => {
         }))
     });
 
-    describe.only('webView.getService(services).call(...)', () => {
+    describe('webView.getService(services).call(...)', () => {
         withWebView(it, 'calls services published on the browser side', async (win) => {
             win.webView.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'web-view-side-services.html'));
             await once(win.webView, 'did-finish-load');

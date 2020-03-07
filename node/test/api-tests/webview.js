@@ -41,36 +41,20 @@ describe('BrowserWindow#webView', () => {
     });
 
     describe('webView.loadFile(path)', () => {
-        withWebView(it, 'loads the given file', async (win) => {
+        withWebView(it, 'loads the given file', (win) => new Promise(resolve =>{
             win.webView.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'web-view-load-file.html'));
-            await once(messageNode, 'hello-web-view-load-file');
-        })
+            win.webView.publishServices({
+                'dgtest': { loaded() { resolve() } }
+            })
+        }))
     });
 
-    describe('webView.executeJavaScript(code)', () => {
-        withWebView(it, 'returns a promise of the evaluated value', async (win) => {
-            const result = await win.webView.executeJavaScript("{ answer: 40+2 }");
-            expect(result).to.deep.equal({ answer: 42 });
-        }, true);
-
-        withWebView(it, 'returns a promise that resolves to the result of the evaluated promise', async (win) => {
-            const result = await win.webView.executeJavaScript("Promise.resolve({ answer: 40+2 })");
-            expect(result).to.deep.equal({ answer: 42 });
-        }, true);
-
-        withWebView(it, 'returns a promise that rejects when there is a syntax error', async (win) => {
-            const resultPromise = win.webView.executeJavaScript("nonsense");
-            await expect(resultPromise).to.eventually.rejected;
-        }, true);
-
-        withWebView(it, 'returns a promise that rejects when the code throws an error synchronously', async (win) => {
-            const resultPromise = win.webView.executeJavaScript("(function(){ throw new Error(); })()");
-            await expect(resultPromise).to.eventually.rejected;
-        }, true);
-
-        withWebView(it, 'returns a promise that rejects when the code is evaluated to a promise that rejects', async (win) => {
-            const resultPromise = win.webView.executeJavaScript("Promise.reject(new Error())");
-            await expect(resultPromise).to.eventually.rejected;
-        }, true);
+    describe.only('webView.getService(services).call(...)', () => {
+        withWebView(it, 'calls services published on the browser side', async (win) => {
+            win.webView.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'web-view-side-services.html'));
+            await once(win.webView, 'did-finish-load');
+            const resultFromBrowser = await win.webView.getService('aBrowserService').call('getJSONObject');
+            expect(resultFromBrowser).to.eql({ answer: 42 });
+        });
     });
 });

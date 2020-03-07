@@ -9,9 +9,8 @@ const lazyApp = (): AppModule.App => {
 };
 
 const execCommand = (window: BrowserWindow, command: string): void => {
-  window.webView.executeJavaScript(`document.execCommand('${command}')`);
+  window.webView["native_"].executeJavaScript(`document.execCommand('${command}')`)
 }
-
 
 export type Role = 'about' | 'close' | 'copy' | 'cut' | 'delete' | 'front' | 'help' | 'hide' |
     'hideothers' | 'minimize' | 'paste' | 'pasteAndMatchStyle' | 'quit' | 'redo' | 'reload' | 

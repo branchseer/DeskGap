@@ -1,10 +1,9 @@
 import { EventEmitter, IEventMap } from '../common/events';
-import messageNode from './message-node';
-import { evaluateJavaScript } from './internal/js-evaluation';
 import appPath from './internal/app-path';
 import path = require('path');
 import globals from './internal/globals';
 import { platform } from 'os';
+import JSONTalk, { IServices, IServiceClient } from 'json-talk'
 
 const { WebViewNative } = require('./bindings');
 const isWinRTEngineAvailable = process.platform === 'win32' && WebViewNative.isWinRTEngineAvailable();
@@ -30,7 +29,8 @@ export interface WebPreferences {
 }
 
 let currentId = 0;
-export class WebView extends EventEmitter<WebViewEvents> {
+
+export class WebView<Services extends IServices = any> extends EventEmitter<WebViewEvents> {
     /** @internal */ private id_: number;
     /** @internal */ private native_: any;
     /** @internal */ private engine_: Engine | null;
@@ -39,12 +39,23 @@ export class WebView extends EventEmitter<WebViewEvents> {
     /** @internal */ private asyncNodeValuesByName_ = new Map<string, any>();
     /** @internal */ private isDevToolsEnabled_: boolean = false;
 
-    constructor(callbacks: { onPageTitleUpdated: (title: string) => void, onReadyToShow: () => void }, preferences: WebPreferences) {
+    #jsonTalk: JSONTalk<Services>;
+    #jsonTalkServices: IServices;
+    
+    constructor(
+        callbacks: { onPageTitleUpdated: (title: string) => void, onReadyToShow: () => void }, 
+        preferences: WebPreferences, 
+    ) {
         super();
         this.id_ = currentId;
         currentId++;
 
         this.engine_ = preferences.engine || defaultEngine;
+
+        this.#jsonTalkServices = { };
+        this.#jsonTalk = new JSONTalk<Services>((message) => {
+            this.native_.executeJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(message)})`, null);
+        }, this.#jsonTalkServices);
 
         this.native_ = new WebViewNative({
             didFinishLoad: () => {
@@ -58,8 +69,7 @@ export class WebView extends EventEmitter<WebViewEvents> {
             },
             onStringMessage: (stringMessage: string) => {
                 if (this.isDestroyed()) return;
-                const [channelName, args]: [string, any] = JSON.parse(stringMessage);
-                messageNode['trigger_'](channelName, { sender: this }, ...args);
+                this.#jsonTalk.feedMessage(JSON.parse(stringMessage));
             },
             onPageTitleUpdated: (title: string) => {
                 try {
@@ -71,6 +81,14 @@ export class WebView extends EventEmitter<WebViewEvents> {
                 }
             }
         }, this.engine_ == null ? null : engineCodeByName[this.engine_]);
+    }
+
+    publishServices(services: IServices) {
+        Object.assign(this.#jsonTalkServices, services);
+    }
+    
+    getService<ServiceName extends (keyof Services & string)>(serviceName: ServiceName): IServiceClient<Services[ServiceName]> {
+        return this.#jsonTalk.connectService(serviceName)
     }
 
     get id(): number {
@@ -94,13 +112,6 @@ export class WebView extends EventEmitter<WebViewEvents> {
             throw new Error(errorMessage);
         }
     }
-    send(channelName: string, ...args: any[]): void {
-        if (this.isDestroyed()) return;
-        this.native_.executeJavaScript(`window.deskgap.__messageReceived(${JSON.stringify(channelName)}, ${JSON.stringify(args)})`, null);
-    }
-    executeJavaScript(code: string): Promise<any> {
-        return evaluateJavaScript(this.native_, code);
-    }
 
     setDevToolsEnabled(enabled: boolean): void {
         this.native_.setDevToolsEnabled(enabled);
@@ -115,7 +126,6 @@ export class WebView extends EventEmitter<WebViewEvents> {
         this.native_.reload();
     }
 }
-
 
 export const WebViews = {
     getAllWebViews(): WebView[] {

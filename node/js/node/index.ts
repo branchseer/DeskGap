@@ -4,10 +4,8 @@ import app from './app';
 import { BrowserWindow } from './browser-window';
 import { Menu, MenuItem } from './menu';
 import { WebViews } from './webview';
-import messageNode from './message-node';
 import Dialog from './dialog';
 import shell from './shell';
-import './internal/async-node';
 import systemPreferences from './system-preferences';
 import { registerModule } from './internal/cjs-intercept';
 
@@ -18,8 +16,6 @@ const deskgap = {
     webContents: WebViews,
     Menu,
     MenuItem,
-    messageNode,
-    ipcMain: messageNode,
     systemPreferences,
     dialog: Dialog,
     NativeException,

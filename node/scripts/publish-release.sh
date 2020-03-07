@@ -22,4 +22,4 @@ if [[ ! $statusCode == 2* ]]; then
 fi
 
 echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > $HOME/.npmrc
-npm publish $DESKGAP_NPM_TARBALL
+npm publish $DESKGAP_NPM_TARBALL --tag=$DESKGAP_AP_NPM_TAG

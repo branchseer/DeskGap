@@ -234,6 +234,7 @@ stages:
         isDraft: false
         addChangeLog: false
         releaseNotesSource: 'file'
+        isPreRelease: ne(variables['DESKGAP_AP_NPM_TAG'], 'latest')
         releaseNotesFile: $(Build.SourcesDirectory)/node/WHATS_NEW.md
 
     - task: Bash@3

@@ -32,7 +32,6 @@ contextMenu.popup(browserWindow);
             <script type="text/javascript">
             var itemLabel = document.getElementById('context-menu-item-label').value;
             function popupContextMenu() {
-                alert(1)
                 deskgap.getService('').send(
                     'execute',
                     "const contextMenu = require('deskgap').Menu.buildFromTemplate([{ label: " + JSON.stringify(itemLabel) + " }]);contextMenu.popup(browserWindow);"

@@ -137,4 +137,4 @@ With a Node.js runtime bundled, DeskGap comes with support for npm packages and 
 
 ### Can I port my Electron app to DeskGap without much modification?
 
-Probably no. The DeskGap API is still quite limited. If you start building an app with DeskGap, getting it running on Electron may be easy, but not the other way around.
+Probably no. The DeskGap API is still quite limited.

@@ -263,5 +263,5 @@ stages:
         filePath: $(Build.SourcesDirectory)/node/scripts/test-npm.sh
       env:
         DISPLAY: ':99.0'
-        DESKGAP_NPM_TEST_INSTALL_WHAT: deskgap
+        DESKGAP_NPM_TEST_INSTALL_WHAT: deskgap@$(DESKGAP_AP_NPM_TAG)
         DESKGAP_NPM_TEST_VERSION_FILE: $(Build.SourcesDirectory)/node/VERSION

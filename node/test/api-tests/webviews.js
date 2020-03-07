@@ -96,9 +96,9 @@ describe('webViews', () => {
             if (!webViews.isEngineAvailable('trident')) return this.skip();
             webViews.setDefaultEngine('trident');
             const window = new BrowserWindow({ show: false });
-            window.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
+            window.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'web-view-ua-service.html'));
             await once(window.webView, 'did-finish-load');
-            const userAgent = await window.webView.executeJavaScript('navigator.userAgent');
+            const userAgent = await window.webView.getService('').call('ua');
             expect(userAgent).to.include('Trident');
         });
 
@@ -107,9 +107,9 @@ describe('webViews', () => {
 
             webViews.setDefaultEngine('winrt');
             const window = new BrowserWindow({ show: false });
-            window.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'blank.html'));
+            window.loadFile(path.resolve(__dirname, '..', 'fixtures', 'files', 'web-view-ua-service.html'));
             await once(window.webView, 'did-finish-load');
-            const userAgent = await window.webView.executeJavaScript('navigator.userAgent');
+            const userAgent = await window.webView.getService('').call('ua');
             expect(userAgent).to.include('WebKit');
         });
         

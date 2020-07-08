@@ -40,6 +40,23 @@ contextMenu.popup(browserWindow);
             </script>
         </section>
 
+        <section>
+            <h2 id="h-menu">Shell</h2>
+            <span class="note">Node.js script</span>
+            <pre><code>
+shell.buildFromTemplate('<input id="shell-open-folder-label" value="C:/Users/" />'');
+<button onclick="showItemInFolder()">Run</button>
+            </code></pre>
+            <script type="text/javascript">
+            function showItemInFolder() {
+                deskgap.getService('').send(
+                    'execute',
+                    `require('deskgap').shell.showItemInFolder("${document.getElementById('shell-open-folder-label').value}");`
+                );
+            }
+            </script>
+        </section>
+
 
         <section>
             <h2 id="h-dialog">dialog</h2>

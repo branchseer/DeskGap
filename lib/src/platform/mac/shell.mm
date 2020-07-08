@@ -10,3 +10,7 @@ bool DeskGap::Shell::OpenExternal(const std::string& urlString) {
     }
     return [[NSWorkspace sharedWorkspace] openURL: url];
 }
+
+bool DeskGap::Shell::ShowItemInFolder(const std::string& path) {
+    return false;
+}

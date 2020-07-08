@@ -7,6 +7,7 @@ namespace DeskGap {
     class Shell {
     public:
         static bool OpenExternal(const std::string& path);
+        static bool ShowItemInFolder(const std::string& path);
     };
 }
 

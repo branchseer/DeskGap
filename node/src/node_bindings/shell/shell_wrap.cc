@@ -12,5 +12,11 @@ Napi::Object DeskGap::ShellObject(const Napi::Env& env) {
         });
         return Napi::Boolean::New(info.Env(), success);
     }));
+    shellObject.Set("showItemInFolder", Napi::Function::New(env, [](const Napi::CallbackInfo& info) {
+        std::string pathString = info[0].As<Napi::String>();
+        UISync(info.Env(), [&]() {
+        	Shell::ShowItemInFolder(pathString);
+        });
+    }));
     return shellObject;
 }

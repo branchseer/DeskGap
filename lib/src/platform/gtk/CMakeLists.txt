@@ -1,6 +1,6 @@
 bin2code(${CMAKE_CURRENT_LIST_DIR}/dg_preload_gtk.js ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_gtk.c)
 
-add_library(deskgap_platform_preload_script OBJECT ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_gtk.c)
+add_library(deskgap_platform_preload_script STATIC ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_gtk.c)
 target_link_libraries(deskgap_platform PRIVATE deskgap_platform_preload_script)
 
 find_package(PkgConfig REQUIRED)

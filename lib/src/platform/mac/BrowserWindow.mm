@@ -2,7 +2,7 @@
 #include <cmath>
 #include <unordered_map>
 #include "./BrowserWindow_impl.h"
-#import "./util/NSScreen+Geometry.h"
+#import "./util/NSScreen_geo.h"
 #import "./cocoa/DeskGapWindow.h"
 #include "browser_window.hpp"
 #include "./webview_impl.h"
@@ -33,6 +33,7 @@
 }
 - (void)windowDidResize:(NSNotification *)notification {
     _callbacks.onResize();
+
 }
 - (void)windowDidMove:(NSNotification *)notification {
     _callbacks.onMove();
@@ -42,7 +43,6 @@
     return NO;
 }
 @end
-
 
 @interface DeskGapWindowContentView: NSView @end
 @implementation DeskGapWindowContentView
@@ -70,6 +70,47 @@ namespace DeskGap {
             [[nsWindow standardWindowButton: windowButton] setHidden: !visible];
         }
     }
+
+    // Credits: https://github.com/electron/electron/pull/21781/files
+    void BrowserWindow::Impl::UpdateTrafficLightsPosition() {
+        if (titleStyle != TitleBarStyle::HIDDEN) {
+            return;
+        }
+        if (!trafficLightPosition.has_value()) {
+            return;
+        }
+
+        NSButton* close = [nsWindow standardWindowButton:NSWindowCloseButton];
+        NSButton* miniaturize = [nsWindow standardWindowButton:NSWindowMiniaturizeButton];
+        NSButton* zoom = [nsWindow standardWindowButton:NSWindowZoomButton];
+        NSView* titleBarContainerView = close.superview.superview;
+
+        // Hide the container when exiting fullscreen, otherwise traffic light buttons
+        // jump
+        if (exitingFullScreen) {
+            [titleBarContainerView setHidden:YES];
+            return;
+        }
+
+        [titleBarContainerView setHidden:NO];
+        CGFloat buttonHeight = [close frame].size.height;
+        CGFloat titleBarFrameHeight = buttonHeight + trafficLightPosition->y;
+        CGRect titleBarRect = titleBarContainerView.frame;
+        titleBarRect.size.height = titleBarFrameHeight;
+        titleBarRect.origin.y = nsWindow.frame.size.height - titleBarFrameHeight;
+        [titleBarContainerView setFrame:titleBarRect];
+
+        NSArray* windowButtons = @[ close, miniaturize, zoom ];
+        const CGFloat space_between =
+                [miniaturize frame].origin.x - [close frame].origin.x;
+        for (NSUInteger i = 0; i < windowButtons.count; i++) {
+            NSView* view = [windowButtons objectAtIndex:i];
+            CGRect rect = [view frame];
+            rect.origin.x = trafficLightPosition->x + (i * space_between);
+            rect.origin.y = (titleBarFrameHeight - rect.size.height) / 2;
+            [view setFrameOrigin:rect.origin];
+        }
+    }
     
     BrowserWindow::BrowserWindow(const WebView& webview, EventCallbacks&& callbacks): impl_(std::make_unique<Impl>()) {
         NSWindow *window = [[DeskGapWindow alloc]
@@ -85,6 +126,12 @@ namespace DeskGap {
         if (@available(macOS 10.12, *)) {
             [window setTabbingMode: NSWindowTabbingModeDisallowed];
         }
+
+        auto onResize = std::move(callbacks.onResize);
+        callbacks.onResize = [impl = impl_.get(), onResize = std::move(onResize)]() {
+            onResize();
+            impl->UpdateTrafficLightsPosition();
+        };
 
         DeskGapBrowserWindowDelegate* windowDelegate = [[DeskGapBrowserWindowDelegate alloc]
             initWithCallbacks: callbacks
@@ -111,7 +158,6 @@ namespace DeskGap {
 
         impl_->nsWindow = window;
         impl_->nsWindowDelegate = windowDelegate;
-        impl_->webview = &webview;
         impl_->effectViews = [NSMutableArray new];
     }
 
@@ -302,6 +348,7 @@ namespace DeskGap {
 
 
     void BrowserWindow::Show() {
+        NSLog(@"Show!");
         [NSApp activateIgnoringOtherApps: YES];
         [impl_->nsWindow makeKeyAndOrderFront: nil];
     }
@@ -312,6 +359,7 @@ namespace DeskGap {
 
     void BrowserWindow::SetTitle(const std::string& utf8title) {
         [impl_->nsWindow setTitle: NSStr(utf8title)];
+        impl_->UpdateTrafficLightsPosition();
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
@@ -321,12 +369,12 @@ namespace DeskGap {
             screen = [NSScreen mainScreen];
         }
 
-        NSRect flippedFrame = [screen DeskGap_convertRectToVisiblePortion: [window frame]];
+        NSRect flippedFrame = DeskGapNSScreenConvertRectToVisiblePortion(screen, [window frame]);
 
         flippedFrame.size.width = width;
         flippedFrame.size.height = height;
 
-        [window setFrame: [screen DeskGap_convertRectFromVisiblePortion: flippedFrame] display: YES animate: animate];
+        [window setFrame: DeskGapNSScreenConvertRectFromVisiblePortion(screen, flippedFrame) display: YES animate: animate];
     }
 
     void BrowserWindow::SetMaximumSize(int width, int height) {
@@ -350,12 +398,12 @@ namespace DeskGap {
             screen = [NSScreen mainScreen];
         }
 
-        NSRect flippedFrame = [screen DeskGap_convertRectToVisiblePortion: [window frame]];
+        NSRect flippedFrame = DeskGapNSScreenConvertRectToVisiblePortion(screen, [window frame]);
 
         flippedFrame.origin.x = x;
         flippedFrame.origin.y = y;
 
-        [window setFrame: [screen DeskGap_convertRectFromVisiblePortion: flippedFrame] display: YES animate: animate];
+        [window setFrame: DeskGapNSScreenConvertRectFromVisiblePortion(screen, flippedFrame) display: YES animate: animate];
     }
 
     std::array<int, 2> BrowserWindow::GetSize() {
@@ -371,7 +419,7 @@ namespace DeskGap {
         if (!screen) {
             screen = [NSScreen mainScreen];
         }
-        NSRect flippedFrame = [screen DeskGap_convertRectToVisiblePortion: [window frame]];
+        NSRect flippedFrame = DeskGapNSScreenConvertRectToVisiblePortion(screen, [window frame]);
         return { 
             (int)std::round(NSMinX(flippedFrame)), 
             (int)std::round(NSMinY(flippedFrame))
@@ -413,6 +461,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetTitleBarStyle(TitleBarStyle titleBarStyle) {
+        this->impl_->titleStyle = titleBarStyle;
         NSWindow* window = impl_->nsWindow;
         NSRect windowFrame = [window frame];
 

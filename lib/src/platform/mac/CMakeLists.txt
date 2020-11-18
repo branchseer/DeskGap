@@ -1,7 +1,6 @@
 target_compile_options(deskgap_platform PUBLIC "-fobjc-arc")
 
 target_link_libraries(deskgap_platform PUBLIC "-framework AppKit" "-framework WebKit")
-target_link_options(deskgap_platform PUBLIC "-ObjC")
 
 add_library(deskgap_platform_preload_script STATIC ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_mac.c)
 
@@ -13,8 +12,7 @@ target_sources(deskgap_platform PRIVATE
     cocoa/DeskGapWindow.h
     cocoa/DeskGapWindow.m
 
-    util/NSScreen+Geometry.h
-    util/NSScreen+Geometry.m
+    util/NSScreen_geo.h
 
     app.mm
     BrowserWindow.mm

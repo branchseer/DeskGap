@@ -13,10 +13,10 @@ target_compile_definitions(deskgap_winrt
     PRIVATE DESKGAP_EXPORTING
 )
 
-add_library(deskgap_platform_trident_preload_script OBJECT
+add_library(deskgap_platform_trident_preload_script STATIC
     ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_trident.c
 )
-add_library(deskgap_platform_winrt_preload_script OBJECT
+add_library(deskgap_platform_winrt_preload_script STATIC
     ${CMAKE_CURRENT_BINARY_DIR}/dg_preload_winrt.c
 )
 

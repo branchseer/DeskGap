@@ -4,10 +4,27 @@
 #import <Cocoa/Cocoa.h>
 
 #include "browser_window.hpp"
+#include <optional>
+
+@interface DeskGapBrowserWindowInternal: NSObject <NSWindowDelegate>
+-(instancetype)initWithCallbacks: (DeskGap::BrowserWindow::EventCallbacks&) callbacks;
+@end
 
 struct DeskGap::BrowserWindow::Impl {
-    id internal;
-    NSWindow* nsWindow_;
+    NSWindow* nsWindow;
+    id<NSWindowDelegate> nsWindowDelegate;
+    NSMutableArray<NSVisualEffectView*>* effectViews;
+    NSMutableArray<NSLayoutConstraint*>* effectViewLayoutConstraints = [NSMutableArray new];
+
+    void SetStyleMask(bool on, NSWindowStyleMask flag);
+    void SetTrafficLightsVisible(bool visible);
+
+    TitleBarStyle titleStyle = TitleBarStyle::DEFAULT;
+    void UpdateTrafficLightsPosition();
+
+    std::optional<NSPoint> trafficLightPosition;
+
+    bool exitingFullScreen = false;
 };
 
 #endif

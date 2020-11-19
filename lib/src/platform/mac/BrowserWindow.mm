@@ -11,65 +11,37 @@
 
 
 @interface DeskGapBrowserWindowDelegate: NSObject <NSWindowDelegate>
-//-(instancetype)initWithCallbacks: (DeskGap::BrowserWindow::EventCallbacks&) callbacks;
+-(instancetype)initWithCallbacks: (DeskGap::BrowserWindow::EventCallbacks&) callbacks;
 @end
 
-@implementation DeskGapBrowserWindowInternal {
-    DeskGap::BrowserWindow::EventCallbacks callbacks_;
-
-    NSWindow* window_;
-    NSMutableArray<NSVisualEffectView*>* effectViews_;
-    NSMutableArray<NSLayoutConstraint*>* effectViewLayoutConstraints_;
-
-//    void SetStyleMask(bool on, NSWindowStyleMask flag);
-//    void SetTrafficLightsVisible(bool visible);
-    DeskGap::BrowserWindow::TitleBarStyle titleStyle_;
-//    void UpdateTrafficLightsPosition();
-
-    std::optional<NSPoint> trafficLightPosition;
-
-    bool exitingFullScreen_;
+@implementation DeskGapBrowserWindowDelegate {
+    DeskGap::BrowserWindow::EventCallbacks _callbacks;
 }
 
 -(instancetype)initWithCallbacks: (DeskGap::BrowserWindow::EventCallbacks&) callbacks {
     self = [super init];
     if (self) {
-        callbacks_ = std::move(callbacks);
-        effectViews_ = [NSMutableArray new];
-        effectViewLayoutConstraints_ = [NSMutableArray new];
-        titleStyle_ = DeskGap::BrowserWindow::TitleBarStyle::DEFAULT;
-        exitingFullScreen_ = false;
+        _callbacks = std::move(callbacks);
     }
     return self;
 }
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-    callbacks_.onFocus();
+    _callbacks.onFocus();
 }
 - (void)windowDidResignKey:(NSNotification *)notification {
-    callbacks_.onBlur();
+    _callbacks.onBlur();
 }
 - (void)windowDidResize:(NSNotification *)notification {
-    callbacks_.onResize();
+    _callbacks.onResize();
 
 }
 - (void)windowDidMove:(NSNotification *)notification {
-    callbacks_.onMove();
+    _callbacks.onMove();
 }
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-    callbacks_.onClose();
+    _callbacks.onClose();
     return NO;
 }
-- (void)setStyleMaskFlag:(NSWindowStyleMask)flag on:(bool)on {
-    bool wasMaximizable = [[window_ standardWindowButton:NSWindowZoomButton] isEnabled];
-    if (on) {
-        window_.styleMask |= flag;
-    }
-    else {
-        window_.styleMask &= ~flag;
-    }
-    [[window_ standardWindowButton: NSWindowZoomButton] setEnabled: wasMaximizable];
-}
-
 @end
 
 @interface DeskGapWindowContentView: NSView @end
@@ -78,7 +50,20 @@
 @end
 
 namespace DeskGap {
+    
+    //Reference: https://github.com/electron/electron/blob/5ae3d1a1b2dbe11d3091d366467591d9cb21fdfe/atom/browser/native_window_mac.mm#L1479
+    void BrowserWindow::Impl::SetStyleMask(bool on, NSWindowStyleMask flag) {
+        bool wasMaximizable = [[nsWindow standardWindowButton:NSWindowZoomButton] isEnabled];
 
+        if (on) {
+            nsWindow.styleMask |= flag;
+        }
+        else {
+            nsWindow.styleMask &= ~flag;
+        }
+
+        [[nsWindow standardWindowButton: NSWindowZoomButton] setEnabled: wasMaximizable];
+    }
 
     void BrowserWindow::Impl::SetTrafficLightsVisible(bool visible) {
         for (NSWindowButton windowButton: { NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton }) {

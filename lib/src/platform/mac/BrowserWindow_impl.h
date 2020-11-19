@@ -15,12 +15,13 @@ struct DeskGap::BrowserWindow::Impl {
     id<NSWindowDelegate> nsWindowDelegate;
     NSMutableArray<NSVisualEffectView*>* effectViews;
     NSMutableArray<NSLayoutConstraint*>* effectViewLayoutConstraints = [NSMutableArray new];
+    bool maximizable;
 
     void SetStyleMask(bool on, NSWindowStyleMask flag);
     void SetTrafficLightsVisible(bool visible);
 
     TitleBarStyle titleStyle = TitleBarStyle::DEFAULT;
-    void UpdateTrafficLightsPosition();
+    void UpdateTrafficLightPosition();
 
     std::optional<NSPoint> trafficLightPosition;
 

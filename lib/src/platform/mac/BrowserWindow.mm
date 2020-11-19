@@ -33,7 +33,18 @@
 }
 - (void)windowDidResize:(NSNotification *)notification {
     _callbacks.onResize();
-
+}
+- (void)windowWillEnterFullScreen:(NSNotification *)notification {
+    _callbacks.willEnterFullScreen();
+}
+- (void)windowDidEnterFullScreen:(NSNotification *)notification {
+    _callbacks.didEnterFullScreen();
+}
+- (void)windowWillExitFullScreen:(NSNotification *)notification {
+    _callbacks.willExitFullScreen();
+}
+- (void)windowDidExitFullScreen:(NSNotification *)notification {
+    _callbacks.didExitFullScreen();
 }
 - (void)windowDidMove:(NSNotification *)notification {
     _callbacks.onMove();
@@ -72,10 +83,12 @@ namespace DeskGap {
     }
 
     // Credits: https://github.com/electron/electron/pull/21781/files
-    void BrowserWindow::Impl::UpdateTrafficLightsPosition() {
+    void BrowserWindow::Impl::UpdateTrafficLightPosition() {
         if (titleStyle != TitleBarStyle::HIDDEN) {
             return;
         }
+        [[nsWindow standardWindowButton: NSWindowZoomButton] setEnabled: maximizable];
+
         if (!trafficLightPosition.has_value()) {
             return;
         }
@@ -127,10 +140,21 @@ namespace DeskGap {
             [window setTabbingMode: NSWindowTabbingModeDisallowed];
         }
 
-        auto onResize = std::move(callbacks.onResize);
-        callbacks.onResize = [impl = impl_.get(), onResize = std::move(onResize)]() {
+        callbacks.onResize = [impl = impl_.get(), onResize = std::move(callbacks.onResize)]() {
             onResize();
-            impl->UpdateTrafficLightsPosition();
+            impl->UpdateTrafficLightPosition();
+        };
+
+        callbacks.willExitFullScreen = [impl = impl_.get(), willExitFullScreen = std::move(callbacks.willExitFullScreen)]() {
+            willExitFullScreen();
+            impl->exitingFullScreen = true;
+            impl->UpdateTrafficLightPosition();
+        };
+
+        callbacks.didExitFullScreen = [impl = impl_.get(), didExitFullScreen = std::move(callbacks.didExitFullScreen)] {
+            didExitFullScreen();
+            impl->exitingFullScreen = false;
+            impl->UpdateTrafficLightPosition();
         };
 
         DeskGapBrowserWindowDelegate* windowDelegate = [[DeskGapBrowserWindowDelegate alloc]
@@ -162,6 +186,7 @@ namespace DeskGap {
     }
 
     void BrowserWindow::SetMaximizable(bool maximizable) {
+        impl_->maximizable = maximizable;
         [[impl_->nsWindow standardWindowButton: NSWindowZoomButton] setEnabled: maximizable];
     }
     void BrowserWindow::SetMinimizable(bool minimizable) {
@@ -346,9 +371,7 @@ namespace DeskGap {
         [NSLayoutConstraint activateConstraints: impl_->effectViewLayoutConstraints];
     }
 
-
     void BrowserWindow::Show() {
-        NSLog(@"Show!");
         [NSApp activateIgnoringOtherApps: YES];
         [impl_->nsWindow makeKeyAndOrderFront: nil];
     }
@@ -359,7 +382,7 @@ namespace DeskGap {
 
     void BrowserWindow::SetTitle(const std::string& utf8title) {
         [impl_->nsWindow setTitle: NSStr(utf8title)];
-        impl_->UpdateTrafficLightsPosition();
+        impl_->UpdateTrafficLightPosition();
     }
 
     void BrowserWindow::SetSize(int width, int height, bool animate) {
@@ -496,7 +519,13 @@ namespace DeskGap {
         }
 
         [window setFrame: windowFrame display: YES];
+        impl_->UpdateTrafficLightPosition();
     }
+    void BrowserWindow::SetTrafficLightPosition(int x, int y) {
+        impl_->trafficLightPosition.emplace(NSMakePoint(x, y));
+        impl_->UpdateTrafficLightPosition();
+    }
+
 
     BrowserWindow::~BrowserWindow() = default;
 }

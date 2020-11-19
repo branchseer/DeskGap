@@ -93,6 +93,10 @@ namespace DeskGap {
             return;
         }
 
+        if ([nsWindow styleMask] & NSWindowStyleMaskFullScreen) {
+            return;
+        }
+
         NSButton* close = [nsWindow standardWindowButton:NSWindowCloseButton];
         NSButton* miniaturize = [nsWindow standardWindowButton:NSWindowMiniaturizeButton];
         NSButton* zoom = [nsWindow standardWindowButton:NSWindowZoomButton];

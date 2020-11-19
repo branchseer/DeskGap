@@ -23,6 +23,12 @@ namespace DeskGap {
             std::function<void()> onResize;
             std::function<void()> onMove;
             std::function<void()> onClose;
+#ifdef __APPLE__
+            std::function<void()> willEnterFullScreen;
+            std::function<void()> didEnterFullScreen;
+            std::function<void()> willExitFullScreen;
+            std::function<void()> didExitFullScreen;
+#endif
         };
         explicit BrowserWindow(const WebView&, EventCallbacks&&);
         BrowserWindow(const BrowserWindow&) = delete;
@@ -64,6 +70,7 @@ namespace DeskGap {
             HIDDEN_INSET = 2
         };
         void SetTitleBarStyle(TitleBarStyle);
+        void SetTrafficLightPosition(int x, int y);
 
         struct Vibrancy {
             std::string material;

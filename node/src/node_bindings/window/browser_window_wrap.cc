@@ -243,9 +243,11 @@ namespace DeskGap {
             },
             [jsOnClose = JSFunctionForUI::Persist(jsCallbacks.Get("onClose").As<Napi::Function>())]() {
                 jsOnClose->Call();
-            },
+            }
+#ifdef __APPLE__
             //TODO: Export fullscreen events to js
-            []() {}, [](){}, [](){}, [](){}
+            ,[]() {}, [](){}, [](){}, [](){}
+#endif
         };
         UISyncDelayable(info.Env(), [this, webViewWrap, callbacks = std::move(callbacks)]() mutable {
             this->browser_window_ = std::make_unique<BrowserWindow>(*(webViewWrap->webview_), std::move(callbacks));
